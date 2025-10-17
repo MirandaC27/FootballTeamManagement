@@ -1,3 +1,4 @@
+// Reused from ParkingLotExampleJS
 require('dotenv').config();
 
 const dbcon = require('./model/DbConnection.js');

@@ -1,3 +1,23 @@
 body {
-  background-color: #bdd4ff;
+    background-color: #dde9ff;
+}
+
+#signin-btn, #account-dropdown {
+  display: none;
+}
+
+
+#login-form, #register-form {
+    width: 400px;         
+    margin: 80px auto; 
+}
+
+#login-form .btn, #register-form .btn {
+  width: 100%;
+  margin-top: 15px;
+}
+
+#login-form p {
+  text-align: center;
+  margin-top: 20px;
 }
