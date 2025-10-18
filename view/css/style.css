@@ -29,6 +29,7 @@ body {
 .admin-card {
   width: 18rem;
   border-radius: 10px;
+  margin-bottom: 40px;
 }
 
 .table {

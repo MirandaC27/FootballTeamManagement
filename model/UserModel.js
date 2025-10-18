@@ -36,8 +36,7 @@ const userSchema = new mongoose.Schema({
     required: false,
     enum: ['admin', 'manager', 'adult'],
   },
-},
-  { timestamps: true }
+}
 );
 
 const userModel = mongoose.model('user', userSchema);

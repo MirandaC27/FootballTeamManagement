@@ -26,5 +26,10 @@ app.get('/loggedUser', UserCont.loggedUser);
 app.get('/getAllUsers', UserCont.getAllUsers);
 app.put('/approveUser/:id', UserCont.approveUser);
 
+// minor controller routes
+const MinorCont = require('./controller/MinorController');
+app.put('/reassignMinor', MinorCont.reassignMinor);
+app.get('/getAllMinors', MinorCont.getAllMinors);
+
 // export for server.js
 module.exports = app; 

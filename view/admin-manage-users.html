@@ -116,6 +116,9 @@
         checkLoggedUser();
     </script>
     <script>
+        /**
+         * Display a table of all users from database.
+         */ 
         async function displayUsers() {
             let response = await fetch('/getAllUsers');
             let users = await response.json();
@@ -159,6 +162,11 @@
                 tbody.appendChild(tr);
             }
         }
+
+        /**
+         * Set true in approve for user on database.
+         * @param userId user's ID
+         */  
         async function approveUsers(userId) {
             await fetch(`/approveUser/${userId}`, { method: 'PUT' });
         }
