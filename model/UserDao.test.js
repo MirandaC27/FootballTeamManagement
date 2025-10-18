@@ -1,5 +1,5 @@
 const dbcon = require('./DbConnection');
-const dao = require('./UserModel');
+const dao = require('./UserDao');
 
 /**
  * Executed once before all tests

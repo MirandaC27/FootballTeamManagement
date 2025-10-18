@@ -1,5 +1,5 @@
-const dao = require('../model/MinorModel');
-//const teamDao = require('../model/TeamModel');
+const dao = require('../model/MinorDao');
+//const teamDao = require('../model/TeamDao');
 
 const SEASON_START = new Date('2025-10-01');
 const SEASON_END = new Date('2025-10-31');

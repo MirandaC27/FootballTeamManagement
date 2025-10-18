@@ -1,5 +1,5 @@
 const dbcon = require('./DbConnection');
-const dao = require('./MinorModel');
+const dao = require('./MinorDao');
 
 /**
  * Executed once before all tests

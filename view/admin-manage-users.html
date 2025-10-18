@@ -84,9 +84,6 @@
     </div>
 
     <script>
-        /**
-        * Show sign in button if logged out or show account dropdown if signed in.
-        */
         async function checkLoggedUser() {
             let response = await fetch('/loggedUser');
             let user = await response.json();
@@ -107,8 +104,14 @@
                 SIGN_IN_BTN.style.display = 'block';
                 ACCOUNT_DROPDOWN.style.display = 'none';
             }
+            checkAdminAccess(user);
+        }
 
-            // Block admin.html if user isn't an admin
+        /**
+         * Block admin.html if user isn't an admin.
+         * @param user user object
+         */
+        function checkAdminAccess(user) {
             if (!user || user.role !== 'admin') {
                 window.location.replace('/login.html');
             }
@@ -118,55 +121,73 @@
     <script>
         /**
          * Display a table of all users from database.
-         */ 
+         */
         async function displayUsers() {
             let response = await fetch('/getAllUsers');
             let users = await response.json();
             let tbody = document.getElementById('userTableBody');
 
-            // Display all users on the table by creating each row
             for (let user of users) {
-                let tr = document.createElement('tr');
-                let userId = document.createElement('td');
-                let userName = document.createElement('td');
-                let userEmail = document.createElement('td');
-                let userPhone = document.createElement('td');
-                let userRole = document.createElement('td');
-                let userApprove = document.createElement('td');
-
-                userId.appendChild(document.createTextNode(user._id));
-                userName.appendChild(document.createTextNode(user.name));
-                userEmail.appendChild(document.createTextNode(user.email));
-                userPhone.appendChild(document.createTextNode(user.phone));
-                userRole.appendChild(document.createTextNode(user.role));
-
-                if (user.approve) {
-                    userApprove.appendChild(document.createTextNode('Approved'));
-                } else {
-                    const approveBtn = document.createElement("button");
-                    approveBtn.textContent = "Approve?";
-                    approveBtn.classList.add("btn", "btn-sm", "btn-primary");
-                    approveBtn.onclick = async function() {
-                        await approveUsers(user._id);
-                    };
-                    userApprove.appendChild(approveBtn);
-                }
-
-                tr.appendChild(userId);
-                tr.appendChild(userName);
-                tr.appendChild(userEmail);
-                tr.appendChild(userPhone);
-                tr.appendChild(userRole);
-                tr.appendChild(userApprove);
-
+                const tr = createUserRow(user);
                 tbody.appendChild(tr);
+            }
+        }
+
+        /**
+         * Create a table row for a single user.
+         */
+        function createUserRow(user) {
+            let tr = document.createElement('tr');
+            let userId = document.createElement('td');
+            let userName = document.createElement('td');
+            let userEmail = document.createElement('td');
+            let userPhone = document.createElement('td');
+            let userRole = document.createElement('td');
+            let userApprove = document.createElement('td');
+
+            // Fill each row cell with user's info
+            userId.appendChild(document.createTextNode(user._id));
+            userName.appendChild(document.createTextNode(user.name));
+            userEmail.appendChild(document.createTextNode(user.email));
+            userPhone.appendChild(document.createTextNode(user.phone));
+            userRole.appendChild(document.createTextNode(user.role));
+
+            // Show approve status depending on user state
+            const approveCell = createApproveCell(user);
+            userApprove.appendChild(approveCell);
+
+            tr.appendChild(userId);
+            tr.appendChild(userName);
+            tr.appendChild(userEmail);
+            tr.appendChild(userPhone);
+            tr.appendChild(userRole);
+            tr.appendChild(userApprove);
+
+            return tr;
+        }
+
+        /**
+         * Create either an "Approved" label or an "Approve?" button for a user.
+         * @param user user object
+         */
+        function createApproveCell(user) {
+            if (user.approve) {
+                return document.createTextNode('Approved');
+            } else {
+                const approveBtn = document.createElement("button");
+                approveBtn.textContent = "Approve?";
+                approveBtn.classList.add("btn", "btn-sm", "btn-primary");
+                approveBtn.onclick = async function () {
+                    await approveUsers(user._id);
+                };
+                return approveBtn;
             }
         }
 
         /**
          * Set true in approve for user on database.
          * @param userId user's ID
-         */  
+         */
         async function approveUsers(userId) {
             await fetch(`/approveUser/${userId}`, { method: 'PUT' });
         }

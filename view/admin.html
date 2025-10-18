@@ -80,9 +80,6 @@
     </div>
 
     <script>
-        /**
-        * Show sign in button if logged out or show account dropdown if signed in.
-        */
         async function checkLoggedUser() {
             let response = await fetch('/loggedUser');
             let user = await response.json();
@@ -103,8 +100,14 @@
                 SIGN_IN_BTN.style.display = 'block';
                 ACCOUNT_DROPDOWN.style.display = 'none';
             }
+            checkAdminAccess(user);
+        }
 
-            // Block admin.html if user isn't an admin
+        /**
+         * Block admin.html if user isn't an admin.
+         * @param user user object
+         */
+        function checkAdminAccess(user) {
             if (!user || user.role !== 'admin') {
                 window.location.replace('/login.html');
             }

@@ -1,4 +1,4 @@
-const dao = require('../model/UserModel');
+const dao = require('../model/UserDao');
 const passUtil = require('../util/PasswordUtil');
 
 /**
