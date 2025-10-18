@@ -6,11 +6,11 @@ const passUtil = require('../util/PasswordUtil');
  * @param {*} req request object containing data
  * @param {*} res response object used to send back
  */
-const register = async(req, res) => {
+const register = async (req, res) => {
     try {
         const { username, password, email, phone, date_of_birth, name } = req.body;
         const hashedPassword = passUtil.hashPassword(password);
-        const newUser = new dao({ username, password: hashedPassword, email, phone, date_of_birth, name, role: 'adult' });
+        const newUser = new dao.userModel({ username, password: hashedPassword, email, phone, date_of_birth, name, role: 'adult', approve: false });
         await newUser.save();
         res.redirect('login.html');
     } catch (err) {
@@ -24,10 +24,10 @@ const register = async(req, res) => {
  * @param {*} res response object to send back
  * @returns 
  */
-const login = async(req, res) => {
+const login = async (req, res) => {
     try {
         const { username, password } = req.body;
-        const user = await dao.findOne(({ username }));
+        const user = await dao.userModel.findOne(({ username }));
 
         // can't find username
         if (!user) {
@@ -37,7 +37,7 @@ const login = async(req, res) => {
         // check password
         const isMatch = await passUtil.comparePassword(password, user.password);
         if (!isMatch) {
-            return res.redirect('login.html?error=1'); 
+            return res.redirect('login.html?error=1');
         }
 
         // successful login
@@ -55,11 +55,11 @@ const login = async(req, res) => {
  * @param {*} res response object to send back
  */
 const loggedUser = (req, res) => {
-  if (req.session.user) {
-    res.send( req.session.user );
-  } else {
-    res.json(null); 
-  }
+    if (req.session.user) {
+        res.send(req.session.user);
+    } else {
+        res.json(null);
+    }
 };
 
 /**
@@ -67,9 +67,37 @@ const loggedUser = (req, res) => {
  * @param {*} req request object containing data
  * @param {*} res response object to send back
  */
-const logout = async(req, res) => {
-    req.session.user = null; 
+const logout = async (req, res) => {
+    req.session.user = null;
     res.redirect('index.html');
+};
+
+/**
+ * Get all users from the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object to send back
+ */
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await dao.userModel.find();
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).send('Error getting users');
+    }
+};
+
+/**
+ * Approve an user. 
+ * @param {*} req request object containing data
+ * @param {*} res response object to send back
+ */
+const approveUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await dao.userModel.findByIdAndUpdate(id, { approve: true });
+    } catch (err) {
+        res.status(500).send('Error approving user');
+    }
 };
 
 module.exports = {
@@ -77,4 +105,6 @@ module.exports = {
     login,
     loggedUser,
     logout,
+    getAllUsers,
+    approveUser,
 };

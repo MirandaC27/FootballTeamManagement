@@ -28,7 +28,7 @@ beforeEach(async function() {
  */
 test('Create new user',async function() {
     let newdata = {username: 'test', password: '12345678', email: 'test@gmail.com', 
-        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last'};
+        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last', approve: false};
     let created = await dao.create(newdata);
     let found = await dao.read(created._id);
     expect(created._id).not.toBeNull(); 
@@ -40,7 +40,7 @@ test('Create new user',async function() {
  */
 test('Delete user', async function() {
     let newdata = {username: 'test', password: '12345678', email: 'test@gmail.com', 
-        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last'};
+        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last', approve: false};
     let created = await dao.create(newdata); 
     let deleted = await dao.del(created._id);
     let found = await dao.read(created._id); 
@@ -53,11 +53,11 @@ test('Delete user', async function() {
  */
 test('Read All', async function() {
     let newdata1 = {username: 'test1', password: '12345678', email: 'test1@gmail.com', 
-        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last'};
+        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last', approve: false};
     let newdata2 = {username: 'test2', password: '123456789', email: 'test2@gmail.com', 
-        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last'};
+        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last', approve: false};
     let newdata3 = {username: 'test3', password: '12345678910', email: 'test3@gmail.com', 
-        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last'};
+        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last', approve: false};
     await dao.create(newdata1);
     await dao.create(newdata2);
     await dao.create(newdata3);
@@ -71,7 +71,7 @@ test('Read All', async function() {
  */
 test('Find Login user', async function() {
     let newdata = {username: 'test1', password: '12345678', email: 'test1@gmail.com', 
-        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last'};
+        phone: '1230001234', date_of_birth: '10/17/2025', name: 'First Last', approve: false};
     let created = await dao.create(newdata); 
     let logged = await dao.findLogin(newdata.username);
     expect(logged).not.toBeNull();

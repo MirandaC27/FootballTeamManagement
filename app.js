@@ -23,6 +23,8 @@ app.post('/register', UserCont.register);
 app.post('/login', UserCont.login);
 app.get('/logout', UserCont.logout);
 app.get('/loggedUser', UserCont.loggedUser);
+app.get('/getAllUsers', UserCont.getAllUsers);
+app.put('/approveUser/:id', UserCont.approveUser);
 
 // export for server.js
 module.exports = app; 

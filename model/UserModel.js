@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  approve: {
+    type: Boolean,
+    required: false,
+  },
   role: {
     type: String,
     required: false,
