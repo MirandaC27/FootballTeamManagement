@@ -150,7 +150,7 @@
             minorTeamId.appendChild(document.createTextNode(minor.team_id ? minor.team_id : '-'));
 
             // Reassign button for the Action column 
-            const reassignBtn = createReassignButton();
+            const reassignBtn = createReassignButton(minor);
             minorReassign.appendChild(reassignBtn);
             tr.appendChild(minorId);
             tr.appendChild(minorName);
@@ -162,18 +162,19 @@
 
         /**
          * Create a reassign button, which is for the Action column. 
+         * @param minorId minor's ID in database
          */
-        function createReassignButton() {
+        function createReassignButton(minor) {
             const reassignBtn = document.createElement("button");
             reassignBtn.textContent = "Reassign?";
             reassignBtn.classList.add("btn", "btn-sm", "btn-primary");
 
             reassignBtn.onclick = async function () {
                 const newTeamId = prompt("Enter new team ID:");
-                if (newTeam == null) {
+                if (newTeamId == null) {
                     return;
                 } else {
-                    await reassignMinor(newTeamId);
+                    await reassignMinor(minor, newTeamId);
                 }
             };
             return reassignBtn;
@@ -182,8 +183,8 @@
         /**
          * Reassign minor on database by changing its team ID.
          */
-        async function reassignMinor(newTeamId) {
-            await fetch(`/reassignMinor/${newTeamId}`, { method: 'PUT' });
+        async function reassignMinor(minor, newTeamId) {
+            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamId}`, {method: 'PUT'});
         }
         displayMinors();
     </script>

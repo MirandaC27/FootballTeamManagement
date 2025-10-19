@@ -28,7 +28,7 @@ app.put('/approveUser/:id', UserCont.approveUser);
 
 // minor controller routes
 const MinorCont = require('./controller/MinorController');
-app.put('/reassignMinor', MinorCont.reassignMinor);
+app.put('/reassignMinor/:minorId/:newTeamId', MinorCont.reassignMinor);
 app.get('/getAllMinors', MinorCont.getAllMinors);
 
 // export for server.js

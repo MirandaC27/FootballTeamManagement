@@ -1,6 +1,7 @@
 const dao = require('../model/MinorDao');
 //const teamDao = require('../model/TeamDao');
 
+// A hard-coded season
 const SEASON_START = new Date('2025-10-01');
 const SEASON_END = new Date('2025-10-31');
 
@@ -8,17 +9,25 @@ const SEASON_END = new Date('2025-10-31');
  * Reassign a minor to a new existing team.
  */
 const reassignMinor = async (req, res) => {
-    const { minorId, newTeamId } = req.body;
-    const currentDate = new Date();
+    try {
+        const { minorId, newTeamId } = req.params;
+        console.log('Params received:', req.params);
+        const currentDate = new Date();
 
-    // This can't be implemented right now because no TeamModel
-    if (currentDate >= SEASON_START && currentDate <= SEASON_END) {
+        // Check if season has began
+        if (currentDate < SEASON_START || currentDate > SEASON_END) {
+            return res.redirect('admin-manage-minors.html?error=1');
+        }
+
+        // Can't be implemented right now
         /*const team = await teamDao.findById(newTeamId);
         if (!team) {
             return res.redirect('admin-manage-minors.html?error=1');
-        }
+        }*/
+
         await dao.minorModel.findByIdAndUpdate(minorId, { team_id: newTeamId });
-        */
+    } catch (err) {
+        res.status(500).send('Error reassigning minors');
     }
 };
 
@@ -36,7 +45,7 @@ const getAllMinors = async (req, res) => {
     }
 };
 
-module.exports = { 
+module.exports = {
     reassignMinor,
     getAllMinors,
 };
