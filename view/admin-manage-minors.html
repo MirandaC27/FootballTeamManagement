@@ -83,15 +83,18 @@
     </div>
 
     <script>
+        /**
+        * Show sign in button if logged out or show account dropdown if signed in.
+        */
         async function checkLoggedUser() {
             let response = await fetch('/loggedUser');
             let user = await response.json();
-            const SIGN_IN_BTN = document.getElementById('signin-btn');
-            const ACCOUNT_DROPDOWN = document.getElementById('account-dropdown');
+            const signInBtn = document.getElementById('signin-btn');
+            const accountDropdown = document.getElementById('account-dropdown');
 
             if (user) {
-                SIGN_IN_BTN.style.display = 'none';
-                ACCOUNT_DROPDOWN.style.display = 'block';
+                signInBtn.style.display = 'none';
+                accountDropdown.style.display = 'block';
 
                 // show admin option only if user is an admin
                 if (user.role === 'admin') {
@@ -100,8 +103,8 @@
                     document.getElementById('admin').style.display = 'none';
                 }
             } else {
-                SIGN_IN_BTN.style.display = 'block';
-                ACCOUNT_DROPDOWN.style.display = 'none';
+                signInBtn.style.display = 'block';
+                accountDropdown.style.display = 'none';
             }
             checkAdminAccess(user);
         }
@@ -184,7 +187,7 @@
          * Reassign minor on database by changing its team ID.
          */
         async function reassignMinor(minor, newTeamId) {
-            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamId}`, {method: 'PUT'});
+            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamId}`, { method: 'PUT' });
         }
         displayMinors();
     </script>
