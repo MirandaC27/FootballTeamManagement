@@ -5,5 +5,4 @@ function calendarArray{
         arr[x]  = new Array(6);
     }
 
-    for
 }
