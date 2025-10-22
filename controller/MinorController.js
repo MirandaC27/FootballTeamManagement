@@ -3,7 +3,7 @@ const dao = require('../model/MinorDao');
 
 // A hard-coded season
 const SEASON_START = new Date('2025-10-01');
-const SEASON_END = new Date('2025-10-31');
+const SEASON_END = new Date('2025-11-30');
 
 /**
  * Reassign a minor to a new existing team.
