@@ -1,5 +1,6 @@
-const controller = require("./MinorController");
-const dao = require("../model/MinorDao");
+const controller = require('./MinorController');
+const dao = require('../model/MinorDao');
+const teamDao = require('../model/TeamDao');
 
 // Mock the entire dao module
 jest.mock("../model/MinorDao");
@@ -21,6 +22,7 @@ test('Reassign minor within season', async function () {
 
     // Mock the current date and the dao model call
     jest.setSystemTime(new Date('2025-10-26'));
+    teamDao.teamModel.findById = jest.fn().mockResolvedValue({ _id: "00d", name: "Team D" });
     dao.minorModel.findByIdAndUpdate = jest.fn();
     await controller.reassignMinor(req, res);
 
