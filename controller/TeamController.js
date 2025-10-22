@@ -14,3 +14,5 @@ const getAllTeams = async (req, res) => {
         res.status(500).send('Error getting teams');
     }
 };
+
+module.exports = {getAllTeams};
