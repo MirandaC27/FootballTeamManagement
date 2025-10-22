@@ -10,3 +10,8 @@ To run the Node.js Express server, use the following command on terminal: ```nod
 
 ## Testing and Coverage
 To run tests and display coverage, use the following command on terminal: ```npm run coverage```.
+
+## Schedule Generation
+The schedule generation algorithm ensures:
+- Teams only play each other once
+- Variety between similar matched teams and mismatched matchups. (80% similar, 20% other)

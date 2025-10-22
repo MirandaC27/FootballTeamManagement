@@ -76,7 +76,7 @@ test('Find team', async function() {
     let logged = await dao.findTeam(newData.username);
     expect(logged).not.toBeNull();
     expect(logged._id).toEqual(created._id);
-    expect(logged.username).toEqual(created.username);
+    expect(logged.name).toEqual(created.name);
 });
 
 /**

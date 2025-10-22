@@ -30,5 +30,9 @@ const MinorCont = require('./controller/MinorController');
 app.put('/reassignMinor/:minorId/:newTeamId', MinorCont.reassignMinor);
 app.get('/getAllMinors', MinorCont.getAllMinors);
 
+// team controller routes
+const TeamCont = require('./controller/TeamController');
+app.get('/getAllTeams', TeamCont.getAllTeams);
+
 // export for server.js
 module.exports = app; 
