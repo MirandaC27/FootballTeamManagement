@@ -14,3 +14,5 @@ const generateSeasonSchedule = async () => {
         res.status(500).send('Error registering');
     }
 };
+
+module.exports = {generateSeasonSchedule};
