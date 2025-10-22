@@ -1,45 +1,58 @@
+function generateMonth(year, month) {
+  const monthArr = Array.from({ length: 6 }, () => new Array(7).fill(""));
+  const startDayInWeek = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+  let day  = 1;
+  //let counter = 1;
+  //let started = false;
 
-function generateMonth (year, month){
-    const monthArr = Array.from({ length: 6}, () => new Array(7).fill(""));
-    const startDayInWeek = new Date(year, month, 1).getDay();
-    const monthLong = new Date(year, month+1, 0).getDay();
-    
-    let counter = 1;
-    let started = false;
+  for (let x = 0; x < 6; x++) {
+    for (let y = 0; y < 7; y++) {
 
-    for(let x = 0; x < 6; x++){
-        for(let y = 0; y < 7; y++){
-            if(!started && startDayInWeek){
-                started = true;
-            }
+      if (x === 0 && y < startDayInWeek) {
+        continue;
+      }
 
-            else if(started && counter <= monthLong){
-                monthArr[x][y] = counter;
-                counter++;
-            }
+      if (day <= daysInMonth){
+        monthArr[x][y] = day.toString();
+        day++;
+      }
 
-            else{
-                monthArr[x][y] = "";
-            }
-        }
     }
-    return monthArr
+  }
+
+  return monthArr;
 }
 
-function calendarArray(year, monthIndex = null){
+function calendarArray(year, monthIndex = null) {
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
-    if(monthArray != null){
-        return generateMonth(year, monthIndex);
+  // Single month case
+  if (monthIndex != null) {
+    return {
+      year: year,
+      monthName: months[monthIndex],
+      data: generateMonth(year, monthIndex),
+    };
+  }
+
+  // Full year case
+  else {
+    const arr = [];
+    for (let m = 0; m < 12; m++) {
+      arr.push({
+        year: year,
+        monthName: months[m],
+        data: generateMonth(year, m),
+      });
     }
-
-    else{
-        const arr = [];
-        for(let m = 0; m < 12; m++){
-            arr.push(generateMonth(year,m));
-        }
-        return arr;
-    }   
+    return arr;
+  }
 }
+
 
 module.exports = calendarArray;
