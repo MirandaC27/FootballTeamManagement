@@ -32,6 +32,24 @@ test('Reassign minor within season', async function () {
 });
 
 /**
+ * Reassign minor to a team that doesn't exists test.
+ */
+test('Reassign minor to a team that doesn\'t exists', async function () {
+    let req = { params: { minorId: "121212", newTeamId: "00d" } };
+    let res = { redirect: jest.fn(), status: jest.fn(), send: jest.fn() };
+
+    // Mock the current date and the dao model call 
+    jest.setSystemTime(new Date('2025-10-26'));
+    teamDao.teamModel.findById = jest.fn().mockResolvedValue(null);
+    dao.minorModel.findByIdAndUpdate = jest.fn();
+    await controller.reassignMinor(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith("admin-manage-minors.html?error=1");
+    expect(dao.minorModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+});
+
+/**
  * Reassign minor before season starts test. 
  */
 test('Reassign minor but before season starts', async function () {
