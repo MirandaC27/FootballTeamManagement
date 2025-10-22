@@ -35,3 +35,64 @@ body {
 .table {
   background-color: white;
 }
+
+/*calendar*/
+.calendar-container {
+  max-width: 800px;
+  margin: 60px auto;
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.calendar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendar-nav button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.calendar-nav button:hover {
+  background-color: #0056b3;
+}
+
+#calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+#calendar-table th {
+  background-color: #cce0ff;
+  padding: 10px;
+  font-weight: bold;
+}
+
+#calendar-table td {
+  border: 1px solid #ddd;
+  height: 60px;
+  vertical-align: middle;
+  font-size: 16px;
+}
+
+#calendar-table td.day:hover {
+  background-color: #e6f0ff;
+  cursor: pointer;
+}
+
+#month-year {
+  font-size: 1.3em;
+  font-weight: bold;
+}
