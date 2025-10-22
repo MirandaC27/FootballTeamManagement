@@ -15,4 +15,5 @@ const getAllTeams = async (req, res) => {
     }
 };
 
+
 module.exports = {getAllTeams};

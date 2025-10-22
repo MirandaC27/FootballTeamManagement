@@ -1,6 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const session = require('express-session');
+const path = require('path');
+const calendar = require('./calendar-config');
 const app = express();
 
 // middleware
@@ -34,5 +36,40 @@ app.get('/getAllMinors', MinorCont.getAllMinors);
 const TeamCont = require('./controller/TeamController');
 app.get('/getAllTeams', TeamCont.getAllTeams);
 
+//calendar routes
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+// Redirect /calendar → current month page
+app.get('/calendar', (req, res) => {
+  const now = new Date();
+  res.redirect(`/calendar/month/${now.getMonth()}?year=${now.getFullYear()}`);
+});
+
+// Return JSON calendar data for a given month
+app.get('/calendar/data/:monthIndex', (req, res) => {
+  const year = parseInt(req.query.year) || new Date().getFullYear();
+  const monthIndex = parseInt(req.params.monthIndex);
+
+  if (monthIndex < 0 || monthIndex > 11) {
+    return res.status(404).json({ error: 'That month does not exist' });
+  }
+
+  const CALENDAR_DATA = calendar(year, monthIndex);
+  res.json(CALENDAR_DATA);
+});
+
+// Serve the static calendar page itself
+app.get('/calendar/month/:monthIndex', (req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'calendar.html'));
+});
+
+
+
+console.log("UserCont:", UserCont);
+console.log("MinorCont:", MinorCont);
+console.log("TeamCont:", TeamCont);
 // export for server.js
 module.exports = app; 
