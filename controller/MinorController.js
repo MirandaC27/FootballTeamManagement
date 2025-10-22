@@ -11,7 +11,6 @@ const SEASON_END = new Date('2025-11-30');
 const reassignMinor = async (req, res) => {
     try {
         const { minorId, newTeamId } = req.params;
-        console.log('Params received:', req.params);
         const currentDate = new Date();
 
         // Check if season has began
