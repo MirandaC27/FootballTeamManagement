@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/style.css">
-    <title>Admin - Soccer League Management</title>
+    <title>Manage Schedule - Soccer League Management</title>
 </head>
 
 <body>
@@ -63,26 +63,20 @@
         </div>
     </nav>
 
-    <h1 class="text-center mt-4" id="admin-dashboard">Admin Dashboard</h1>
+    <!--Show options for generating schedules-->
     <div class="card shadow text-center">
         <div class="card-body">
-            <h5 class="card-title">👤 Manage Users</h5>
-            <p class="card-text text-muted">View, approve, and manage user accounts.</p>
-            <a href="admin-manage-users.html" class="btn btn-primary stretched-link">Go</a>
+            <h5 class="card-title">📅 Generate Season Schedule</h5>
+            <p class="card-text text-muted">Generate the schedule for the season.</p>
+            <a href="#" class="btn btn-primary stretched-link" onclick="showGeneratedSchedule()">Go</a>
         </div>
     </div>
+
     <div class="card shadow text-center">
         <div class="card-body">
-            <h5 class="card-title">👤 Manage Minors</h5>
-            <p class="card-text text-muted">Reassign minors associated to an user.</p>
-            <a href="admin-manage-minors.html" class="btn btn-primary stretched-link">Go</a>
-        </div>
-    </div>
-    <div class="card shadow text-center">
-        <div class="card-body">
-            <h5 class="card-title">📅 Generate Schedule</h5>
-            <p class="card-text text-muted">Generate season schedule or playoff bracket.</p>
-            <a href="admin-generate-schedule.html" class="btn btn-primary stretched-link">Go</a>
+            <h5 class="card-title">Generate Playoff Bracket</h5>
+            <p class="card-text text-muted">Generate a playoff bracket for this season.</p>
+            <a href="admin-manage-playoffs.html" class="btn btn-primary stretched-link">Go</a>
         </div>
     </div>
 
@@ -110,19 +104,90 @@
                 signInBtn.style.display = 'block';
                 accountDropdown.style.display = 'none';
             }
-            checkAdminAccess(user);
-        }
-
-        /**
-         * Block admin.html if user isn't an admin.
-         * @param user user object
-         */
-        function checkAdminAccess(user) {
-            if (!user || user.role !== 'admin') {
-                window.location.replace('/login.html');
-            }
         }
         checkLoggedUser();
+
+
+        function showGeneratedSchedule() {
+            generateSeasonSchedule();
+            window.location.href = "admin-current-schedule.html";
+        }
+
+        async function generateSeasonSchedule() {
+            let response = await fetch('/getAllTeams');
+            let teams = await response.json();
+            let teamsAndQuality = [];
+            for (let team of teams) {
+                let totalGamesPlayed = team.priorSeasonWins + team.priorSeasonLosses;
+                let teamQuality = team.priorSeasonWins / totalGamesPlayed;
+                let teamWithQuality = {
+                    name: team.name,
+                    lastSeasonQuality: teamQuality
+                };
+                teamsAndQuality.push(teamWithQuality);
+            }
+            let defaultWeeks = 10;
+            return generateSchedule(teamsAnQuality, 10);
+        }
+
+        function generateSchedule(teams, numWeeks) {
+            let schedule = [];
+            // avoiding repeat matchups
+            let matchHistory = new Set();
+            for (let week = 1; week <= numWeeks; week++) {
+                let shuffled = shuffleTeams([...teams]);
+                let weeksMatches = [];
+                while (shuffled.length > 1) {
+                    let teamA = shuffled.shift();
+                    // get possible opponents teamA has not faced
+                    let possibleOpponents = shuffled.filter(t => {
+                        const key1 = `${teamA.name}-${t.name}`;
+                        const key2 = `${t.name}-${teamA.name}`;
+                        return !matchHistory.has(key1) && !matchHistory.has(key2);
+                    });
+                    if (possibleOpponents.length == 0) {
+                        continue;
+                    }
+                    // sort possible opponents by most similar strenth
+                    possibleOpponents.sort((a, b) => 
+                        Math.abs(teamA.strength - a.strength) - Math.abs(teamA.strength - b.strength)
+                    );
+                    // choose similar strength opponent 80% of time, random opponent 20% of time
+                    if (Math.random() < 0.8) {
+                        let opponent = possibleOpponents[0];
+                    }
+                    else {
+                        // choose random opponent out of possible choices
+                        let opponent = possibleOpponents[Math.floor(Math.random() * possibleOpponents.length)];
+                    }
+                    // remove opponent from list
+                    shuffled.splice(shuffled.indexOf(opponent), 1);
+                    // add matchup to the weeks matches
+                    let matchup = {
+                        week,
+                        homeTeam: teamA.name,
+                        awayTeam: teamB.name 
+                    };
+                    weeksMatches.push(matchup);
+                }
+                // add the weeks matches to the season schedule
+                schedule.push(weeksMatches);
+            }
+            // return the entire seasons schedule
+            return schedule;
+        }
+
+        function shuffleTeams(teams) {
+            let currentIndex = teams.length;
+            while (currentIndex != 0) {
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+            [teams[currentIndex], teams[randomIndex]] = [teams[randomIndex], teams[currentIndex]];
+            }
+            return teams;
+        }
+
+
     </script>
 
 </body>

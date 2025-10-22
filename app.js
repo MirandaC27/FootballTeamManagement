@@ -61,5 +61,9 @@ app.get('/calendar/month/:monthIndex', (req, res) => {
   res.sendFile(path.join(__dirname, 'layout', 'calendar.html'));
 });
 
+// team controller routes
+const TeamCont = require('./controller/TeamController');
+app.get('/getAllTeams', TeamCont.getAllTeams);
+
 // export for server.js
 module.exports = app; 
