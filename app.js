@@ -1,6 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const session = require('express-session');
+const path = require('path');
+const calendar = require('./calendar-config');
 const app = express();
 
 // middleware
@@ -31,10 +33,6 @@ app.put('/reassignMinor/:minorId/:newTeamId', MinorCont.reassignMinor);
 app.get('/getAllMinors', MinorCont.getAllMinors);
 
 //calendar routes
-app.set('view engine', ejs);
-app.set('views', this.path.join(__dirname, 'layout'));
-app.use(express.static(this.path.join(__dirname, 'layout')));
-
 const MONTHS = [  "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
 
@@ -52,13 +50,16 @@ app.get('/calendar/month/:monthIndex', (res, req) => {
   }
 
   const CALENDAR_DATA = calendar(year, monthIndex);
-
-  res.render('index', {
-    calendar: CALENDAR_DATA,
-    monthName: MONTHS[monthIndex]
+  res.json({
+    monthName: MONTHS[monthIndex],
+    year,
+    data:CALENDAR_DATA
   });
 });
 
+app.get('/calendar/month/:monthIndex', (req, res) => {
+  res.sendFile(path.join(__dirname, 'layout', 'calendar.html'));
+});
 
 // export for server.js
 module.exports = app; 
