@@ -42,7 +42,7 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-// Redirect /calendar → current month page
+// Redirect /calendar to current month page
 app.get('/calendar', (req, res) => {
   const now = new Date();
   res.redirect(`/calendar/month/${now.getMonth()}?year=${now.getFullYear()}`);
