@@ -1,20 +1,26 @@
 const Match = require("./Match");
 
-exports.create = async function(newMatch) {
-  try {
-    const match = new Match(newMatch);
-    return await match.save();
-  } catch (err) {
-    console.error("Error creating match:", err);
-    return {};
-  }
+const create = async (newMatch) => {
+    try {
+        return await matchModel.create(newMatch);
+    } catch (err) {
+        console.error('Error in DAO create:', err);
+        return {};
+    }
 };
 
-exports.readAll = async function() {
-  try {
-    return await Match.find({});
-  } catch (err) {
-    console.error("Error reading matches:", err);
-    return [];
-  }
+const readAll = async () => {
+    try {
+        return await matchModel.find();
+    } catch (err) {
+        console.error('Error in DAO readAll:', err);
+        return [];
+    }
 };
+
+module.exports = {
+    matchModel,
+    create,
+    readAll,
+};
+
