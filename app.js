@@ -66,10 +66,31 @@ app.get('/calendar/month/:monthIndex', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'calendar.html'));
 });
 
+// schedule controller routes
+const ScheduleCont = require("./controller/ScheduleController");
+app.get('/', ScheduleCont.getAllWeeks);
+app.get('/:weekNumber', ScheduleCont.getSpecificWeek);
+app.post('/', ScheduleCont.createWeek);
+app.put('/:weekNumber', ScheduleCont.upsertWeek);
+app.delete('/:weekNumber', ScheduleCont.deleteWeek);
+app.patch('/:weekNumber/result', ScheduleCont.updateMatchupResult);
+
+// schedule save route
+const scheduleDao = require('./model/SeasonScheduleDao');
+app.post('/schedule', async (req, res) => {
+  try {
+    let weekNumber, weekMatchups = req.body;
+    const savedWeek = await scheduleDao.upsertWeek(weekNumber, weekMatchups);
+    res.json(savedWeek);
+  } catch (err) {
+      res.status(500).send('Error saving week');
+  }
+});
 
 
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);
 console.log("TeamCont:", TeamCont);
+console.log("ScheduleCont", ScheduleCont);
 // export for server.js
 module.exports = app; 

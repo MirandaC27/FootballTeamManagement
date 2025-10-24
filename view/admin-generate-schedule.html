@@ -108,8 +108,8 @@
         checkLoggedUser();
 
 
-        function showGeneratedSchedule() {
-            generateSeasonSchedule();
+        async function showGeneratedSchedule() {
+            await generateSeasonSchedule();
             window.location.href = "admin-current-schedule.html";
         }
 
@@ -127,7 +127,22 @@
                 teamsAndQuality.push(teamWithQuality);
             }
             let defaultWeeks = 10;
-            return generateSchedule(teamsAnQuality, 10);
+            let schedule = generateSchedule(teamsAnQuality, 10);
+
+            for (let matches of schedule) {
+                const weekNumber = matches[0]?.week || 0
+                if (weekNumber > 0) {
+                    await fetch('../app', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            weekNumber: weekNumber,
+                            weekMatchups: matches
+                        })
+                    });
+                }
+            }
+            return schedule
         }
 
         function generateSchedule(teams, numWeeks) {
@@ -152,13 +167,14 @@
                     possibleOpponents.sort((a, b) => 
                         Math.abs(teamA.strength - a.strength) - Math.abs(teamA.strength - b.strength)
                     );
+                    let opponent;
                     // choose similar strength opponent 80% of time, random opponent 20% of time
                     if (Math.random() < 0.8) {
-                        let opponent = possibleOpponents[0];
+                        opponent = possibleOpponents[0];
                     }
                     else {
                         // choose random opponent out of possible choices
-                        let opponent = possibleOpponents[Math.floor(Math.random() * possibleOpponents.length)];
+                        opponent = possibleOpponents[Math.floor(Math.random() * possibleOpponents.length)];
                     }
                     // remove opponent from list
                     shuffled.splice(shuffled.indexOf(opponent), 1);
