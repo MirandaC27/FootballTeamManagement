@@ -166,9 +166,11 @@
                     let matchup = {
                         week,
                         homeTeam: teamA.name,
-                        awayTeam: teamB.name 
+                        awayTeam: opponent.name 
                     };
                     weeksMatches.push(matchup);
+                    matchHistory.add(`${teamA.name}-${opponent.name}`);
+                    matchHistory.add(`${opponent.name}-${teamA.name}`);
                 }
                 // add the weeks matches to the season schedule
                 schedule.push(weeksMatches);
