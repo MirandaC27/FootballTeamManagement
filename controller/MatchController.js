@@ -20,6 +20,23 @@ const createNewMatch = async (req, res) => {
     }
 };
 
+const deleteMatch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await dao.matchModel.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    res.json({ message: "Match deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting match:", err);
+    res.status(500).json({ message: "Server error while deleting match" });
+  }
+};
+
+
 
 const getAllMatches = async (req, res) => {
    
@@ -53,7 +70,10 @@ const getCalendarData = async (req, res) => {
             })
             
             //map each day to the month
-            .map(m => new Date(m.matchDate).getDate());
+            .map(m => ({
+                day: new Date(m.matchDate).getDate(),
+                id:m._id
+            }));
         
             res.json({
             year: monthData.year,
@@ -69,8 +89,11 @@ const getCalendarData = async (req, res) => {
     }
 };
 
+
+
 module.exports = {
     createNewMatch,
+    deleteMatch,
     getAllMatches,
-    getCalendarData,
+    getCalendarData
 };

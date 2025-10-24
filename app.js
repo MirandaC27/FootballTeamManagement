@@ -57,6 +57,8 @@ app.get('/calendar/data/:year/:month', MatchCont.getCalendarData);
 // Match routes
 app.post('/addMatch', MatchCont.createNewMatch);
 app.get('/getAllMatches', MatchCont.getAllMatches);
+app.delete('/deleteMatch/:id', MatchCont.deleteMatch);
+
 
 
 

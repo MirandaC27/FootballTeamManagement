@@ -178,3 +178,22 @@ body {
   margin-top: 15px;
   text-align: center;
 }
+
+
+#match-day {
+  background-color: #e6ffe6;
+  position: relative;
+}
+
+#delete-btn {
+  border: none;
+  background: none;
+  color: red;
+  font-size: 0.9em;
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  cursor: pointer;
+}
+
+
