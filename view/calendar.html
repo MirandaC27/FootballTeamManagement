@@ -15,6 +15,9 @@
       <button id="next-month">Next &gt;</button>
     </div>
 
+    <button id="show-add-form">+ Add Match</button>
+    
+
     <table id="calendar-table">
       <thead>
         <tr>
@@ -24,8 +27,147 @@
       </thead>
       <tbody id="calendar-body"></tbody>
     </table>
+
+    
   </div>
 
+  <form id="add-match-form" method="POST" action="/addMatch">
+    <label for="matchDate">Add Match:</label>
+    <input type="date" name="matchDate" id="matchDate" required>
+    <button type="submit">Add</button>
+    <button type="button" id="cancelBtn">Cancel</button>
+  </form>
+
+  <p id="form-status"></p>
+
   <script src="/calendar-config.js"></script>
+
+  <!-- new rendering-->
+  <script>
+    const monthYearLabel = document.getElementById("month-year");
+    const calendarBody = document.getElementById("calendar-body");
+    const prevBtn = document.getElementById("prev-month");
+    const nextBtn = document.getElementById("next-month");
+    const showFormBtn = document.getElementById("show-add-form");
+    const addForm = document.getElementById("add-match-form");
+
+
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    // Fetch and render calendar
+    async function renderCalendar(year, month) {
+      
+      const response = await fetch(`/calendar/data/${year}/${month + 1}`); 
+      const result = await response.json();
+      const matchDays = result.matchDays || [];
+      
+      const monthData = calendarArray(year, month);
+      const days = monthData.data;
+      
+      // Update title
+      monthYearLabel.textContent = `${monthData.monthName} ${year}`;
+      
+      // Clear previous calendar
+      calendarBody.innerHTML = "";
+
+      for (let i = 0; i < days.length; i++) {
+        const row = document.createElement("tr");
+        
+        for (let j = 0; j < days[i].length; j++) {
+          const cell = document.createElement("td");
+          const day = days[i][j];
+          if (day) 
+          {
+            cell.textContent = day;
+
+            // Highlight match days
+            if (matchDays.includes(parseInt(day))) {
+              cell.classList.add("match-day");
+            }
+          }
+          row.appendChild(cell);
+        }
+        calendarBody.appendChild(row);
+      }
+    }
+
+    // Initial render
+    renderCalendar(currentYear, currentMonth);
+
+    prevBtn.addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar(currentYear, currentMonth);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar(currentYear, currentMonth);
+    });
+
+    //form buttons
+    showFormBtn.addEventListener("click", () => {
+      addForm.style.display = "block";
+      showFormBtn.style.display = "none";
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      addForm.style.display = "none";
+      showFormBtn.style.display = "inline-block";
+      formStatus.textContent = "";
+    });
+
+    const matchForm = document.getElementById("add-match-form");
+    const formStatus = document.getElementById("form-status");
+  
+    matchForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const dateValue = document.getElementById("matchDate").value;
+
+    if (!dateValue) {
+      formStatus.textContent = "Please select a date.";
+      return;
+    }
+
+    try 
+    {
+      const res = await fetch("/addMatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchDate: dateValue }),
+      });
+
+      if (res.ok) {
+        formStatus.textContent = "Match added.";
+        renderCalendar(currentYear, currentMonth);
+      } 
+      
+      else {
+        formStatus.textContent = "Could not add match.";
+      }
+    } 
+    
+    catch (err) 
+    {
+      console.error("Error:", err);
+      formStatus.textContent = "Could not connect to server.";
+    }
+
+  });
+
+  </script>
+
+
+
+
 </body>
 </html>

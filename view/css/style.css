@@ -96,3 +96,85 @@ body {
   font-size: 1.3em;
   font-weight: bold;
 }
+
+/*match form*/
+#add-match-form {
+  max-width: 400px;
+  margin: 20px auto 50px;
+  background-color: white;
+  padding: 20px 25px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+#add-match-form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+#add-match-form input[type="date"] {
+  width: 80%;
+  padding: 8px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+}
+
+#add-match-form input[type="date"]:focus {
+  border-color: #007bff;
+}
+
+#add-match-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+#add-match-form button:hover {
+  background-color: #007bff;
+}
+
+#add-match-form {
+  display: none;
+  margin-top: 20px;
+}
+
+#form-status {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+#show-add-form {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+#show-add-form:hover {
+  background-color: #0056b3;
+}
+
+#add-match-form {
+  margin-top: 15px;
+  text-align: center;
+}

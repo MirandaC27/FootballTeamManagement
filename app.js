@@ -49,6 +49,7 @@ app.get('/calendar', (req, res) => {
 });
 
 // Return JSON calendar data for a given month
+/*
 app.get('/calendar/data/:monthIndex', (req, res) => {
   const year = parseInt(req.query.year) || new Date().getFullYear();
   const monthIndex = parseInt(req.params.monthIndex);
@@ -60,11 +61,19 @@ app.get('/calendar/data/:monthIndex', (req, res) => {
   const CALENDAR_DATA = calendar(year, monthIndex);
   res.json(CALENDAR_DATA);
 });
+*/
 
 // Serve the static calendar page itself
 app.get('/calendar/month/:monthIndex', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'calendar.html'));
 });
+
+//calendar match adding routes
+const MatchCont = require('./controller/MatchController');
+
+app.post('/addMatch', MatchCont.createNewMatch);
+app.get('/getAllMatches', MatchCont.getAllMatches);
+app.get('/calendar/data/:year/:month', MatchCont.getCalendarData);
 
 
 

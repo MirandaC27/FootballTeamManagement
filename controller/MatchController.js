@@ -11,7 +11,7 @@ const createNewMatch = async (req, res) => {
 
         const newMatch = new dao.matchModel({ matchDate });
         await newMatch.save();
-        res.redirect('/calendar');
+        res.status(200).json({ message: "Match added successfully" });
     }
 
     catch(err){
@@ -39,9 +39,9 @@ const getCalendarData = async (req, res) => {
     
     try{
         const year = parseInt(req.params.year);
-        const month = parseInt(req.params.month);
+        const monthIndex = parseInt(req.params.month) - 1;
 
-        const monthData = calendarArray(year, month);
+        const monthData = calendarArray(year, monthIndex);
         const matches = await dao.matchModel.find();
 
         const matchDays = matches
@@ -49,12 +49,13 @@ const getCalendarData = async (req, res) => {
             //get matches in requested month and year
             .filter(m =>{
                 const date = new Date(m.matchDate);
-                return date.getMonth() === month && date.getFullYear() === year;
+                return date.getMonth() === monthIndex && date.getFullYear() === year;
             })
             
             //map each day to the month
-            .map(m => new Date(m.matchDate.getDate()));
-        res.json({
+            .map(m => new Date(m.matchDate).getDate());
+        
+            res.json({
             year: monthData.year,
             monthName: monthData.monthName,
             data: monthData.data,

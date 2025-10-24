@@ -1,31 +1,41 @@
-const Match = require("./Match");
+const mongoose = require("mongoose");
 
-const create = async (newMatch) => {
-    try {
-        return await matchModel.create(newMatch);
-    } 
+// Define schema
+const matchSchema = new mongoose.Schema({
+  matchDate: { type: Date, required: true },
+});
 
-    catch (err) {
-        console.error('Error in DAO create:', err);
-        return {};
-    }
-};
+// Create model
+const Match = mongoose.model("Match", matchSchema);
 
-const readAll = async () => {
-    try {
-        return await matchModel.find();
-    }
-    
-    catch (err) {
-        console.error('Error in DAO readAll:', err);
-        return [];
-    }
-};
+// === DAO Functions ===
 
+// Create new match
+async function create(newMatchData) {
+  const match = new Match(newMatchData);
+  return await match.save();
+}
+
+// Read all matches
+async function readAll() {
+  return await Match.find();
+}
+
+// Optional: find by ID
+async function readById(id) {
+  return await Match.findById(id);
+}
+
+// Optional: delete match
+async function remove(id) {
+  return await Match.findByIdAndDelete(id);
+}
+
+// Export both the model and DAO functions
 module.exports = {
-    matchModel,
-    create,
-    readAll,
+  matchModel: Match,
+  create,
+  readAll,
+  readById,
+  remove,
 };
-
-
