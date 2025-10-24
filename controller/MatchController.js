@@ -9,8 +9,8 @@ const createNewMatch = async (req, res) => {
             return res.status(400).send('No match date');
         }
 
-        const newMatch = new dao.matchModel({ matchDate });
-        await newMatch.save();
+        const localDate = new Date(`${matchDate}T00:00:00`);
+        await dao.create({ matchDate: localDate });
         res.status(200).json({ message: "Match added successfully" });
     }
 

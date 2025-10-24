@@ -1,196 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
-    <title>Home - Soccer League Management</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar - Soccer League Management</title>
+
+  <!-- Bootstrap + custom CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
+  <!-- Navbar -->
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="/index.html">
+      <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+      littleLIGA
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-    <!--nav bar-->
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
-        <nav class="navbar navbar-dark bg-primary">
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/index.html">Home</a>
+        <a class="nav-item nav-link" href="#">League</a>
+        <a class="nav-item nav-link" href="#">Matches</a>
+        <a class="nav-item nav-link" href="#">Team</a>
+        <a class="nav-item nav-link active" href="/calendar.html">Calendar</a>
+      </div>
+    </div>
 
-            <!--logo-->
-            <a class="navbar-brand" href="/index.html">
-                <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
-                littleLIGA
-            </a>
-        </nav>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <!-- Sign in / Account controls -->
+    <div id="signin-btn" class="ms-auto">
+      <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
+    </div>
+    <div id="account-dropdown" class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+        </svg> Account
+      </button>
+      <ul class="dropdown-menu">
+        <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
+        <li><a class="dropdown-item" href="/logout">Log out</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        <!--options-->
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-item nav-link active" href="/index.html">Home <span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link" href="#">League</a>
-                <a class="nav-item nav-link" href="#">Matches</a>
-                <a class="nav-item nav-link" href="#">Team</a>
-                <a id="calendar-link" class="nav-item nav-link" href="#">Calendar</a>
-            </div>
-        </div>
+  <!-- Calendar Section -->
+  <div class="container mt-4 mb-5">
+    <h1 class="text-center mb-4">Match Calendar</h1>
 
-        <!--sign in button-->
-        <div id="signin-btn" class="ms-auto">
-            <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
-        </div>
+    <div class="d-flex justify-content-center align-items-center mb-3">
+      <button id="prev-month" class="btn btn-outline-primary mr-3">&lt; Previous</button>
+      <h4 id="month-year" class="m-0 font-weight-bold"></h4>
+      <button id="next-month" class="btn btn-outline-primary ml-3">Next &gt;</button>
+    </div>
 
-        <!--account and log out dropdown-->
-        <div id="account-dropdown" class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
-                    viewBox="0 0 16 16">
-                    <path
-                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                </svg> Account
-            </button>
-            <ul class="dropdown-menu">
-                <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
-                <li><a class="dropdown-item" href="/logout">Log out</a></li>
-            </ul>
-        </div>
-    </nav>
+    <div class="text-center mb-3">
+      <button id="show-add-form" class="btn btn-success">+ Add Match</button>
+    </div>
 
-    <!-- Calendar Section -->
-    <div id="calendar-section" class="calendar-container" style="display:none; padding:20px;">
-        <h1 id="calendar-title">Calendar</h1>
-
-        <!-- previous and next month buttons -->
-        <div class="calendar-nav mb-3">
-        <button id="prev-month" class="btn btn-outline-primary">&lt; Previous</button>
-        <span id="month-year" class="mx-3 font-weight-bold"></span>
-        <button id="next-month" class="btn btn-outline-primary">Next &gt;</button>
-        </div>
-
-        <!-- days of the week at top -->
-        <table id="calendar-table" class="table table-bordered text-center">
+    <div class="table-responsive">
+      <table id="calendar-table" class="table table-bordered text-center">
         <thead class="thead-light">
-            <tr>
+          <tr>
             <th>Sun</th><th>Mon</th><th>Tue</th>
             <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-            </tr>
+          </tr>
         </thead>
         <tbody id="calendar-body"></tbody>
-        </table>
+      </table>
     </div>
 
-    <script>
-        /**
-        * Show sign in button if logged out or show account dropdown if signed in.
-        */
-        async function checkLoggedUser() {
-            let response = await fetch('/loggedUser');
-            let user = await response.json();
-            const signInBtn = document.getElementById('signin-btn');
-            const accountDropdown = document.getElementById('account-dropdown');
+    <form id="add-match-form" class="border p-3 bg-light rounded" style="display:none;">
+      <div class="form-group">
+        <label for="matchDate">Add Match Date:</label>
+        <input type="date" name="matchDate" id="matchDate" class="form-control" required>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">Add</button>
+        <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
+      </div>
+    </form>
 
-            if (user) {
-                signInBtn.style.display = 'none';
-                accountDropdown.style.display = 'block';
+    <p id="form-status" class="text-center mt-3"></p>
+  </div>
 
-                // show admin option only if user is an admin
-                if (user.role === 'admin') {
-                    document.getElementById('admin').style.display = 'block';
-                } else {
-                    document.getElementById('admin').style.display = 'none';
-                }
-            } else {
-                signInBtn.style.display = 'block';
-                accountDropdown.style.display = 'none';
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous"></script>
+
+  <script>
+    // --- Account / Sign-in logic (same as index.html) ---
+    async function checkLoggedUser() {
+      let response = await fetch('/loggedUser');
+      let user = await response.json();
+      const signInBtn = document.getElementById('signin-btn');
+      const accountDropdown = document.getElementById('account-dropdown');
+
+      if (user) {
+        signInBtn.style.display = 'none';
+        accountDropdown.style.display = 'block';
+        document.getElementById('admin').style.display = (user.role === 'admin') ? 'block' : 'none';
+      } else {
+        signInBtn.style.display = 'block';
+        accountDropdown.style.display = 'none';
+      }
+    }
+    checkLoggedUser();
+
+
+    // --- Calendar logic ---
+    const monthYearLabel = document.getElementById("month-year");
+    const calendarBody = document.getElementById("calendar-body");
+    const prevBtn = document.getElementById("prev-month");
+    const nextBtn = document.getElementById("next-month");
+    const showFormBtn = document.getElementById("show-add-form");
+    const addForm = document.getElementById("add-match-form");
+    const formStatus = document.getElementById("form-status");
+
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    async function renderCalendar(year, month) {
+      try {
+        const response = await fetch(`/calendar/data/${year}/${month + 1}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const result = await response.json();
+        const matchDays = result.matchDays || [];
+        const days = result.data;
+
+        monthYearLabel.textContent = `${result.monthName} ${result.year}`;
+        calendarBody.innerHTML = "";
+
+        for (const week of days) {
+          const row = document.createElement("tr");
+          for (const day of week) {
+            const cell = document.createElement("td");
+            if (day) {
+              cell.textContent = day;
+              if (matchDays.includes(parseInt(day))) cell.classList.add("bg-warning", "font-weight-bold");
             }
+            row.appendChild(cell);
+          }
+          calendarBody.appendChild(row);
         }
-        checkLoggedUser();
-    </script>
-    
-    <!--calendar page-->
-    <script>
-    // Show the calendar section when Calendar link is clicked
-    document.getElementById('calendar-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCalendar();
+      } catch (err) {
+        console.error("Error loading calendar:", err);
+        monthYearLabel.textContent = "Error loading calendar data.";
+      }
+    }
+
+    prevBtn.addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar(currentYear, currentMonth);
     });
 
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
+    nextBtn.addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar(currentYear, currentMonth);
+    });
 
-    async function showCalendar() {
-        document.getElementById('calendar-section').style.display = 'block';
-        await loadCalendar(currentYear, currentMonth);
-    }
+    showFormBtn.addEventListener("click", () => {
+      addForm.style.display = "block";
+      showFormBtn.style.display = "none";
+    });
 
-    async function loadCalendar(year, monthIndex) {
-        const res = await fetch(`/calendar/data/${monthIndex}?year=${year}`);
-        const data = await res.json();
-        renderCalendar(data);
-    }
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      addForm.style.display = "none";
+      showFormBtn.style.display = "inline-block";
+      formStatus.textContent = "";
+    });
 
-    function renderCalendar(data) {
-        const body = document.getElementById('calendar-body');
-        const monthYear = document.getElementById('month-year');
-        monthYear.textContent = `${data.monthName} ${data.year}`;
-        body.innerHTML = '';
+    document.getElementById("add-match-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const dateValue = document.getElementById("matchDate").value;
+      if (!dateValue) {
+        formStatus.textContent = "Please select a date.";
+        return;
+      }
 
-        data.data.forEach(week => {
-        const tr = document.createElement('tr');
-        week.forEach(day => {
-            const td = document.createElement('td');
-            td.textContent = day || '';
-            if (day) td.classList.add('day');
-            tr.appendChild(td);
+      try {
+        const res = await fetch("/addMatch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchDate: dateValue }),
         });
-        body.appendChild(tr);
-        });
-    }
 
-    document.getElementById('prev-month').addEventListener('click', async () => {
-        currentMonth--;
-        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-        await loadCalendar(currentYear, currentMonth);
+        formStatus.textContent = res.ok ? "Match added." : "Could not add match.";
+        renderCalendar(currentYear, currentMonth);
+      } catch {
+        formStatus.textContent = "⚠️ Could not connect to server.";
+      }
     });
 
-    document.getElementById('next-month').addEventListener('click', async () => {
-        currentMonth++;
-        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-        await loadCalendar(currentYear, currentMonth);
-    });
-    </script>
-
-
-
-    <!-- calendar -->
-    <div id="calendar-section" class="calendar-container" style="display:none;">
-    <h1 id="calendar-title">Calendar</h1>
-
-    <div class="calendar-nav">
-        <button id="prev-month">&lt; Previous</button>
-        <span id="month-year"></span>
-        <button id="next-month">Next &gt;</button>
-    </div>
-
-    <table id="calendar-table">
-        <thead>
-        <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th>
-            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-        </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
-    </table>
-    </div>
-
-
+    // Initial render
+    renderCalendar(currentYear, currentMonth);
+  </script>
 </body>
-
 </html>

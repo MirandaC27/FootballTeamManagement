@@ -40,8 +40,7 @@
 
   <p id="form-status"></p>
 
-  <script src="/calendar-config.js"></script>
-
+  
   <!-- new rendering-->
   <script>
     const monthYearLabel = document.getElementById("month-year");
@@ -58,40 +57,43 @@
 
     // Fetch and render calendar
     async function renderCalendar(year, month) {
-      
-      const response = await fetch(`/calendar/data/${year}/${month + 1}`); 
-      const result = await response.json();
-      const matchDays = result.matchDays || [];
-      
-      const monthData = calendarArray(year, month);
-      const days = monthData.data;
-      
-      // Update title
-      monthYearLabel.textContent = `${monthData.monthName} ${year}`;
-      
-      // Clear previous calendar
-      calendarBody.innerHTML = "";
+  try {
+    // month + 1 because JS Date months are 0-based
+    const response = await fetch(`/calendar/data/${year}/${month + 1}`);
 
-      for (let i = 0; i < days.length; i++) {
-        const row = document.createElement("tr");
-        
-        for (let j = 0; j < days[i].length; j++) {
-          const cell = document.createElement("td");
-          const day = days[i][j];
-          if (day) 
-          {
-            cell.textContent = day;
-
-            // Highlight match days
-            if (matchDays.includes(parseInt(day))) {
-              cell.classList.add("match-day");
-            }
-          }
-          row.appendChild(cell);
-        }
-        calendarBody.appendChild(row);
-      }
+    if (!response.ok) {
+      throw new Error(`Failed to fetch calendar data: ${response.status}`);
     }
+
+    const result = await response.json();
+
+    const matchDays = result.matchDays || [];
+    const days = result.data;
+
+    monthYearLabel.textContent = `${result.monthName} ${result.year}`;
+    calendarBody.innerHTML = "";
+
+    for (let i = 0; i < days.length; i++) {
+      const row = document.createElement("tr");
+      for (let j = 0; j < days[i].length; j++) {
+        const cell = document.createElement("td");
+        const day = days[i][j];
+        if (day) {
+          cell.textContent = day;
+          if (matchDays.includes(parseInt(day))) {
+            cell.classList.add("match-day");
+          }
+        }
+        row.appendChild(cell);
+      }
+      calendarBody.appendChild(row);
+    }
+  } catch (err) {
+    console.error("Error loading calendar:", err);
+    monthYearLabel.textContent = "Error loading calendar data.";
+  }
+}
+
 
     // Initial render
     renderCalendar(currentYear, currentMonth);
@@ -165,9 +167,6 @@
   });
 
   </script>
-
-
-
-
+  
 </body>
 </html>
