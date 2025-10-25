@@ -196,4 +196,17 @@ body {
   cursor: pointer;
 }
 
+@media (min-width: 768px) {
+  #match-details {
+    align-self: flex-start;
+    position: sticky;
+    top: 100px; 
+  }
+}
+
+
+#match-details {
+  transition: opacity 0.3s ease;
+}
+
 
