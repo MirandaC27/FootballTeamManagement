@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 // Define schema
 const matchSchema = new mongoose.Schema({
   matchDate: { type: Date, required: true },
+  title: { type: String, required: true }
 });
 
 // Create model
@@ -21,12 +22,12 @@ async function readAll() {
   return await Match.find();
 }
 
-// Optional: find by ID
+
 async function readById(id) {
   return await Match.findById(id);
 }
 
-// Optional: delete match
+
 async function remove(id) {
   return await Match.findByIdAndDelete(id);
 }

@@ -3,14 +3,14 @@ const calendarArray = require('../calendar-config');
 
 const createNewMatch = async (req, res) => {
     try{
-        const{ matchDate } = req.body;
+        const{ matchDate, title } = req.body;
         
-        if(!matchDate){
-            return res.status(400).send('No match date');
+        if(!matchDate || !title){
+            return res.status(400).send('date and title are required');
         }
 
         const localDate = new Date(`${matchDate}T00:00:00`);
-        await dao.create({ matchDate: localDate });
+        await dao.create({ matchDate: localDate, title });
         res.status(200).json({ message: "Match added successfully" });
     }
 
@@ -30,7 +30,9 @@ const deleteMatch = async (req, res) => {
     }
 
     res.json({ message: "Match deleted successfully" });
-  } catch (err) {
+  } 
+  
+  catch (err) {
     console.error("Error deleting match:", err);
     res.status(500).json({ message: "Server error while deleting match" });
   }
@@ -72,7 +74,8 @@ const getCalendarData = async (req, res) => {
             //map each day to the month
             .map(m => ({
                 day: new Date(m.matchDate).getDate(),
-                id:m._id
+                id:m._id,
+                title: m.title
             }));
         
             res.json({

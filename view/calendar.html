@@ -78,18 +78,33 @@
     </div>
 
     <form id="add-match-form" class="border p-3 bg-light rounded" style="display:none;">
+      
+      <div class="form-group">
+          <label for="matchTitle">Match Title:</label>
+          <input type="text" name="matchTitle" id="matchTitle" class="form-control" required>
+      </div>
+
       <div class="form-group">
         <label for="matchDate">Add Match Date:</label>
         <input type="date" name="matchDate" id="matchDate" class="form-control" required>
       </div>
+
       <div class="text-center">
         <button type="submit" class="btn btn-primary">Add</button>
         <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
       </div>
+
     </form>
 
     <p id="form-status" class="text-center mt-3"></p>
   </div>
+
+  <div id="match-details" class="border p-3 bg-light rounded mt-3" style="display:none;">
+    <h4>Match Details</h4>
+    <p><strong>Title:</strong> <span id="match-title"></span></p>
+    <p><strong>Date:</strong> <span id="match-date"></span></p>
+  </div>
+
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
@@ -130,6 +145,10 @@
     let currentYear = today.getFullYear();
 
     async function renderCalendar(year, month) {
+
+      const detailsBox = document.getElementById("match-details");
+      detailsBox.style.display = "none";
+
       try {
         const response = await fetch(`/calendar/data/${year}/${month + 1}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -153,9 +172,19 @@
               const match = matchDays.find(m => m.day === parseInt(day));
 
               if (match){
-                cell.classList.add("bg-warning", "font-weight-bold", "position-relative");
+                cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "match-cell");
                 
-                // Add delete button
+                cell.addEventListener("click", (e) => {
+                  
+                  e.stopPropagation();
+                  
+                  const detailsBox = document.getElementById("match-details");
+                  document.getElementById("match-title").textContent = match.title;
+                  document.getElementById("match-date").textContent = `${result.monthName} ${day}, ${result.year}`;
+                  detailsBox.style.display = "block";
+
+                });
+                
               
                 const delBtn = document.createElement("button");
                 delBtn.textContent = "🗑️";
@@ -206,6 +235,15 @@
       }
     }
 
+    document.addEventListener("click", (e) => {
+      const detailsBox = document.getElementById("match-details");
+
+      if (!e.target.closest(".match-cell") && !e.target.closest("#match-details")) {
+        detailsBox.style.display = "none";
+      }
+
+    });
+
     prevBtn.addEventListener("click", () => {
       currentMonth--;
       if (currentMonth < 0) { currentMonth = 11; currentYear--; }
@@ -230,10 +268,14 @@
     });
 
     document.getElementById("add-match-form").addEventListener("submit", async (e) => {
+      
       e.preventDefault();
+      
+      const titleValue = document.getElementById("matchTitle").value.trim();
       const dateValue = document.getElementById("matchDate").value;
-      if (!dateValue) {
-        formStatus.textContent = "Please select a date.";
+      
+      if (!dateValue||!titleValue) {
+        formStatus.textContent = "Please provide both title and date.";
         return;
       }
 
@@ -241,13 +283,13 @@
         const res = await fetch("/addMatch", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ matchDate: dateValue }),
+          body: JSON.stringify({ matchDate: dateValue, title:titleValue}),
         });
 
         formStatus.textContent = res.ok ? "Match added." : "Could not add match.";
         renderCalendar(currentYear, currentMonth);
       } catch {
-        formStatus.textContent = "⚠️ Could not connect to server.";
+        formStatus.textContent = "Could not connect to server.";
       }
     });
 
