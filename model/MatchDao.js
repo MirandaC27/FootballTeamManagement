@@ -9,12 +9,11 @@ const matchSchema = new mongoose.Schema({
 // Create model
 const Match = mongoose.model("Match", matchSchema);
 
-// === DAO Functions ===
-
 // Create new match
 async function create(newMatchData) {
   const match = new Match(newMatchData);
-  return await match.save();
+  const saved = await match.save();
+  return saved;
 }
 
 // Read all matches

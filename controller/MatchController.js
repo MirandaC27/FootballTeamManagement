@@ -53,6 +53,23 @@ const getAllMatches = async (req, res) => {
     }
 };
 
+function matchByMonth(matches, year, monthIndex){
+    return matches
+
+    //get matches in requested month and year
+    .filter(m =>{
+        const date = new Date(m.matchDate);
+        return date.getMonth() === monthIndex && date.getFullYear() === year;
+    })
+            
+    //map each day to the month
+    .map(m => ({
+        day: new Date(m.matchDate).getDate(),
+        id:m._id,
+        title: m.title
+    }));
+
+}
 
 const getCalendarData = async (req, res) => {
     
@@ -63,20 +80,7 @@ const getCalendarData = async (req, res) => {
         const monthData = calendarArray(year, monthIndex);
         const matches = await dao.matchModel.find();
 
-        const matchDays = matches
-            
-            //get matches in requested month and year
-            .filter(m =>{
-                const date = new Date(m.matchDate);
-                return date.getMonth() === monthIndex && date.getFullYear() === year;
-            })
-            
-            //map each day to the month
-            .map(m => ({
-                day: new Date(m.matchDate).getDate(),
-                id:m._id,
-                title: m.title
-            }));
+        const matchDays = matchByMonth(matches, year, monthIndex)
         
             res.json({
             year: monthData.year,

@@ -17,6 +17,17 @@ app.use(session({
   cookie: { maxAge: 86400000 }
 }))
 
+function isAdmin(req, res, next) {
+
+  const user = req.session.user;
+
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ message: "Access denied: Admins only" });
+  }
+
+  next();
+}
+
 // user controller routes
 const UserCont = require("./controller/UserController");
 app.post('/register', UserCont.register);
@@ -55,9 +66,9 @@ app.get('/calendar/month/:month', (req, res) => {
 app.get('/calendar/data/:year/:month', MatchCont.getCalendarData);
 
 // Match routes
-app.post('/addMatch', MatchCont.createNewMatch);
-app.get('/getAllMatches', MatchCont.getAllMatches);
-app.delete('/deleteMatch/:id', MatchCont.deleteMatch);
+app.post('/addMatch', isAdmin, MatchCont.createNewMatch);
+app.get('/getAllMatches', isAdmin, MatchCont.getAllMatches);
+app.delete('/deleteMatch/:id', isAdmin, MatchCont.deleteMatch);
 
 
 

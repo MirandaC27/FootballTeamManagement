@@ -116,18 +116,44 @@
   <script>
     // --- Account / Sign-in logic (same as index.html) ---
     async function checkLoggedUser() {
+      
+      try{
       let response = await fetch('/loggedUser');
       let user = await response.json();
+      currentUser = user;
+
       const signInBtn = document.getElementById('signin-btn');
       const accountDropdown = document.getElementById('account-dropdown');
+      const showFormButton = document.getElementById('show-add-form');
+      const formStatus = document.getElementById('form-status');      
 
       if (user) {
         signInBtn.style.display = 'none';
         accountDropdown.style.display = 'block';
         document.getElementById('admin').style.display = (user.role === 'admin') ? 'block' : 'none';
-      } else {
+        
+        if (user.role === 'admin'){
+          showFormButton.style.display = 'inline-block';
+          formStatus.textContent = "";
+        }
+
+        else{
+          showFormButton.style.display = 'none';
+          formStatus.textContent = "You must be an admin to add or delete a match.";
+        }
+      
+      }
+
+      
+      else {
         signInBtn.style.display = 'block';
         accountDropdown.style.display = 'none';
+        showFormBtn.style.display = 'none';
+        //formStatus.textContent = "You must be signed in as an admin to add or delete matches.";
+      }
+    }
+      catch(err){
+        console.error("Error with logged user", err);
       }
     }
     checkLoggedUser();
@@ -135,6 +161,9 @@
 
     // --- Calendar logic ---
     const monthYearLabel = document.getElementById("month-year");
+    let currentUser = null;
+
+
     const calendarBody = document.getElementById("calendar-body");
     const prevBtn = document.getElementById("prev-month");
     const nextBtn = document.getElementById("next-month");
@@ -187,9 +216,9 @@
 
                 });
                 
-              
+                if (currentUser && currentUser.role === 'admin'){
                 const delBtn = document.createElement("button");
-                delBtn.textContent = "🗑️";
+                delBtn.textContent = "X";
                 delBtn.classList.add("btn", "btn-sm", "btn-danger", "position-absolute");
                 delBtn.style.top = "2px";
                 delBtn.style.right = "4px";
@@ -224,7 +253,8 @@
                 }
               });
 
-              cell.appendChild(delBtn);
+                cell.appendChild(delBtn);
+                }
               }
             }
             row.appendChild(cell);

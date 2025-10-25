@@ -1,88 +1,88 @@
 const dbcon = require('./DbConnection');
-const dao = require('./MinorDao');
+const dao = require('./MatchDao');
 
-/**
- * Executed once before all tests
- */
-beforeAll(async function() { 
-    dbcon.connect('test');
+beforeAll(async () => { 
+    await dbcon.connect('test');
 });
 
-/**
- *  Executed once after all tests have ran
- */
-afterAll(async function() { 
-    await dao.deleteAll();
-    dbcon.disconnect();
+afterAll(async () => { 
+    await dao.matchModel.deleteMany({});
+    await dbcon.disconnect(); // ensure proper teardown
 });
 
-/**
- * Executed before each test
- */
-beforeEach(async function() {
-    await dao.deleteAll();
+beforeEach(async () => {
+    await dao.matchModel.deleteMany({});
 });
 
-/**
- * Create new minor test.
- */
-test('Create new minor', async function() {
-    let newData = {name: 'Child 1', date_of_birth: '2012-05-10', parent_id: '68f321cef24b117cb0cc4a11',
-        team_id: '68f321cef200117cb0cc4a11'};
+test('Create new match', async () => {
+    let newData = {matchDate: new Date('2024-05-10'), title: 'Quarter Final'};
     let created = await dao.create(newData);
-    let found = await dao.read(created._id);
-    expect(created._id).not.toBeNull(); 
-    expect(found.name).toBe(created.name);
+    let found = await dao.readById(created._id);
+    expect(created._id).not.toBeNull();
+    expect(found.title).toBe(created.title);
 });
 
-/**
- * Delete minor test.
- */
-test('Delete minor', async function() {
-    let newData = {name: 'Child 1', date_of_birth: '2012-05-10', parent_id: '68f321cef24b117cb0cc4a11',
-        team_id: '68f321cef200117cb0cc4a11'};
-    let created = await dao.create(newData); 
-    let deleted = await dao.del(created._id);
-    let found = await dao.read(created._id); 
+test('Delete match', async () => {
+    let newData = {matchDate: new Date('2024-06-15'), title: 'Semi Final'};
+    let created = await dao.create(newData);
+    let deleted = await dao.remove(created._id);
+    let found = await dao.readById(created._id);
     expect(found).toBeNull();
-    expect(deleted._id).toEqual(created._id); 
+    expect(deleted._id).toEqual(created._id);
 });
 
-/**
- * Read all minor documents test.
- */
-test('Read All', async function() {
-    let newData1 = {name: 'Minor 1', date_of_birth: '2011-04-20', parent_id: '68f321cef24b117cb0cc4a11', 
-        team_id: '68f321cef200117cb0cc4a11'};
-    let newData2 = {name: 'Minor 2', date_of_birth: '2013-08-15', parent_id: '68f321cef23b117cb0cc4a11', 
-        team_id: '68f321cef200117cb0cc4a12'};
-    let newData3 = {name: 'Minor 3', date_of_birth: '2014-11-25', parent_id: '68f321cef24b118cb0cc4a11', 
-        team_id: '68f321cef200117cb0cc4a13'};
-    await dao.create(newData1);
-    await dao.create(newData2);
-    await dao.create(newData3);
-    let lstMinors = await dao.readAll();
-    expect(lstMinors.length).toBe(3);
-    expect(lstMinors[0].name).toBe('Minor 1');
+test('Read all matches', async () => {
+    let match1 = {matchDate: new Date('2024-07-01'), title: 'Match 1'};
+    let match2 = {matchDate: new Date('2024-07-02'), title: 'Match 2'};
+    let match3 = {matchDate: new Date('2024-07-03'), title: 'Match 3'};
+    await dao.create(match1);
+    await dao.create(match2);
+    await dao.create(match3);
+    let lstMatches = await dao.readAll();
+    expect(lstMatches.length).toBe(3);
+    expect(lstMatches[0].title).toBe('Match 1');
 });
 
-/**
- * Find minor by name test.
- */
-test('Find Minor by name', async function() {
-let newData1 = {name: 'Minor 1', date_of_birth: '2011-04-20', parent_id: '68f321cef24b117cb0cc4a11', 
-    team_id: '68f321cef200117cb0cc4a11'};
-    let created = await dao.create(newData1); 
-    let found = await dao.findByName(newData1.name);
+test('Read match by ID', async () => {
+    let newData = {matchDate: new Date('2024-08-20'), title: 'Final Match'};
+    let created = await dao.create(newData);
+    let found = await dao.readById(created._id);
     expect(found).not.toBeNull();
     expect(found._id).toEqual(created._id);
-    expect(found.name).toEqual(created.name);
+    expect(found.title).toEqual(created.title);
+});
+
+test('Match not found', async () => {
+    let badId = '000000000000000000000000'; 
+    let found = await dao.readById(badId);
+    expect(found).toBeNull();
 });
 
 /**
- * Minor not found test.
+ * Empty collection read
  */
-test('Minor not found', async function() {
-    let badMinor = await dao.findByName("child child"); 
-    expect(badMinor).toBeNull();
+test('Read all returns empty array when no matches', async () => {
+    const matches = await dao.readAll();
+    expect(matches).toEqual([]);
+});
+
+/**
+ * Create validation error
+ */
+test('Create fails with missing title', async () => {
+    expect.assertions(1);
+    try {
+        await dao.create({ matchDate: new Date() }); // missing title
+    } catch (err) {
+        expect(err.name).toBe('ValidationError');
+    }
+});
+
+/**
+ * Remove non-existent match
+ */
+test('Remove non-existent match returns null', async () => {
+    let badId = '000000000000000000000000';
+    let removed = await dao.remove(badId);
+    expect(removed).toBeNull();
 });
