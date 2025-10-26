@@ -2,30 +2,331 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Calendar</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  <div class="calendar-container">
-    <h1 id="calendar-title">Calendar</h1>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar - Soccer League Management</title>
 
-    <div class="calendar-nav">
-      <button id="prev-month">&lt; Previous</button>
-      <span id="month-year"></span>
-      <button id="next-month">Next &gt;</button>
+  <!-- Bootstrap + custom CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="/index.html">
+      <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+      littleLIGA
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/index.html">Home</a>
+        <a class="nav-item nav-link" href="#">League</a>
+        <a class="nav-item nav-link" href="#">Matches</a>
+        <a class="nav-item nav-link" href="#">Team</a>
+        <a class="nav-item nav-link active" href="/calendar.html">Calendar</a>
+      </div>
     </div>
 
-    <table id="calendar-table">
-      <thead>
-        <tr>
-          <th>Sun</th><th>Mon</th><th>Tue</th>
-          <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-        </tr>
-      </thead>
-      <tbody id="calendar-body"></tbody>
-    </table>
+    <!-- Sign in / Account controls -->
+    <div id="signin-btn" class="ms-auto">
+      <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
+    </div>
+    <div id="account-dropdown" class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+        </svg> Account
+      </button>
+      <ul class="dropdown-menu">
+        <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
+        <li><a class="dropdown-item" href="/logout">Log out</a></li>
+      </ul>
+    </div>
+  </nav>
+
+<div class="container mt-4 mb-5 d-flex flex-column flex-md-row">
+  <!-- Left: Calendar Section -->
+  <div class="flex-grow-1 mr-md-4">
+    <h1 class="text-center mb-4">Match Calendar</h1>
+
+    <div class="d-flex justify-content-center align-items-center mb-3">
+      <button id="prev-month" class="btn btn-outline-primary mr-3">&lt; Previous</button>
+      <h4 id="month-year" class="m-0 font-weight-bold"></h4>
+      <button id="next-month" class="btn btn-outline-primary ml-3">Next &gt;</button>
+    </div>
+
+    <div class="text-center mb-3">
+      <button id="show-add-form" class="btn btn-success">+ Add Match</button>
+    </div>
+
+    <div class="table-responsive">
+      <table id="calendar-table" class="table table-bordered text-center">
+        <thead class="thead-light">
+          <tr>
+            <th>Sun</th><th>Mon</th><th>Tue</th>
+            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+          </tr>
+        </thead>
+        <tbody id="calendar-body"></tbody>
+      </table>
+    </div>
+
+    <form id="add-match-form" class="border p-3 bg-light rounded" style="display:none;">
+      <div class="form-group">
+        <label for="matchTitle">Match Title:</label>
+        <input type="text" name="matchTitle" id="matchTitle" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="matchDate">Add Match Date:</label>
+        <input type="date" name="matchDate" id="matchDate" class="form-control" required>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">Add</button>
+        <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
+      </div>
+    </form>
+
+    <p id="form-status" class="text-center mt-3"></p>
   </div>
 
-  <script src="/calendar-config.js"></script>
+  <!-- Right: Match Details -->
+  <div id="match-details" class="border p-3 bg-light rounded mt-3 mt-md-0" style="display:none; min-width:280px; max-width:350px;">
+    <h4>Match Details</h4>
+    <p><strong>Title:</strong> <span id="match-title"></span></p>
+    <p><strong>Date:</strong> <span id="match-date"></span></p>
+  </div>
+</div>
+
+
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous"></script>
+
+  <script>
+    // --- Account / Sign-in logic (same as index.html) ---
+    async function checkLoggedUser() {
+      
+      try{
+      let response = await fetch('/loggedUser');
+      let user = await response.json();
+      currentUser = user;
+
+      const signInBtn = document.getElementById('signin-btn');
+      const accountDropdown = document.getElementById('account-dropdown');
+      const showFormButton = document.getElementById('show-add-form');
+      const formStatus = document.getElementById('form-status');      
+
+      if (user) {
+        signInBtn.style.display = 'none';
+        accountDropdown.style.display = 'block';
+        document.getElementById('admin').style.display = (user.role === 'admin') ? 'block' : 'none';
+        
+        if (user.role === 'admin'){
+          showFormButton.style.display = 'inline-block';
+          formStatus.textContent = "";
+        }
+
+        else{
+          showFormButton.style.display = 'none';
+          formStatus.textContent = "You must be an admin to add or delete a match.";
+        }
+      
+      }
+
+      
+      else {
+        signInBtn.style.display = 'block';
+        accountDropdown.style.display = 'none';
+        showFormBtn.style.display = 'none';
+        //formStatus.textContent = "You must be signed in as an admin to add or delete matches.";
+      }
+    }
+      catch(err){
+        console.error("Error with logged user", err);
+      }
+    }
+    checkLoggedUser();
+
+
+    // --- Calendar logic ---
+    const monthYearLabel = document.getElementById("month-year");
+    let currentUser = null;
+
+
+    const calendarBody = document.getElementById("calendar-body");
+    const prevBtn = document.getElementById("prev-month");
+    const nextBtn = document.getElementById("next-month");
+    const showFormBtn = document.getElementById("show-add-form");
+    const addForm = document.getElementById("add-match-form");
+    const formStatus = document.getElementById("form-status");
+
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    async function renderCalendar(year, month) {
+
+      const detailsBox = document.getElementById("match-details");
+      detailsBox.style.display = "none";
+
+      try {
+        const response = await fetch(`/calendar/data/${year}/${month + 1}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const result = await response.json();
+        const matchDays = result.matchDays || [];
+        const days = result.data;
+
+        monthYearLabel.textContent = `${result.monthName} ${result.year}`;
+        calendarBody.innerHTML = "";
+
+        for (const week of days) {
+          const row = document.createElement("tr");
+
+          for (const day of week) {
+            const cell = document.createElement("td");
+            
+            if (day) 
+            {
+              cell.textContent = day;
+              const match = matchDays.find(m => m.day === parseInt(day));
+
+              if (match){
+                cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "match-cell");
+                
+                cell.addEventListener("click", (e) => {
+                  
+                  e.stopPropagation();
+                  
+                  const detailsBox = document.getElementById("match-details");
+                  document.getElementById("match-title").textContent = match.title;
+                  document.getElementById("match-date").textContent = `${result.monthName} ${day}, ${result.year}`;
+                  detailsBox.style.display = "block";
+
+                });
+                
+                if (currentUser && currentUser.role === 'admin'){
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "X";
+                delBtn.classList.add("btn", "btn-sm", "btn-danger", "position-absolute");
+                delBtn.style.top = "2px";
+                delBtn.style.right = "4px";
+              
+                delBtn.addEventListener("click", async (e) => {
+                e.stopPropagation();
+
+                if (confirm(`Delete match on ${result.monthName} ${day}, ${result.year}?`)) {
+                  
+                  try 
+                  {
+                    const res = await fetch(`/deleteMatch/${match.id}`, { method: "DELETE" });
+                    
+                    if (res.ok) 
+                    {
+                      alert("Match deleted.");
+                      await renderCalendar(year, month);
+                    } 
+                    
+                    else 
+                    {
+                      alert("Failed to delete match.");
+                    }
+
+                  } 
+                  
+                  catch (err) {
+                    console.error("Delete error:", err);
+                    alert("Could not connect to server.");
+                  }
+
+                }
+              });
+
+                cell.appendChild(delBtn);
+                }
+              }
+            }
+            row.appendChild(cell);
+          }
+          calendarBody.appendChild(row);
+        }
+      } catch (err) {
+        console.error("Error loading calendar:", err);
+        monthYearLabel.textContent = "Error loading calendar data.";
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const detailsBox = document.getElementById("match-details");
+
+      if (!e.target.closest(".match-cell") && !e.target.closest("#match-details")) {
+        detailsBox.style.display = "none";
+      }
+
+    });
+
+    prevBtn.addEventListener("click", () => {
+      currentMonth--;
+      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+      renderCalendar(currentYear, currentMonth);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      currentMonth++;
+      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+      renderCalendar(currentYear, currentMonth);
+    });
+
+    showFormBtn.addEventListener("click", () => {
+      addForm.style.display = "block";
+      showFormBtn.style.display = "none";
+    });
+
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      addForm.style.display = "none";
+      showFormBtn.style.display = "inline-block";
+      formStatus.textContent = "";
+    });
+
+    document.getElementById("add-match-form").addEventListener("submit", async (e) => {
+      
+      e.preventDefault();
+      
+      const titleValue = document.getElementById("matchTitle").value.trim();
+      const dateValue = document.getElementById("matchDate").value;
+      
+      if (!dateValue||!titleValue) {
+        formStatus.textContent = "Please provide both title and date.";
+        return;
+      }
+
+      try {
+        const res = await fetch("/addMatch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ matchDate: dateValue, title:titleValue}),
+        });
+
+        formStatus.textContent = res.ok ? "Match added." : "Could not add match.";
+        renderCalendar(currentYear, currentMonth);
+      } catch {
+        formStatus.textContent = "Could not connect to server.";
+      }
+    });
+
+    // Initial render
+    renderCalendar(currentYear, currentMonth);
+  </script>
 </body>
 </html>

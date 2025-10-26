@@ -4,8 +4,6 @@ function generateMonth(year, month) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   let day  = 1;
-  //let counter = 1;
-  //let started = false;
 
   for (let x = 0; x < 6; x++) {
     for (let y = 0; y < 7; y++) {
