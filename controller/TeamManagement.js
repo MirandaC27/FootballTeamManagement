@@ -24,5 +24,5 @@ const manageTeam = async (req, res) => {
     }
 };
 
-module.exports = { ManagementOfTeam };
+module.exports = { TeamManagement };
 
