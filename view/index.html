@@ -37,7 +37,7 @@
                 <a class="nav-item nav-link" href="#">League</a>
                 <a class="nav-item nav-link" href="#">Matches</a>
                 <a class="nav-item nav-link" href="#">Team</a>
-                <a id="calendar-link" class="nav-item nav-link" href="#">Calendar</a>
+                <a class="nav-item nav-link" href="/calendar.html">Calendar</a>
             </div>
         </div>
 
@@ -63,28 +63,6 @@
         </div>
     </nav>
 
-    <!-- Calendar Section -->
-    <div id="calendar-section" class="calendar-container" style="display:none; padding:20px;">
-        <h1 id="calendar-title">Calendar</h1>
-
-        <!-- previous and next month buttons -->
-        <div class="calendar-nav mb-3">
-        <button id="prev-month" class="btn btn-outline-primary">&lt; Previous</button>
-        <span id="month-year" class="mx-3 font-weight-bold"></span>
-        <button id="next-month" class="btn btn-outline-primary">Next &gt;</button>
-        </div>
-
-        <!-- days of the week at top -->
-        <table id="calendar-table" class="table table-bordered text-center">
-        <thead class="thead-light">
-            <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th>
-            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-            </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
-        </table>
-    </div>
 
     <script>
         /**
@@ -114,82 +92,7 @@
         checkLoggedUser();
     </script>
     
-    <!--calendar page-->
-    <script>
-    // Show the calendar section when Calendar link is clicked
-    document.getElementById('calendar-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCalendar();
-    });
-
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-
-    async function showCalendar() {
-        document.getElementById('calendar-section').style.display = 'block';
-        await loadCalendar(currentYear, currentMonth);
-    }
-
-    async function loadCalendar(year, monthIndex) {
-        const res = await fetch(`/calendar/data/${monthIndex}?year=${year}`);
-        const data = await res.json();
-        renderCalendar(data);
-    }
-
-    function renderCalendar(data) {
-        const body = document.getElementById('calendar-body');
-        const monthYear = document.getElementById('month-year');
-        monthYear.textContent = `${data.monthName} ${data.year}`;
-        body.innerHTML = '';
-
-        data.data.forEach(week => {
-        const tr = document.createElement('tr');
-        week.forEach(day => {
-            const td = document.createElement('td');
-            td.textContent = day || '';
-            if (day) td.classList.add('day');
-            tr.appendChild(td);
-        });
-        body.appendChild(tr);
-        });
-    }
-
-    document.getElementById('prev-month').addEventListener('click', async () => {
-        currentMonth--;
-        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-        await loadCalendar(currentYear, currentMonth);
-    });
-
-    document.getElementById('next-month').addEventListener('click', async () => {
-        currentMonth++;
-        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-        await loadCalendar(currentYear, currentMonth);
-    });
-    </script>
-
-
-
-    <!-- calendar -->
-    <div id="calendar-section" class="calendar-container" style="display:none;">
-    <h1 id="calendar-title">Calendar</h1>
-
-    <div class="calendar-nav">
-        <button id="prev-month">&lt; Previous</button>
-        <span id="month-year"></span>
-        <button id="next-month">Next &gt;</button>
-    </div>
-
-    <table id="calendar-table">
-        <thead>
-        <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th>
-            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-        </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
-    </table>
-    </div>
-
+   
 
 </body>
 
