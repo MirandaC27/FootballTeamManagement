@@ -1,3 +1,8 @@
+/**
+ * Create and return the array for a single month.
+ * @param {*} year requested year of the month
+ * @param {*} month requested month
+ */
 function generateMonth(year, month) {
   const monthArr = Array.from({ length: 6 }, () => new Array(7).fill(""));
   const startDayInWeek = new Date(year, month, 1).getDay();
@@ -23,6 +28,11 @@ function generateMonth(year, month) {
   return monthArr;
 }
 
+/**
+ * Create and return the array for requested configuration (whole year or just month).
+ * @param {*} year requested year of the month
+ * @param {*} monthIndex requested month
+ */
 function calendarArray(year, monthIndex = null) {
   const months = [
     "January", "February", "March", "April", "May", "June",
