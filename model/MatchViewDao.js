@@ -5,31 +5,42 @@
 
 const mongoose = require('mongoose');
 
+const matchSTATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
+
 //match view schema
 const matchviewSchema = new mongoose.Schema({
-    team1: {
-        type: string,
-        required: true,
-        unique: true
+    homeTeam: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'teamSchema',
+        required: true
     },
-    team2:{
-        type: string,
-        required: true,
-        unique: true
+    awayTeam:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'teamSchema',
+        required: true
     },
-    team1Score:{
-        type: int,
-        required: true,
+    homeScore:{
+        type: Number,
+        default: 0
     },
-    team2Score:{
-        type: int,
-        required: true,
+    awayScore:{
+        type: Number,
+        default: 0
     },
-    matchDate:{},
-    matchTime:{},
-    matchLocation:{},
-    matchGoal:{},
+    matchDatetime:{
+        type: Date,
+    },
+    matchLocation:{
+        type: String,
+        required: true
+    },
+    matchStatus:{
+        type: String,
+        required: true
+    }
 });
+
+const matchviewModel = mongoose.model('Matchview', matchviewSchema);
 
 //JavaScript code to refresh the page every minute <-- find this
 //Ajax code, refreshes fro special stuff
