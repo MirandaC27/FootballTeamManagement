@@ -97,6 +97,38 @@
         }
         checkLoggedUser();
 
+        const matchID = '3409tj5ognfkgjb';
+        const matchURL = '../match/${matchID}';
+
+        async function displayMatch(){
+            try{
+                const res = await fetch(matchURL);
+                if(!res.ok){
+                    throw new error('Could not find match data.');
+                }
+
+                const matchData = await res.json();
+
+                const dateObj = new Date(matchData.matchDatetime);
+                const formatTime = toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                const formatDate = toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+
+                document.getElementById('datetime').textContent = `${formatDate} at ${formatTime}`;
+                document.getElementById('location').textContent = `Location: ${matchData.matchLocation}`;
+                document.getElementById('status').textContent = `${matchData.matchStatus}`;
+
+                document.getElementById('home-name').textContent = matchData.homeTeam.name;
+                document.getElementById('home-score').textContent = matchData.homeScore;
+                document.getElementById('away-score').textContent = matchData.awayTeam.name;
+                document.getElementById('away-score').textContent = matchData.awayScore;
+            }
+            catch (err){
+                console.error('Display error: ', err);
+            }
+
+        }
+
+        document.addEventListener('ContentLoaded', displayMatch);
         
 
     </script>
