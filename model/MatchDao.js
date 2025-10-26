@@ -3,6 +3,11 @@
  * @version 1
  **/
 
+//JavaScript code to refresh the page every minute <-- find this
+//Ajax code, refreshes fro special stuff
+//match timer is a beautification: can be replaced with in progress/finsihed/scheduled
+
+
 const mongoose = require('mongoose');
 
 const matchSTATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
@@ -43,6 +48,17 @@ const matchviewSchema = new mongoose.Schema({
 
 const matchviewModel = mongoose.model('matchview', matchviewSchema);
 
-//JavaScript code to refresh the page every minute <-- find this
-//Ajax code, refreshes fro special stuff
-//match timer is a beautification: can be replaced with in progress/finsihed/scheduled
+//Test functions
+
+/*
+    Read and return all matchview documents from the database.
+ */
+async function readAll(){
+    return await matchviewModel.find();
+}
+
+async function read(id){
+    return await matchviewModel.findById(id);
+}
+
+async function create(){}
