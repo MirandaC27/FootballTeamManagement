@@ -99,11 +99,15 @@
   </div>
 
   <!-- Right: Event Details -->
-  <div id="event-details" class="border p-3 bg-light rounded mt-3 mt-md-0" style="display:none; min-width:280px; max-width:350px;">
+<div id="event-details" class="border p-3 bg-light rounded mt-3 mt-md-0"
+     style="display:none; min-width:280px; max-width:350px;">
     <h4>Event Details</h4>
-    <p><strong>Title:</strong> <span id="event-title"></span></p>
     <p><strong>Date:</strong> <span id="event-date"></span></p>
-  </div>
+    
+    <div id="event-list-container">
+      <strong>Events:</strong>
+      <ul id="event-list" class="pl-3 mb-0"></ul>
+    </div>
 </div>
 
 
@@ -199,73 +203,78 @@
             if (day) 
             {
               cell.textContent = day;
-              const event = eventDays.find(m => m.day === parseInt(day));
+              const eventsForDay = eventDays.filter(e => e.day === parseInt(day));
 
-              if (event){
+              if (eventsForDay.length > 0) {
                 cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "event-cell");
-                
+
+                // count of events per cell
+                if (eventsForDay.length === 1) {
+                  cell.textContent = `${day}`;
+                } else {
+                  cell.innerHTML = `${day} <br><small>(${eventsForDay.length} events)</small>`;
+                }
+
+                // Clicking the day shows details for all events
                 cell.addEventListener("click", (e) => {
-                  
                   e.stopPropagation();
-                  
                   const detailsBox = document.getElementById("event-details");
-                  document.getElementById("event-title").textContent = event.title;
-                  document.getElementById("event-date").textContent = `${result.monthName} ${day}, ${result.year}`;
-                  detailsBox.style.display = "block";
-
-                });
-                
-                if (currentUser && currentUser.role === 'admin'){
-                const delBtn = document.createElement("button");
-                delBtn.textContent = "X";
-                delBtn.classList.add("btn", "btn-sm", "btn-danger", "position-absolute");
-                delBtn.style.top = "2px";
-                delBtn.style.right = "4px";
-              
-                delBtn.addEventListener("click", async (e) => {
-                e.stopPropagation();
-
-                if (confirm(`Delete event on ${result.monthName} ${day}, ${result.year}?`)) {
+                  const eventList = document.getElementById("event-list");
+                  const eventDate = document.getElementById("event-date");
                   
-                  try 
-                  {
-                    const res = await fetch(`/deleteEvent/${event.id}`, { method: "DELETE" });
-                    
-                    if (res.ok) 
-                    {
-                      alert("Event deleted.");
-                      await renderCalendar(year, month);
-                    } 
-                    
-                    else 
-                    {
-                      alert("Failed to delete event.");
-                    }
+                  eventList.innerHTML = "";
+                  eventDate.textContent = `${result.monthName} ${day}, ${result.year}`;
 
-                  } 
-                  
-                  catch (err) {
-                    console.error("Delete error:", err);
-                    alert("Could not connect to server.");
+                  eventsForDay.forEach(ev => {
+                  const li = document.createElement("li");
+                  li.classList.add("mb-2");
+                  li.textContent = ev.title;
+
+                  if (currentUser && currentUser.role === "admin") {
+                    const delBtn = document.createElement("button");
+                    delBtn.textContent = "Delete";
+                    delBtn.classList.add("btn", "btn-sm", "btn-danger", "ml-2");
+
+                    delBtn.addEventListener("click", async (e) => {
+                      e.stopPropagation();
+                      if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}, ${result.year}?`)) {
+                        try {
+                          const res = await fetch(`/deleteEvent/${ev.id}`, { method: "DELETE" });
+                          if (res.ok) {
+                            alert("Event deleted.");
+                            await renderCalendar(year, month);
+                            detailsBox.style.display = "none";
+                          } else {
+                            alert("Failed to delete event.");
+                          }
+                        } catch (err) {
+                          console.error("Delete error:", err);
+                          alert("Could not connect to server.");
+                        }
+                      }
+                    });
+
+                    li.appendChild(delBtn);
                   }
 
-                }
+                  eventList.appendChild(li);
               });
 
-                cell.appendChild(delBtn);
-                }
-              }
-            }
-            row.appendChild(cell);
+              detailsBox.style.display = "block";
+            });
           }
-          calendarBody.appendChild(row);
         }
-      } catch (err) {
-        console.error("Error loading calendar:", err);
-        monthYearLabel.textContent = "Error loading calendar data.";
-      }
-    }
 
+        row.appendChild(cell);
+      }
+
+      calendarBody.appendChild(row);
+    }
+  } catch (err) {
+    console.error("Error loading calendar:", err);
+    monthYearLabel.textContent = "Error loading calendar data.";
+  }
+}
     document.addEventListener("click", (e) => {
       const detailsBox = document.getElementById("event-details");
 
