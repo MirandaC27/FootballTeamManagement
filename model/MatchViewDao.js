@@ -40,7 +40,8 @@ const matchviewSchema = new mongoose.Schema({
     }
 });
 
-const matchviewModel = mongoose.model('Matchview', matchviewSchema);
+
+const matchviewModel = mongoose.model('matchview', matchviewSchema);
 
 //JavaScript code to refresh the page every minute <-- find this
 //Ajax code, refreshes fro special stuff
