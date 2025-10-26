@@ -10,7 +10,7 @@ test('Add minor to team', async function(){
 
     dao.minorModel.findById.mockResolvedValue(minor);
 
-    await controller.ManagementOfTeam(req, res);
+    await controller.TeamManagement(req, res);
 
     expect(minor.team_id).toEqual("A1");
     expect(minor.save).toHaveBeenCalled();
@@ -23,7 +23,7 @@ test('Remove minor from team', async function(){
 
     dao.minorModel.findById.mockResolvedValue(minor);
 
-    await controller.ManagementOfTeam(req, res);
+    await controller.TeamManagement(req, res);
 
     expect(minor.team_id).toBeNull();
     expect(minor.save).toHaveBeenCalled();
@@ -36,7 +36,7 @@ test('Invalid action', async function(){
 
     dao.minorModel.findById.mockResolvedValue(minor);
 
-    await controller.ManagementOfTeam(req, res);
+    await controller.TeamManagement(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith("Invalid action");
@@ -48,7 +48,7 @@ test('Minor not found', async function(){
 
     dao.minorModel.findById.mockResolvedValue(null);
 
-    await controller.ManagementOfTeam(req, res);
+    await controller.TeamManagement(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith("Minor not found");
@@ -60,7 +60,7 @@ test('Catch unexpected error', async function(){
 
     dao.minorModel.findById.mockRejectedValue(new Error("DB error"));
 
-    await controller.ManagementOfTeam(req, res);
+    await controller.TeamManagement(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith("error managing team");

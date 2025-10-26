@@ -1,6 +1,6 @@
 const dao = require('../model/TeamDao');
 
-const createTeam = async (req, res) => {
+const teamCreation = async (req, res) => {
     try {
         const { name, location, wins, losses, priorSeasonWins, priorSeasonLosses, playoffSeed } = req.body;
         const newTeam = { name, location, wins, losses, priorSeasonWins, priorSeasonLosses, playoffSeed };

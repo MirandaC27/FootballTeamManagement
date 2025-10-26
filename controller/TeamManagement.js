@@ -1,6 +1,6 @@
 const dao = require('../model/MinorDao');
 
-const manageTeam = async (req, res) => {
+const TeamManagement = async (req, res) => {
     try {
         const { minorId, teamId, action } = req.body;
         const minor = await dao.minorModel.findById(minorId);
