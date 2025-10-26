@@ -1,6 +1,11 @@
 const dao = require('../model/MatchDao');
-const calendarArray = require('../calendar-config');
+const calendarArray = require('../CalendarConfig');
 
+/**
+ * Create a new match and register it in the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
 const createNewMatch = async (req, res) => {
     try{
         const{ matchDate, title } = req.body;
@@ -20,6 +25,11 @@ const createNewMatch = async (req, res) => {
     }
 };
 
+/**
+ * delete an existing match and register it in the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
 const deleteMatch = async (req, res) => {
   try {
     const { id } = req.params;
@@ -39,7 +49,11 @@ const deleteMatch = async (req, res) => {
 };
 
 
-
+/**
+ * get all matches from the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
 const getAllMatches = async (req, res) => {
    
     try{
@@ -53,6 +67,12 @@ const getAllMatches = async (req, res) => {
     }
 };
 
+/**
+ * create mapping of matches in a month
+ * @param {*} matches get the matches in the requested month and year
+ * @param {*} year requested year of matches
+ * @param {*} monthIndex index of the requested month
+ */
 function matchByMonth(matches, year, monthIndex){
     return matches
 
@@ -71,6 +91,11 @@ function matchByMonth(matches, year, monthIndex){
 
 }
 
+/**
+ * get the calendar data from the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
 const getCalendarData = async (req, res) => {
     
     try{

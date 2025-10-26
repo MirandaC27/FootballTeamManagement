@@ -1,6 +1,6 @@
-// calendar-config.test.js
-const calendarArray = require('./calendar-config');
+const calendarArray = require('./CalendarConfig');
 
+  //Create a normal month
   test('generate the month of January 2025 correctly', () => {
     const result = calendarArray(2025, 0); // January 2025
     expect(result).toHaveProperty('year', 2025);
@@ -8,9 +8,9 @@ const calendarArray = require('./calendar-config');
     expect(result).toHaveProperty('data');
 
     const data = result.data;
-    expect(data.length).toBe(6);          // 6 weeks
+    expect(data.length).toBe(6);          
     data.forEach(week => {
-      expect(week.length).toBe(7);        // 7 days
+      expect(week.length).toBe(7);        
     });
 
     // Check first day placement (Jan 1, 2025 is a Wednesday)
@@ -20,6 +20,7 @@ const calendarArray = require('./calendar-config');
     expect(data[0][3]).toBe('1');       //Wednesday
   });
 
+  //create a normal year
   test('generate the current year (2025) correctly', () => {
     const result = calendarArray(2025);
     expect(Array.isArray(result)).toBe(true);
@@ -30,7 +31,6 @@ const calendarArray = require('./calendar-config');
       expect(monthObj).toHaveProperty('monthName');
       expect(monthObj).toHaveProperty('data');
 
-      // Data structure
       const data = monthObj.data;
       expect(data.length).toBe(6);
       data.forEach(week => {
@@ -39,6 +39,7 @@ const calendarArray = require('./calendar-config');
     });
   });
 
+  //create a leap year (edge case)
   test('leap year 2024 correctness', () => {
     const feb2024 = calendarArray(2024, 1); // Feb 2024 (leap year)
     const days = feb2024.data.flat().filter(d => d !== '');

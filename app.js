@@ -2,7 +2,6 @@ const express = require('express');
 const morgan = require('morgan');
 const session = require('express-session');
 const path = require('path');
-//const calendar = require('./calendar-config');
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'view')));
