@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Match View</title>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+    <!--nav bar-->
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+        <nav class="navbar navbar-dark bg-primary">
+
+            <!--logo-->
+            <a class="navbar-brand" href="/index.html">
+                <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+                littleLIGA
+            </a>
+        </nav>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!--options-->
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="/index.html">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="#">League</a>
+                <a class="nav-item nav-link" href="#">Matches</a>
+                <a class="nav-item nav-link" href="#">Team</a>
+                <a class="nav-item nav-link" href="#">Calendar</a>
+            </div>
+        </div>
+
+        <!--sign in button-->
+        <div id="signin-btn" class="ms-auto">
+            <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
+        </div>
+
+        <!--account and log out dropdown-->
+        <div id="account-dropdown" class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                </svg> Account
+            </button>
+            <ul class="dropdown-menu">
+                <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
+                <li><a class="dropdown-item" href="/logout">Log out</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--container for the match-->
+    <div class="card shadow text-center">
+        <div class="card-body">
+            <h5 class="card-title">Match Tracker</h5>
+        </div>
+    </div>
+
+    <script>
+        /**
+        * Show sign in button if logged out or show account dropdown if signed in.
+        */
+        async function checkLoggedUser() {
+            let response = await fetch('/loggedUser');
+            let user = await response.json();
+            const signInBtn = document.getElementById('signin-btn');
+            const accountDropdown = document.getElementById('account-dropdown');
+
+            if (user) {
+                signInBtn.style.display = 'none';
+                accountDropdown.style.display = 'block';
+
+                // show admin option only if user is an admin
+                if (user.role === 'admin') {
+                    document.getElementById('admin').style.display = 'block';
+                } else {
+                    document.getElementById('admin').style.display = 'none';
+                }
+            } else {
+                signInBtn.style.display = 'block';
+                accountDropdown.style.display = 'none';
+            }
+        }
+        checkLoggedUser();
+
+        const matchID = '3409tj5ognfkgjb';
+        const matchURL = '../match/${matchID}';
+
+        async function displayMatch(){
+            try{
+                const res = await fetch(matchURL);
+                if(!res.ok){
+                    throw new error('Could not find match data.');
+                }
+
+                const matchData = await res.json();
+
+                const dateObj = new Date(matchData.matchDatetime);
+                const formatTime = toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+                const formatDate = toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+
+                document.getElementById('datetime').textContent = `${formatDate} at ${formatTime}`;
+                document.getElementById('location').textContent = `Location: ${matchData.matchLocation}`;
+                document.getElementById('status').textContent = `${matchData.matchStatus}`;
+
+                document.getElementById('home-name').textContent = matchData.homeTeam.name;
+                document.getElementById('home-score').textContent = matchData.homeScore;
+                document.getElementById('away-score').textContent = matchData.awayTeam.name;
+                document.getElementById('away-score').textContent = matchData.awayScore;
+            }
+            catch (err){
+                console.error('Display error: ', err);
+            }
+
+        }
+
+        document.addEventListener('ContentLoaded', displayMatch);
+        
+
+    </script>
+
+</body>
+
+</html>
