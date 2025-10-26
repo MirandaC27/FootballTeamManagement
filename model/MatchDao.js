@@ -13,7 +13,7 @@ const mongoose = require('mongoose');
 const matchSTATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
 
 //match view schema
-const matchviewSchema = new mongoose.Schema({
+const matchSchema = new mongoose.Schema({
     homeTeam: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'teamSchema',
@@ -34,6 +34,7 @@ const matchviewSchema = new mongoose.Schema({
     },
     matchDatetime:{
         type: Date,
+        required: true
     },
     matchLocation:{
         type: String,
@@ -41,24 +42,55 @@ const matchviewSchema = new mongoose.Schema({
     },
     matchStatus:{
         type: String,
-        required: true
+        required: true,
+        default: 'Scheduled'
     }
 });
 
 
-const matchviewModel = mongoose.model('matchview', matchviewSchema);
+const matchModel = mongoose.model('match', matchSchema);
 
 //Test functions
+//inserted test functions from Chloe's Match Dao push
 
-/*
-    Read and return all matchview documents from the database.
+async function readAll() {
+  return await Match.find();
+}
+
+/**
+ * create a new match and save it in database.
+ * @param {*} newMatchData data for new match
+ * @returns a fully formed match object
  */
-async function readAll(){
-    return await matchviewModel.find();
+async function create(newMatchData) {
+  const match = new Match(newMatchData);
+  const saved = await match.save();
+  return saved;
 }
 
-async function read(id){
-    return await matchviewModel.findById(id);
+/**
+ * find an existing match in the database.
+ * @param {*} newMatchData data for new match
+ * @returns a fully formed match object
+ */
+async function readById(id) {
+  return await Match.findById(id);
 }
 
-async function create(){}
+/**
+ * delete an existing match in the database.
+ * @param {*} newMatchData data for new match
+ * @returns a fully formed match object
+ */
+async function remove(id) {
+  return await Match.findByIdAndDelete(id);
+}
+
+
+module.exports = {
+  matchModel: Match,
+  create,
+  readAll,
+  readById,
+  remove,
+};
