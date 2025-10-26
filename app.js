@@ -5,6 +5,8 @@ const path = require('path');
 //const calendar = require('./calendar-config');
 const app = express();
 
+app.use(express.static(path.join(__dirname, 'view')));
+
 // middleware
 app.use(morgan('dev')); 
 app.use(express.urlencoded({ extended: true }));

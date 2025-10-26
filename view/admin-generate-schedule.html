@@ -127,7 +127,7 @@
                 teamsAndQuality.push(teamWithQuality);
             }
             let defaultWeeks = 10;
-            let schedule = generateSchedule(teamsAnQuality, 10);
+            let schedule = generateSchedule(teamsAndQuality, 10);
 
             for (let matches of schedule) {
                 const weekNumber = matches[0]?.week || 0
