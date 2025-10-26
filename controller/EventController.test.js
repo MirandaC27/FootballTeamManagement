@@ -1,10 +1,10 @@
-const controller = require('./MatchController');
-const dao = require('../model/MatchDao');
+const controller = require('./EventController');
+const dao = require('../model/EventDao');
 const calendarArray = require('../CalendarConfig');
 
 
 //test setup
-jest.mock('../model/MatchDao');
+jest.mock('../model/EventDao');
 jest.mock('../CalendarConfig');
 
 beforeEach(() => {
@@ -13,112 +13,112 @@ beforeEach(() => {
 });
 
 /*
-* create match tests
+* create event tests
 */
-//fail to create an empty match without a date or a title
-test('Create empty match', async () => {
+//fail to create an empty event without a date or a title
+test('Create empty event', async () => {
     const req = { body: {} };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
-    await controller.createNewMatch(req, res);
+    await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith('date and title are required');
 });
 
-//fail to create a match without a date
-test('Create a match without a date', async () => {
+//fail to create a event without a date
+test('Create a event without a date', async () => {
     const req = { body: {title: 'no date yet'} };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
-    await controller.createNewMatch(req, res);
+    await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith('date and title are required');
 });
 
 
-//fail to create match without a title.
-test('Create a match without a title', async () => {
+//fail to create event without a title.
+test('Create a event without a title', async () => {
     const req = { body: {title: 'no date yet'} };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
-    await controller.createNewMatch(req, res);
+    await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith('date and title are required');
 });
 
-//create a new match with date and title
-test('Create new match successfully', async () => {
-    const req = { body: { matchDate: '2025-10-24', title: 'Final' } };
+//create a new event with date and title
+test('Create new event successfully', async () => {
+    const req = { body: { eventDate: '2025-10-24', title: 'Final' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     dao.create.mockResolvedValue({});
 
-    await controller.createNewMatch(req, res);
+    await controller.createNewEvent(req, res);
 
     expect(dao.create).toHaveBeenCalledWith({
-        matchDate: new Date('2025-10-24T00:00:00'),
+        eventDate: new Date('2025-10-24T00:00:00'),
         title: 'Final',
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Match added successfully' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Event added successfully' });
 });
 
-//create match that has an error from the Database
-test('Create new match with DAO error', async () => {
-    const req = { body: { matchDate: '2025-10-24', title: 'Semi' } };
+//create event that has an error from the Database
+test('Create new event with DAO error', async () => {
+    const req = { body: { eventDate: '2025-10-24', title: 'Semi' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     dao.create.mockRejectedValue(new Error('DB Error'));
 
-    await controller.createNewMatch(req, res);
+    await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Could not create match');
+    expect(res.send).toHaveBeenCalledWith('Could not create event');
 });
 
 
 /*
-* delete match tests
+* delete event tests
 */
-//delete an existing match
-test('Delete match successfully', async () => {
+//delete an existing event
+test('Delete event successfully', async () => {
     const req = { params: { id: '123' } };
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    dao.matchModel = { findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '123' }) };
+    dao.eventModel = { findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '123' }) };
 
-    await controller.deleteMatch(req, res);
+    await controller.deleteEvent(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ message: 'Match deleted successfully' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Event deleted successfully' });
 });
 
-//delete a non-existent match
-test('Delete match not found', async () => {
+//delete a non-existent event
+test('Delete event not found', async () => {
     const req = { params: { id: '999' } };
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    dao.matchModel = { findByIdAndDelete: jest.fn().mockResolvedValue(null) };
+    dao.eventModel = { findByIdAndDelete: jest.fn().mockResolvedValue(null) };
 
-    await controller.deleteMatch(req, res);
+    await controller.deleteEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Match not found' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Event not found' });
 });
 
-//delete match that has an error from the Database
-test('Delete match with DAO error', async () => {
+//delete event that has an error from the Database
+test('Delete event with DAO error', async () => {
     const req = { params: { id: '123' } };
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    dao.matchModel = { findByIdAndDelete: jest.fn().mockRejectedValue(new Error('DB Error')) };
+    dao.eventModel = { findByIdAndDelete: jest.fn().mockRejectedValue(new Error('DB Error')) };
 
-    await controller.deleteMatch(req, res);
+    await controller.deleteEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Server error while deleting match' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Server error while deleting event' });
 });
 
 
@@ -126,34 +126,34 @@ test('Delete match with DAO error', async () => {
 * getting data tests
 */
 
-//get all existing matches from database
-test('Get all matches successfully', async () => {
+//get all existing events from database
+test('Get all events successfully', async () => {
     const req = {};
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    const matches = [
-        { _id: 'm1', matchDate: '2025-10-24' },
-        { _id: 'm2', matchDate: '2025-10-25' },
+    const events = [
+        { _id: 'm1', eventDate: '2025-10-24' },
+        { _id: 'm2', eventDate: '2025-10-25' },
     ];
-    dao.matchModel = { find: jest.fn().mockResolvedValue(matches) };
+    dao.eventModel = { find: jest.fn().mockResolvedValue(events) };
 
-    await controller.getAllMatches(req, res);
+    await controller.getAllEvents(req, res);
 
-    expect(dao.matchModel.find).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith(matches);
+    expect(dao.eventModel.find).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith(events);
 });
 
-//try getting a match with error from database
-test('Get all matches with DAO error', async () => {
+//try getting a event with error from database
+test('Get all events with DAO error', async () => {
     const req = {};
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    dao.matchModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
+    dao.eventModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
 
-    await controller.getAllMatches(req, res);
+    await controller.getAllEvents(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Could not get matches');
+    expect(res.send).toHaveBeenCalledWith('Could not get events');
 });
 
 //get all calendar data
@@ -162,10 +162,10 @@ test('Get calendar data successfully', async () => {
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     calendarArray.mockReturnValue({ year: 2025, monthName: 'October', data: [] });
-    dao.matchModel = {
+    dao.eventModel = {
         find: jest.fn().mockResolvedValue([
-            { _id: '1', matchDate: '2025-10-05T00:00:00', title: 'Match 1' },
-            { _id: '2', matchDate: '2025-09-30T00:00:00', title: 'Match 2' },
+            { _id: '1', eventDate: '2025-10-05T00:00:00', title: 'Event 1' },
+            { _id: '2', eventDate: '2025-09-30T00:00:00', title: 'Event 2' },
         ]),
     };
 
@@ -176,7 +176,7 @@ test('Get calendar data successfully', async () => {
         year: 2025,
         monthName: 'October',
         data: [],
-        matchDays: [{ day: 5, id: '1', title: 'Match 1' }],
+        eventDays: [{ day: 5, id: '1', title: 'Event 1' }],
     });
 
     expect(res.status).not.toHaveBeenCalled();
@@ -188,7 +188,7 @@ test('Get calendar data with DAO error', async () => {
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     calendarArray.mockReturnValue({ year: 2025, monthName: 'October', data: [] });
-    dao.matchModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
+    dao.eventModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
 
     await controller.getCalendarData(req, res);
 

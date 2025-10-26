@@ -28,7 +28,7 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/index.html">Home</a>
         <a class="nav-item nav-link" href="#">League</a>
-        <a class="nav-item nav-link" href="#">Matches</a>
+        <a class="nav-item nav-link" href="#">Events</a>
         <a class="nav-item nav-link" href="#">Team</a>
         <a class="nav-item nav-link active" href="/calendar.html">Calendar</a>
       </div>
@@ -54,7 +54,7 @@
 <div class="container mt-4 mb-5 d-flex flex-column flex-md-row">
   <!-- Left: Calendar Section -->
   <div class="flex-grow-1 mr-md-4">
-    <h1 class="text-center mb-4">Match Calendar</h1>
+    <h1 class="text-center mb-4">Calendar</h1>
 
     <div class="d-flex justify-content-center align-items-center mb-3">
       <button id="prev-month" class="btn btn-outline-primary mr-3">&lt; Previous</button>
@@ -63,7 +63,7 @@
     </div>
 
     <div class="text-center mb-3">
-      <button id="show-add-form" class="btn btn-success">+ Add Match</button>
+      <button id="show-add-form" class="btn btn-success">+ Add Event</button>
     </div>
 
     <div class="table-responsive">
@@ -78,15 +78,15 @@
       </table>
     </div>
 
-    <form id="add-match-form" class="border p-3 bg-light rounded" style="display:none;">
+    <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
       <div class="form-group">
-        <label for="matchTitle">Match Title:</label>
-        <input type="text" name="matchTitle" id="matchTitle" class="form-control" required>
+        <label for="eventTitle">Event Title:</label>
+        <input type="text" name="eventTitle" id="eventTitle" class="form-control" required>
       </div>
 
       <div class="form-group">
-        <label for="matchDate">Add Match Date:</label>
-        <input type="date" name="matchDate" id="matchDate" class="form-control" required>
+        <label for="eventDate">Add Event Date:</label>
+        <input type="date" name="eventDate" id="eventDate" class="form-control" required>
       </div>
 
       <div class="text-center">
@@ -98,11 +98,11 @@
     <p id="form-status" class="text-center mt-3"></p>
   </div>
 
-  <!-- Right: Match Details -->
-  <div id="match-details" class="border p-3 bg-light rounded mt-3 mt-md-0" style="display:none; min-width:280px; max-width:350px;">
-    <h4>Match Details</h4>
-    <p><strong>Title:</strong> <span id="match-title"></span></p>
-    <p><strong>Date:</strong> <span id="match-date"></span></p>
+  <!-- Right: Event Details -->
+  <div id="event-details" class="border p-3 bg-light rounded mt-3 mt-md-0" style="display:none; min-width:280px; max-width:350px;">
+    <h4>Event Details</h4>
+    <p><strong>Title:</strong> <span id="event-title"></span></p>
+    <p><strong>Date:</strong> <span id="event-date"></span></p>
   </div>
 </div>
 
@@ -139,7 +139,7 @@
 
         else{
           showFormButton.style.display = 'none';
-          formStatus.textContent = "You must be an admin to add or delete a match.";
+          formStatus.textContent = "You must be an admin to add or delete a event.";
         }
       
       }
@@ -149,7 +149,6 @@
         signInBtn.style.display = 'block';
         accountDropdown.style.display = 'none';
         showFormBtn.style.display = 'none';
-        //formStatus.textContent = "You must be signed in as an admin to add or delete matches.";
       }
     }
       catch(err){
@@ -168,7 +167,7 @@
     const prevBtn = document.getElementById("prev-month");
     const nextBtn = document.getElementById("next-month");
     const showFormBtn = document.getElementById("show-add-form");
-    const addForm = document.getElementById("add-match-form");
+    const addForm = document.getElementById("add-event-form");
     const formStatus = document.getElementById("form-status");
 
     let today = new Date();
@@ -177,7 +176,7 @@
 
     async function renderCalendar(year, month) {
 
-      const detailsBox = document.getElementById("match-details");
+      const detailsBox = document.getElementById("event-details");
       detailsBox.style.display = "none";
 
       try {
@@ -185,7 +184,7 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const result = await response.json();
-        const matchDays = result.matchDays || [];
+        const eventDays = result.eventDays || [];
         const days = result.data;
 
         monthYearLabel.textContent = `${result.monthName} ${result.year}`;
@@ -200,18 +199,18 @@
             if (day) 
             {
               cell.textContent = day;
-              const match = matchDays.find(m => m.day === parseInt(day));
+              const event = eventDays.find(m => m.day === parseInt(day));
 
-              if (match){
-                cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "match-cell");
+              if (event){
+                cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "event-cell");
                 
                 cell.addEventListener("click", (e) => {
                   
                   e.stopPropagation();
                   
-                  const detailsBox = document.getElementById("match-details");
-                  document.getElementById("match-title").textContent = match.title;
-                  document.getElementById("match-date").textContent = `${result.monthName} ${day}, ${result.year}`;
+                  const detailsBox = document.getElementById("event-details");
+                  document.getElementById("event-title").textContent = event.title;
+                  document.getElementById("event-date").textContent = `${result.monthName} ${day}, ${result.year}`;
                   detailsBox.style.display = "block";
 
                 });
@@ -226,21 +225,21 @@
                 delBtn.addEventListener("click", async (e) => {
                 e.stopPropagation();
 
-                if (confirm(`Delete match on ${result.monthName} ${day}, ${result.year}?`)) {
+                if (confirm(`Delete event on ${result.monthName} ${day}, ${result.year}?`)) {
                   
                   try 
                   {
-                    const res = await fetch(`/deleteMatch/${match.id}`, { method: "DELETE" });
+                    const res = await fetch(`/deleteEvent/${event.id}`, { method: "DELETE" });
                     
                     if (res.ok) 
                     {
-                      alert("Match deleted.");
+                      alert("Event deleted.");
                       await renderCalendar(year, month);
                     } 
                     
                     else 
                     {
-                      alert("Failed to delete match.");
+                      alert("Failed to delete event.");
                     }
 
                   } 
@@ -268,9 +267,9 @@
     }
 
     document.addEventListener("click", (e) => {
-      const detailsBox = document.getElementById("match-details");
+      const detailsBox = document.getElementById("event-details");
 
-      if (!e.target.closest(".match-cell") && !e.target.closest("#match-details")) {
+      if (!e.target.closest(".event-cell") && !e.target.closest("#event-details")) {
         detailsBox.style.display = "none";
       }
 
@@ -299,12 +298,12 @@
       formStatus.textContent = "";
     });
 
-    document.getElementById("add-match-form").addEventListener("submit", async (e) => {
+    document.getElementById("add-event-form").addEventListener("submit", async (e) => {
       
       e.preventDefault();
       
-      const titleValue = document.getElementById("matchTitle").value.trim();
-      const dateValue = document.getElementById("matchDate").value;
+      const titleValue = document.getElementById("eventTitle").value.trim();
+      const dateValue = document.getElementById("eventDate").value;
       
       if (!dateValue||!titleValue) {
         formStatus.textContent = "Please provide both title and date.";
@@ -312,13 +311,13 @@
       }
 
       try {
-        const res = await fetch("/addMatch", {
+        const res = await fetch("/addEvent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ matchDate: dateValue, title:titleValue}),
+          body: JSON.stringify({ eventDate: dateValue, title:titleValue}),
         });
 
-        formStatus.textContent = res.ok ? "Match added." : "Could not add match.";
+        formStatus.textContent = res.ok ? "Event added." : "Could not add event.";
         renderCalendar(currentYear, currentMonth);
       } catch {
         formStatus.textContent = "Could not connect to server.";

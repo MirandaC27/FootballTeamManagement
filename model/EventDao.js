@@ -1,0 +1,53 @@
+const mongoose = require("mongoose");
+
+// event schema: (may edit later depending on what features get added)
+const eventSchema = new mongoose.Schema({
+  eventDate: { type: Date, required: true },
+  title: { type: String, required: true }
+});
+
+
+const Event = mongoose.model("Event", eventSchema);
+
+// for testing purposes
+async function readAll() {
+  return await Event.find();
+}
+
+/**
+ * create a new event and save it in database.
+ * @param {*} newEventData data for new event
+ * @returns a fully formed event object
+ */
+async function create(newEventData) {
+  const event = new Event(newEventData);
+  const saved = await event.save();
+  return saved;
+}
+
+/**
+ * find an existing event in the database.
+ * @param {*} newEventData data for new event
+ * @returns a fully formed event object
+ */
+async function readById(id) {
+  return await Event.findById(id);
+}
+
+/**
+ * delete an existing event in the database.
+ * @param {*} newEventData data for new event
+ * @returns a fully formed event object
+ */
+async function remove(id) {
+  return await Event.findByIdAndDelete(id);
+}
+
+
+module.exports = {
+  eventModel: Event,
+  create,
+  readAll,
+  readById,
+  remove,
+};

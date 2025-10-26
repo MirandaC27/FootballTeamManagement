@@ -48,8 +48,8 @@ const TeamCont = require('./controller/TeamController');
 app.get('/getAllTeams', TeamCont.getAllTeams);
 
 //calendar routes
-const MatchCont = require('./controller/MatchController');
-console.log("MatchCont loaded:", MatchCont);
+const EventCont = require('./controller/EventController');
+console.log("EventCont loaded:", EventCont);
 
 
 // Redirect /calendar to current month page
@@ -64,12 +64,12 @@ app.get('/calendar/month/:month', (req, res) => {
 });
 
 // Return JSON calendar data for the given month/year
-app.get('/calendar/data/:year/:month', MatchCont.getCalendarData);
+app.get('/calendar/data/:year/:month', EventCont.getCalendarData);
 
-// Match routes
-app.post('/addMatch', isAdmin, MatchCont.createNewMatch);
-app.get('/getAllMatches', isAdmin, MatchCont.getAllMatches);
-app.delete('/deleteMatch/:id', isAdmin, MatchCont.deleteMatch);
+// event routes
+app.post('/addEvent', isAdmin, EventCont.createNewEvent);
+app.get('/getAllEvent', isAdmin, EventCont.getAllEvents);
+app.delete('/deleteEvent/:id', isAdmin, EventCont.deleteEvent);
 
 
 // schedule controller routes
