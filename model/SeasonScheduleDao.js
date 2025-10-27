@@ -1,5 +1,4 @@
-//bad way to implement the season schedule, must adjust
-//confusing rows of data with columns of data (field data)
+
 
 const mongoose = require('mongoose');
 const matchupSchema = require('./MatchupDao');

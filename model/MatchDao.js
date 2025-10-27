@@ -1,8 +1,3 @@
-/**
- * @author Nyrique' Butler
- * @version 1
- **/
-
 //JavaScript code to refresh the page every minute <-- find this
 //Ajax code, refreshes fro special stuff
 //match timer is a beautification: can be replaced with in progress/finsihed/scheduled
