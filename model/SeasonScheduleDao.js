@@ -41,7 +41,7 @@ async function read(id) {
  */
 async function create(weekNumber, matchups) {
   try {
-    const week = new seasonScheduleModel({ weekNumber, weekMatchups: matchups });
+    const week = new seasonScheduleModel({ weekNumber: weekNumber, weekMatchups: matchups });
     await week.save();
     return week;
   } catch (err) {

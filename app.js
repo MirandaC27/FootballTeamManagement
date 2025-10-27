@@ -81,17 +81,6 @@ app.put('/upsertWeek', ScheduleCont.upsertWeek);
 app.delete('/deleteWeek', ScheduleCont.deleteWeek);
 app.patch('/updateMatchupResult', ScheduleCont.updateMatchupResult);
 
-// schedule save route
-const scheduleDao = require('./model/SeasonScheduleDao');
-app.post('/schedule', async (req, res) => {
-  try {
-    let weekNumber, weekMatchups = req.body;
-    const savedWeek = await scheduleDao.upsertWeek(weekNumber, weekMatchups);
-    res.json(savedWeek);
-  } catch (err) {
-      res.status(500).send('Error saving week');
-  }
-});
 
 
 console.log("UserCont:", UserCont);

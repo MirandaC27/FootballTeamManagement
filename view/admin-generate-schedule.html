@@ -132,14 +132,17 @@
             for (let matches of schedule) {
                 const weekNumber = matches[0]?.week || 0
                 if (weekNumber > 0) {
-                    await fetch('/app/schedule', {
+                    const res = await fetch('/createWeek', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
-                            weekNumber: weekNumber,
-                            weekMatchups: matches
+                            weekNumber,
+                            matchups: matches
                         })
                     });
+                    if (!res.ok) {
+                        console.error(`Failed to save week ${weekNumber}:`, await res.text());
+                    }
                 }
             }
             return schedule

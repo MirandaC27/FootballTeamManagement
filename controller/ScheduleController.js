@@ -22,7 +22,7 @@ const getAllWeeks = async(req, res) => {
  */
 const getSpecificWeek = async(req, res) => {
     try {
-        const weekNumber = req.params;
+        const weekNumber = req.query.weekNumber;
         const week = await dao.findWeek(weekNumber);
         if (!week) {
             return res.status(404).json({ message: 'Week not found' });
