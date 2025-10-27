@@ -3,7 +3,7 @@ const dao = require("../model/TeamDao");
 
 jest.mock("../model/TeamDao");
 
-test('Create team successfully', async function(){
+test('Create team successfully!', async function(){
     let req = { 
         body: { 
             name: "Palmeiras", 
@@ -33,7 +33,7 @@ test('Create team successfully', async function(){
     expect(res.redirect).toHaveBeenCalledWith("manager-teams.html?success=1");
 });
 
-test('Handle missing team data gracefully', async function(){
+test('Handle missing team data', async function(){
     let req = { body: { name: "", location: "", wins: 0, losses: 0 } };
     let res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 

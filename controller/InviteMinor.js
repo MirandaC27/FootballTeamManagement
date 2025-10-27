@@ -15,12 +15,12 @@ const inviteMinor = async (req, res) => {
             return res.status(404).send('Parent not found');
         }
         const parentEmail = parent.email;
-        console.log('email i guess sent to', parentEmail);
+        console.log('The email inviting the minor was sent to', parentEmail);
         res.json({
             message: 'sent invite to ' + parentEmail + ' for ' + minor.name + ' to join ' + team.name
         });
     } catch (err) {
-        res.status(500).send('something broke inviting minor');
+        res.status(500).send('An error occurred when inviting the minor');
     }
 };
 
