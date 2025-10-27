@@ -8,7 +8,7 @@ const dao = require('../model/SeasonScheduleDao');
 const getAllWeeks = async(req, res) => {
     try {
         const weeks = await dao.getAll();
-        res.status(200).json(weeks);
+        res.json(weeks);
     } catch (err) {
         res.status(500).send('Error getting weeks');
     }
@@ -27,7 +27,7 @@ const getSpecificWeek = async(req, res) => {
         if (!week) {
             return res.status(404).json({ message: 'Week not found' });
         }
-        res.status(200).json(week);
+        res.json(week);
     } catch (err) {
         res.status(500).send('Error getting week');
     }
@@ -42,7 +42,7 @@ const createWeek = async(req, res) => {
     try {
         const {weekNumber, matchups} = req.body;
         const week = await dao.create(weekNumber, matchups);
-        res.status(201).json(week);
+        res.json(week);
     } catch (err) {
         res.status(500).send('Error getting week');
     }
@@ -58,7 +58,7 @@ const upsertWeek = async(req, res) => {
         const weekNumber = req.params;
         const matchups = req.body;
         const updated = await dao.upsertWeek(weekNumber, matchups);
-        res.status(200).json(updated);
+        res.json(updated);
     } catch (err) {
         res.status(500).send('Error changing matchups');
     }
@@ -72,10 +72,10 @@ const upsertWeek = async(req, res) => {
 const deleteWeek = async(req, res) => {
     try {
         const weekNumber = req.params;
-        const updated = await dao.del(weekNumber, matchups);
-        res.status(200).json(updated);
+        const updated = await dao.delByWeekNumber(weekNumber);
+        res.json(updated);
     } catch (err) {
-        res.status(500).send('Error changing matchups');
+        res.status(500).send('Error deleting week.');
     }
 }
 
@@ -88,14 +88,14 @@ const deleteWeek = async(req, res) => {
 const updateMatchupResult = async(req, res) => {
     try {
         const weekNumber = req.params;
-        let homeTeam, awayTeam, result = req.body;
-        const updated = await dao.updateResult(weekNumber, homeTeam, awayTeam, result);
+        let { homeTeam, awayTeam, result } = req.body;
+        const updatedWeek = await dao.updateResult(weekNumber, homeTeam, awayTeam, result);
         if (!updatedWeek) {
-            return res.status(404).json({ message: 'Matchup not found' });
+            return res.status(404).send({ message: 'Matchup not found' });
         }
-        res.status(200).json(updatedWeek);
+        res.json(updatedWeek);
     } catch (err) {
-        res.status(500).json({ message: 'Failed to update result'});
+        res.status(500).send({ message: 'Failed to update result'});
     }
 }
 

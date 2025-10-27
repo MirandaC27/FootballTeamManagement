@@ -74,12 +74,12 @@ app.delete('/deleteEvent/:id', isAdmin, EventCont.deleteEvent);
 
 // schedule controller routes
 const ScheduleCont = require("./controller/ScheduleController");
-app.get('/', ScheduleCont.getAllWeeks);
-app.get('/:weekNumber', ScheduleCont.getSpecificWeek);
-app.post('/', ScheduleCont.createWeek);
-app.put('/:weekNumber', ScheduleCont.upsertWeek);
-app.delete('/:weekNumber', ScheduleCont.deleteWeek);
-app.patch('/:weekNumber/result', ScheduleCont.updateMatchupResult);
+app.get('/getAllWeeks', ScheduleCont.getAllWeeks);
+app.get('/getSpecificWeek', ScheduleCont.getSpecificWeek);
+app.post('/createWeek', ScheduleCont.createWeek);
+app.put('/upsertWeek', ScheduleCont.upsertWeek);
+app.delete('/deleteWeek', ScheduleCont.deleteWeek);
+app.patch('/updateMatchupResult', ScheduleCont.updateMatchupResult);
 
 // schedule save route
 const scheduleDao = require('./model/SeasonScheduleDao');

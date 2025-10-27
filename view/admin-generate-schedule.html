@@ -122,7 +122,7 @@
                 let teamQuality = team.priorSeasonWins / totalGamesPlayed;
                 let teamWithQuality = {
                     name: team.name,
-                    lastSeasonQuality: teamQuality
+                    strength: teamQuality
                 };
                 teamsAndQuality.push(teamWithQuality);
             }
@@ -132,7 +132,7 @@
             for (let matches of schedule) {
                 const weekNumber = matches[0]?.week || 0
                 if (weekNumber > 0) {
-                    await fetch('../app', {
+                    await fetch('/app/schedule', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({

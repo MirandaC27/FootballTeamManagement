@@ -204,7 +204,7 @@
 
     async function loadWeek1Schedule() {
       try {
-        const response = await fetch('/api/schedule/1'); // Your backend endpoint
+        const response = await fetch('/getSpecificWeek?weekNumber=${1}'); // Your backend endpoint
         if (!response.ok) throw new Error('Failed to fetch week 1');
 
         const weekData = await response.json();
