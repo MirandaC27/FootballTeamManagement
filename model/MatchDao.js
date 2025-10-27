@@ -49,7 +49,7 @@ const matchModel = mongoose.model('match', matchSchema);
 //inserted test functions from Chloe's Match Dao push
 
 async function readAll() {
-  return await Match.find();
+  return await match.find();
 }
 
 /**
@@ -58,8 +58,8 @@ async function readAll() {
  * @returns a fully formed match object
  */
 async function create(newMatchData) {
-  const match = new Match(newMatchData);
-  const saved = await match.save();
+  const matchData = new match(newMatchData);
+  const saved = await matchData.save();
   return saved;
 }
 
@@ -69,7 +69,7 @@ async function create(newMatchData) {
  * @returns a fully formed match object
  */
 async function readById(id) {
-  return await Match.findById(id);
+  return await match.findById(id);
 }
 
 /**
@@ -78,12 +78,12 @@ async function readById(id) {
  * @returns a fully formed match object
  */
 async function remove(id) {
-  return await Match.findByIdAndDelete(id);
+  return await match.findByIdAndDelete(id);
 }
 
 
 module.exports = {
-  matchModel: Match,
+  matchModel: match,
   create,
   readAll,
   readById,
