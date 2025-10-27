@@ -29,7 +29,7 @@ const matchSchema = new mongoose.Schema({
     },
     matchDatetime:{
         type: Date,
-        required: true
+        required: false
     },
     matchLocation:{
         type: String,
