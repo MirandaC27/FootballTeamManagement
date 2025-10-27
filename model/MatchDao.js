@@ -29,7 +29,7 @@ const matchSchema = new mongoose.Schema({
     },
     matchDatetime:{
         type: Date,
-        required: false
+        required: true
     },
     matchLocation:{
         type: String,
@@ -46,46 +46,59 @@ const matchSchema = new mongoose.Schema({
 const matchModel = mongoose.model('match', matchSchema);
 
 //Test functions
-//inserted test functions from Chloe's Match Dao push
 
-async function readAll() {
-  return await match.find();
+async function readAll(){
+  return await matchModel.find();
 }
 
 /**
  * create a new match and save it in database.
- * @param {*} newMatchData data for new match
- * @returns a fully formed match object
+ * @param {*} newMatch data for new match
  */
-async function create(newMatchData) {
-  const matchData = new match(newMatchData);
-  const saved = await matchData.save();
-  return saved;
+async function create(newMatch){
+  const match = new matchModel(newMatch);
+  await match.save();
+  return match;
 }
 
 /**
  * find an existing match in the database.
- * @param {*} newMatchData data for new match
- * @returns a fully formed match object
+ * @param {*} id data for new match
  */
-async function readById(id) {
-  return await match.findById(id);
+async function readById(id){
+  return await matchModel.findById(id);
+}
+
+/**
+ * find an existing match in the database.
+ * @param {*} id data for new match
+ */
+async function updatebyId(id, newData){
+  return await matchModel.updatebyId(id, newData, {new:true});
 }
 
 /**
  * delete an existing match in the database.
- * @param {*} newMatchData data for new match
- * @returns a fully formed match object
+ * @param {*} id data for new match
  */
-async function remove(id) {
-  return await match.findByIdAndDelete(id);
+async function remove(id){
+  return await matchModel.findByIdAndDelete(id);
+}
+
+/**
+ * delete all existing matches in the database.
+ */
+async function removeAll(){
+  await matchModel.deleteMany();
 }
 
 
 module.exports = {
-  matchModel: match,
+  matchModel,
   create,
   readAll,
+  updatebyId,
   readById,
   remove,
+  removeAll
 };
