@@ -126,11 +126,12 @@
                 };
                 teamsAndQuality.push(teamWithQuality);
             }
-            let defaultWeeks = 10;
+            let defaultWeeks = 2;
             let schedule = generateSchedule(teamsAndQuality, 10);
 
-            for (let matches of schedule) {
-                const weekNumber = matches[0]?.week || 0
+            for (let i = 0; i < schedule.length(); i++) {
+                const matches = schedule[i];
+                const weekNumber = i + 1;
                 if (weekNumber > 0) {
                     const res = await fetch('/createWeek', {
                         method: 'POST',

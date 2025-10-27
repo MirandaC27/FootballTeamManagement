@@ -5,12 +5,12 @@ const matchupSchema = new mongoose.Schema({
     homeTeam: {
         type: String,
         required: true,
-        unique: true
+        //unique: true
     },
     awayTeam: {
         type: String,
         required: true,
-        unique: true
+        //unique: true
     },
     result: {
         type: String,
