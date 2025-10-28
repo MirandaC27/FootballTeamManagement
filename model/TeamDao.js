@@ -6,6 +6,7 @@ const teamSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        uppercase: true
     },
     location: {
         type: String,
