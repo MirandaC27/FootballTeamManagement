@@ -114,7 +114,7 @@
         }
 
         async function generateSeasonSchedule() {
-            let response = await fetch('/getAllTeams');
+            let response = await fetch('/getAllTeams', { cache: 'no-store'});
             let teams = await response.json();
             let teamsAndQuality = [];
             for (let team of teams) {
@@ -127,9 +127,9 @@
                 teamsAndQuality.push(teamWithQuality);
             }
             let defaultWeeks = 2;
-            let schedule = generateSchedule(teamsAndQuality, 10);
+            let schedule = generateSchedule(teamsAndQuality, defaultWeeks);
 
-            for (let i = 0; i < schedule.length(); i++) {
+            for (let i = 0; i < schedule.length; i++) {
                 const matches = schedule[i];
                 const weekNumber = i + 1;
                 if (weekNumber > 0) {
