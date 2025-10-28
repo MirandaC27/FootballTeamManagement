@@ -3,14 +3,14 @@ const teamDao = require('../model/TeamDao');
 
 // A hard-coded season
 const SEASON_START = new Date('2025-10-01');
-const SEASON_END = new Date('2025-11-30');
+const SEASON_END = new Date('2025-12-31');
 
 /**
  * Reassign a minor to a new existing team.
  */
 const reassignMinor = async (req, res) => {
     try {
-        const { minorId, newTeamId } = req.params;
+        const { minorId, newTeamName } = req.params;
         const currentDate = new Date();
 
         // Check if season has begun
@@ -18,12 +18,12 @@ const reassignMinor = async (req, res) => {
             return res.redirect('admin-manage-minors.html?error=1');
         }
 
-        // Check if team exists in database
-        const team = await teamDao.read(newTeamId);
+        // Check if team exists in database (name defaulted as uppercase)
+        const team = await teamDao.teamModel.findOne({ name: newTeamName.trim().toUpperCase() });
         if (!team) {
             return res.redirect('admin-manage-minors.html?error=1');
         }
-        await dao.minorModel.findByIdAndUpdate(minorId, { team_id: newTeamId });
+         await dao.minorModel.findByIdAndUpdate(minorId, { team_id: team._id });
     } catch (err) {
         res.status(500).send('Error reassigning minors');
     }
@@ -36,7 +36,7 @@ const reassignMinor = async (req, res) => {
  */
 const getAllMinors = async (req, res) => {
     try {
-        const minors = await dao.minorModel.find();
+        const minors = await dao.minorModel.find().populate('team_id', 'name').populate('parent_id', 'name');
         res.json(minors);
     } catch (err) {
         res.status(500).send('Error getting minors');

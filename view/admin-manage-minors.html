@@ -70,9 +70,9 @@
             <thead>
                 <tr>
                     <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Parent ID</th>
-                    <th scope="col">Team ID</th>
+                    <th scope="col">Minor Name</th>
+                    <th scope="col">Parent Name</th>
+                    <th scope="col">Team Name</th>
                     <th scope="col">Action</th>
                 </tr>
             </thead>
@@ -142,23 +142,23 @@
             let tr = document.createElement('tr');
             let minorId = document.createElement('td');
             let minorName = document.createElement('td');
-            let minorParentId = document.createElement('td');
-            let minorTeamId = document.createElement('td');
+            let minorParentName = document.createElement('td');
+            let minorTeamName = document.createElement('td');
             let minorReassign = document.createElement('td');
 
             // Fill each row cell with minor's info
             minorId.appendChild(document.createTextNode(minor._id));
             minorName.appendChild(document.createTextNode(minor.name));
-            minorParentId.appendChild(document.createTextNode(minor.parent_id));
-            minorTeamId.appendChild(document.createTextNode(minor.team_id ? minor.team_id : '-'));
+            minorParentName.appendChild(document.createTextNode(minor.parent_id.name));
+            minorTeamName.appendChild(document.createTextNode(minor.team_id && minor.team_id.name ? minor.team_id.name : '-'));
 
             // Reassign button for the Action column 
             const reassignBtn = createReassignButton(minor);
             minorReassign.appendChild(reassignBtn);
             tr.appendChild(minorId);
             tr.appendChild(minorName);
-            tr.appendChild(minorParentId);
-            tr.appendChild(minorTeamId);
+            tr.appendChild(minorParentName);
+            tr.appendChild(minorTeamName);
             tr.appendChild(minorReassign);
             return tr;
         }
@@ -173,21 +173,21 @@
             reassignBtn.classList.add("btn", "btn-sm", "btn-primary");
 
             reassignBtn.onclick = async function () {
-                const newTeamId = prompt("Enter new team ID:");
-                if (newTeamId == null) {
+                const newTeamName = prompt("Enter the name of an existing team to reassign:");
+                if (newTeamName == null) {
                     return;
                 } else {
-                    await reassignMinor(minor, newTeamId);
+                    await reassignMinor(minor, newTeamName);
                 }
             };
             return reassignBtn;
         }
 
         /**
-         * Reassign minor on database by changing its team ID.
+         * Reassign minor on database by changing its team name.
          */
-        async function reassignMinor(minor, newTeamId) {
-            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamId}`, { method: 'PUT' });
+        async function reassignMinor(minor, newTeamName) {
+            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamName}`, { method: 'PUT' });
         }
         displayMinors();
     </script>
