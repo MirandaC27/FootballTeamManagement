@@ -10,7 +10,7 @@ const SEASON_END = new Date('2025-12-31');
  */
 const reassignMinor = async (req, res) => {
     try {
-        const { minorId, newTeamName } = req.params;
+        const { minorId, newTeamId } = req.params;
         const currentDate = new Date();
 
         // Check if season has begun
@@ -18,8 +18,8 @@ const reassignMinor = async (req, res) => {
             return res.redirect('admin-manage-minors.html?error=1');
         }
 
-        // Check if team exists in database (name defaulted as uppercase)
-        const team = await teamDao.teamModel.findOne({ name: newTeamName.trim().toUpperCase() });
+        // Check if team exists in database
+        const team = await teamDao.teamModel.findById(newTeamId);
         if (!team) {
             return res.redirect('admin-manage-minors.html?error=1');
         }

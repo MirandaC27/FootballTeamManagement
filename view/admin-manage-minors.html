@@ -121,6 +121,8 @@
         checkLoggedUser();
     </script>
     <script>
+        let teams = [];
+
         /**
          * Display a table of all minors from database.
          */
@@ -137,6 +139,7 @@
 
         /**
          * Create a table row for a single minor.
+         * @param minor object
          */
         function createMinorRow(minor) {
             let tr = document.createElement('tr');
@@ -152,9 +155,9 @@
             minorParentName.appendChild(document.createTextNode(minor.parent_id.name));
             minorTeamName.appendChild(document.createTextNode(minor.team_id && minor.team_id.name ? minor.team_id.name : '-'));
 
-            // Reassign button for the Action column 
-            const reassignBtn = createReassignButton(minor);
-            minorReassign.appendChild(reassignBtn);
+            // Reassign dropdown for the Action column 
+            const reassignSelect = createReassignDropdown(minor);
+            minorReassign.appendChild(reassignSelect);
             tr.appendChild(minorId);
             tr.appendChild(minorName);
             tr.appendChild(minorParentName);
@@ -164,32 +167,62 @@
         }
 
         /**
-         * Create a reassign button, which is for the Action column. 
-         * @param minorId minor's ID in database
-         */
-        function createReassignButton(minor) {
-            const reassignBtn = document.createElement("button");
-            reassignBtn.textContent = "Reassign?";
-            reassignBtn.classList.add("btn", "btn-sm", "btn-primary");
+        * Create a reassign dropdown, which is for the Action column. 
+        * @param minor object
+        */
+        function createReassignDropdown(minor) {
+            let select = document.createElement('select');
+            select.classList.add('form-select', 'form-select-sm');
+            addDropdownOptions(select);
+            addTeamsToDropdown(select);
 
-            reassignBtn.onclick = async function () {
-                const newTeamName = prompt("Enter the name of an existing team to reassign:");
-                if (newTeamName == null) {
-                    return;
-                } else {
-                    await reassignMinor(minor, newTeamName);
-                }
-            };
-            return reassignBtn;
+            select.addEventListener('change', async function () {
+                await reassignMinor(minor, select.value);
+            });
+            return select;
         }
 
         /**
-         * Reassign minor on database by changing its team name.
+         * Fill out the options for reassign dropdown.
+         * @param select html object that creates a dropdown
+         */ 
+        function addDropdownOptions(select) {
+            let teamsOptions = document.createElement('option');
+            teamsOptions.textContent = 'Reassign Team?';
+            teamsOptions.disabled = true;
+            teamsOptions.selected = true;
+            select.appendChild(teamsOptions);
+        }
+
+        /**
+         * Add each team to dropdown (show team name only).
+         * @param select html object that creates a dropdown
          */
-        async function reassignMinor(minor, newTeamName) {
-            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamName}`, { method: 'PUT' });
+        function addTeamsToDropdown(select) {
+            for (let team of teams) {
+                let option = document.createElement('option');
+                option.value = team._id;
+                option.textContent = team.name;
+                select.appendChild(option);
+            }
+        }
+
+        /**
+         * Reassign minor on database by changing its team ID.
+         */
+        async function reassignMinor(minor, newTeamId) {
+            const response = await fetch(`/reassignMinor/${minor._id}/${newTeamId}`, { method: 'PUT' });
+        }
+
+        /**
+         * Get all teams names from database to fill out the dropdown.
+         */
+        async function loadTeams() {
+            let response = await fetch('/getAllTeams');
+            teams = await response.json();
         }
         displayMinors();
+        loadTeams();
     </script>
 </body>
 
