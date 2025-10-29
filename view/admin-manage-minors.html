@@ -173,7 +173,7 @@
         function createReassignDropdown(minor) {
             let select = document.createElement('select');
             select.classList.add('form-select', 'form-select-sm');
-            addDropdownOptions(select);
+            addPlaceholderToDropdown(select);
             addTeamsToDropdown(select);
 
             select.addEventListener('change', async function () {
@@ -183,10 +183,10 @@
         }
 
         /**
-         * Fill out the options for reassign dropdown.
+         * Add the placeholder option to the dropdown. 
          * @param select html object that creates a dropdown
          */ 
-        function addDropdownOptions(select) {
+        function addPlaceholderToDropdown(select) {
             let teamsOptions = document.createElement('option');
             teamsOptions.textContent = 'Reassign Team?';
             teamsOptions.disabled = true;
@@ -208,7 +208,8 @@
         }
 
         /**
-         * Reassign minor on database by changing its team ID.
+         * Reassign minor on database by changing its team ID, which would change team 
+         * name on team column.
          */
         async function reassignMinor(minor, newTeamId) {
             const response = await fetch(`/reassignMinor/${minor._id}/${newTeamId}`, { method: 'PUT' });
