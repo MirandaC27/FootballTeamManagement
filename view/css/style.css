@@ -1,18 +1,21 @@
 body {
-    background-color: #dde9ff;
+  background-color: #dde9ff;
 }
 
-#signin-btn, #account-dropdown {
+#signin-btn,
+#account-dropdown {
   display: none;
 }
 
 
-#login-form, #register-form {
-    width: 400px;         
-    margin: 80px auto; 
+#login-form,
+#register-form {
+  width: 400px;
+  margin: 80px auto;
 }
 
-#login-form .btn, #register-form .btn {
+#login-form .btn,
+#register-form .btn {
   width: 100%;
   margin-top: 15px;
 }
@@ -43,7 +46,7 @@ body {
   background-color: white;
   border-radius: 10px;
   padding: 30px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   text-align: center;
 }
 
@@ -104,7 +107,7 @@ body {
   background-color: white;
   padding: 20px 25px;
   border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.15);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
 
@@ -206,17 +209,17 @@ body {
   flex-shrink: 0;
 }
 
-/* flexbox */
+/* flexbox (middle column is wider than side columns style) */
 .flex-container {
   display: flex;
-  justify-content: space-between; 
-  gap: 20px; 
-}
-
-.column {
-  flex: 1; 
   padding: 20px;
+  gap: 20px;
 }
 
+.standings-col, .calendar-col {
+  flex: 1;
+}
 
-
+.social-feed-col {
+  flex: 2;
+}
