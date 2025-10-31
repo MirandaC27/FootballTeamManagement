@@ -223,3 +223,19 @@ body {
 .social-feed-col {
   flex: 2;
 }
+
+.post-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.left-buttons .btn {
+  margin-right: 10px;
+}
+
+.right-button .btn {
+  padding-left: 25px;
+  padding-right: 25px;
+}
