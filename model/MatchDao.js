@@ -5,29 +5,29 @@
 
 const mongoose = require('mongoose');
 
-const matchSTATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
+const MATCH_STATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
 
 //match view schema
 const matchSchema = new mongoose.Schema({
     homeTeam: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'teamSchema',
+        ref: 'team',
         required: true
     },
     awayTeam:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'teamSchema',
+        ref: 'team',
         required: true
     },
     homeScore:{
         type: Number,
-        default: 0
+        default: -1
     },
     awayScore:{
         type: Number,
-        default: 0
+        default: -1
     },
-    matchDatetime:{
+    matchDate:{
         type: Date,
         required: true
     },
@@ -74,7 +74,7 @@ async function readById(id){
  * @param {*} id data for new match
  */
 async function updatebyId(id, newData){
-  return await matchModel.updatebyId(id, newData, {new:true});
+  return await matchModel.findByIdAndUpdate(id, newData, {new:true});
 }
 
 /**
