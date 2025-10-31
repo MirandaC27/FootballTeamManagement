@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spike - Upload DB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light p-4">
+
+    <div class="container mt-5">
+        <!-- Status message for if file was uploaded successfully -->
+        <div id="statusMessage"></div>
+
+        <!-- Upload Form -->
+        <form id="uploadForm" enctype="multipart/form-data" class="card p-4 shadow-sm">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">Choose File</label>
+                <input class="form-control" type="file" id="fileInput" name="media" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Upload</button>
+        </form>
+
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const statusMessage = document.getElementById("statusMessage");
+
+        /**
+         * Handle uploading file by alerting if was a success or failure.
+         * @param event object event listener
+         */ 
+        async function uploadFile(event) {
+            event.preventDefault(); // prevent from navigating to new page
+            const formData = new FormData(form);
+
+            try { // display alert depending on backend's success
+                const response = await fetch("/upload", { method: "POST", body: formData });
+                statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
+                form.reset();
+            } catch (err) {
+                console.log(err);
+                statusMessage.innerHTML = `<div class="alert-fail">❌ Error uploading file</div>`;
+            }
+        }
+        form.addEventListener("submit", uploadFile);
+    </script>
+</body>
+
+</html>
