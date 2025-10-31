@@ -206,6 +206,17 @@ body {
   flex-shrink: 0;
 }
 
+/* flexbox */
+.flex-container {
+  display: flex;
+  justify-content: space-between; 
+  gap: 20px; 
+}
+
+.column {
+  flex: 1; 
+  padding: 20px;
+}
 
 
 

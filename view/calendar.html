@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,9 +8,30 @@
 
   <!-- Bootstrap + custom CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
-        crossorigin="anonymous">
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
   <link rel="stylesheet" href="/css/style.css">
+
+  <!-- CSS for iframe in index.html -->
+  <style>
+    /* Hide nav bar and h1 for iframe to show only the calendar UI */
+    body.in-iframe .navbar,
+    body.in-iframe h1,
+    body.in-iframe #signin-btn,
+    body.in-iframe #account-dropdown {
+      display: none !important;
+    }
+
+    /* Hide add event button in admin view */
+    body.in-iframe #show-add-form {
+      display: none !important;
+    }
+
+    body.in-iframe {
+      transform: scale(0.8);
+      transform-origin: top left;
+      width: 125%;
+    }
+  </style>
 </head>
 
 <body>
@@ -40,8 +62,10 @@
     </div>
     <div id="account-dropdown" class="dropdown">
       <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
-          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
+          viewBox="0 0 16 16">
+          <path
+            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
         </svg> Account
       </button>
       <ul class="dropdown-menu">
@@ -51,290 +75,302 @@
     </div>
   </nav>
 
-<div class="container mt-4 mb-5 d-flex flex-column flex-md-row">
-  <!-- Left: Calendar Section -->
-  <div class="flex-grow-1 mr-md-4">
-    <h1 class="text-center mb-4">Calendar</h1>
+  <div class="container mt-4 mb-5 d-flex flex-column flex-md-row">
+    <!-- Left: Calendar Section -->
+    <div class="flex-grow-1 mr-md-4">
+      <h1 class="text-center mb-4">Calendar</h1>
 
-    <div class="d-flex justify-content-center align-items-center mb-3">
-      <button id="prev-month" class="btn btn-outline-primary mr-3">&lt; Previous</button>
-      <h4 id="month-year" class="m-0 font-weight-bold"></h4>
-      <button id="next-month" class="btn btn-outline-primary ml-3">Next &gt;</button>
-    </div>
-
-    <div class="text-center mb-3">
-      <button id="show-add-form" class="btn btn-success">+ Add Event</button>
-    </div>
-
-    <div class="table-responsive">
-      <table id="calendar-table" class="table table-bordered text-center">
-        <thead class="thead-light">
-          <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th>
-            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-          </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
-      </table>
-    </div>
-
-    <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
-      <div class="form-group">
-        <label for="eventTitle">Event Title:</label>
-        <input type="text" name="eventTitle" id="eventTitle" class="form-control" required>
+      <div class="d-flex justify-content-center align-items-center mb-3">
+        <button id="prev-month" class="btn btn-outline-primary mr-3">&lt; Previous</button>
+        <h4 id="month-year" class="m-0 font-weight-bold"></h4>
+        <button id="next-month" class="btn btn-outline-primary ml-3">Next &gt;</button>
       </div>
 
-      <div class="form-group">
-        <label for="eventDate">Add Event Date:</label>
-        <input type="date" name="eventDate" id="eventDate" class="form-control" required>
+      <div class="text-center mb-3">
+        <button id="show-add-form" class="btn btn-success">+ Add Event</button>
       </div>
 
-      <div class="text-center">
-        <button type="submit" class="btn btn-primary">Add</button>
-        <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
+      <div class="table-responsive">
+        <table id="calendar-table" class="table table-bordered text-center">
+          <thead class="thead-light">
+            <tr>
+              <th>Sun</th>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+              <th>Sat</th>
+            </tr>
+          </thead>
+          <tbody id="calendar-body"></tbody>
+        </table>
       </div>
-    </form>
 
-    <p id="form-status" class="text-center mt-3"></p>
-  </div>
+      <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
+        <div class="form-group">
+          <label for="eventTitle">Event Title:</label>
+          <input type="text" name="eventTitle" id="eventTitle" class="form-control" required>
+        </div>
 
-  <!-- Right: Event Details -->
-<div id="event-details" class="border p-3 bg-light rounded mt-3 mt-md-0"
-     style="display:none; min-width:280px; max-width:350px;">
-    <h4>Event Details</h4>
-    <p><strong>Date:</strong> <span id="event-date"></span></p>
-    
-    <div id="event-list-container">
-      <strong>Events:</strong>
-      <ul id="event-list" class="pl-3 mb-0"></ul>
+        <div class="form-group">
+          <label for="eventDate">Add Event Date:</label>
+          <input type="date" name="eventDate" id="eventDate" class="form-control" required>
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary">Add</button>
+          <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
+        </div>
+      </form>
+
+      <p id="form-status" class="text-center mt-3"></p>
     </div>
-</div>
+
+    <!-- Right: Event Details -->
+    <div id="event-details" class="border p-3 bg-light rounded mt-3 mt-md-0"
+      style="display:none; min-width:280px; max-width:350px;">
+      <h4>Event Details</h4>
+      <p><strong>Date:</strong> <span id="event-date"></span></p>
+
+      <div id="event-list-container">
+        <strong>Events:</strong>
+        <ul id="event-list" class="pl-3 mb-0"></ul>
+      </div>
+    </div>
 
 
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-          crossorigin="anonymous"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"></script>
 
-  <script>
-    // --- Account / Sign-in logic (same as index.html) ---
-    async function checkLoggedUser() {
-      
-      try{
-      let response = await fetch('/loggedUser');
-      let user = await response.json();
-      currentUser = user;
+    <script>
+      // --- Account / Sign-in logic (same as index.html) ---
+      async function checkLoggedUser() {
 
-      const signInBtn = document.getElementById('signin-btn');
-      const accountDropdown = document.getElementById('account-dropdown');
-      const showFormButton = document.getElementById('show-add-form');
-      const formStatus = document.getElementById('form-status');      
+        try {
+          let response = await fetch('/loggedUser');
+          let user = await response.json();
+          currentUser = user;
 
-      if (user) {
-        signInBtn.style.display = 'none';
-        accountDropdown.style.display = 'block';
-        document.getElementById('admin').style.display = (user.role === 'admin') ? 'block' : 'none';
-        
-        if (user.role === 'admin'){
-          showFormButton.style.display = 'inline-block';
-          formStatus.textContent = "";
-        }
+          const signInBtn = document.getElementById('signin-btn');
+          const accountDropdown = document.getElementById('account-dropdown');
+          const showFormButton = document.getElementById('show-add-form');
+          const formStatus = document.getElementById('form-status');
 
-        else{
-          showFormButton.style.display = 'none';
-          formStatus.textContent = "You must be an admin to add or delete a event.";
-        }
-      
-      }
+          if (user) {
+            signInBtn.style.display = 'none';
+            accountDropdown.style.display = 'block';
+            document.getElementById('admin').style.display = (user.role === 'admin') ? 'block' : 'none';
 
-      
-      else {
-        signInBtn.style.display = 'block';
-        accountDropdown.style.display = 'none';
-        showFormBtn.style.display = 'none';
-      }
-    }
-      catch(err){
-        console.error("Error with logged user", err);
-      }
-    }
-    checkLoggedUser();
+            if (user.role === 'admin') {
+              showFormButton.style.display = 'inline-block';
+              formStatus.textContent = "";
+            }
+
+            else {
+              showFormButton.style.display = 'none';
+              formStatus.textContent = "You must be an admin to add or delete a event.";
+            }
+
+          }
 
 
-    // --- Calendar logic ---
-    const monthYearLabel = document.getElementById("month-year");
-    let currentUser = null;
-
-
-    const calendarBody = document.getElementById("calendar-body");
-    const prevBtn = document.getElementById("prev-month");
-    const nextBtn = document.getElementById("next-month");
-    const showFormBtn = document.getElementById("show-add-form");
-    const addForm = document.getElementById("add-event-form");
-    const formStatus = document.getElementById("form-status");
-
-    let today = new Date();
-    let currentMonth = today.getMonth();
-    let currentYear = today.getFullYear();
-
-    async function renderCalendar(year, month) {
-
-      const detailsBox = document.getElementById("event-details");
-      detailsBox.style.display = "none";
-
-      try {
-        const response = await fetch(`/calendar/data/${year}/${month + 1}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const result = await response.json();
-        const eventDays = result.eventDays || [];
-        const days = result.data;
-
-        monthYearLabel.textContent = `${result.monthName} ${result.year}`;
-        calendarBody.innerHTML = "";
-
-        for (const week of days) {
-          const row = document.createElement("tr");
-
-          for (const day of week) {
-            const cell = document.createElement("td");
-            
-            if (day) 
-            {
-              cell.textContent = day;
-              const eventsForDay = eventDays.filter(e => e.day === parseInt(day));
-
-              if (eventsForDay.length > 0) {
-                cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "event-cell");
-
-                // count of events per cell
-                if (eventsForDay.length === 1) {
-                  cell.textContent = `${day}`;
-                } else {
-                  cell.innerHTML = `${day} <br><small>(${eventsForDay.length} events)</small>`;
-                }
-
-                // Clicking the day shows details for all events
-                cell.addEventListener("click", (e) => {
-                  e.stopPropagation();
-                  const detailsBox = document.getElementById("event-details");
-                  const eventList = document.getElementById("event-list");
-                  const eventDate = document.getElementById("event-date");
-                  
-                  eventList.innerHTML = "";
-                  eventDate.textContent = `${result.monthName} ${day}, ${result.year}`;
-
-                  eventsForDay.forEach(ev => {
-                  const li = document.createElement("li");
-                  li.classList.add("mb-2");
-                  li.textContent = ev.title;
-
-                  if (currentUser && currentUser.role === "admin") {
-                    const delBtn = document.createElement("button");
-                    delBtn.textContent = "Delete";
-                    delBtn.classList.add("btn", "btn-sm", "btn-danger", "ml-2");
-
-                    delBtn.addEventListener("click", async (e) => {
-                      e.stopPropagation();
-                      if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}, ${result.year}?`)) {
-                        try {
-                          const res = await fetch(`/deleteEvent/${ev.id}`, { method: "DELETE" });
-                          if (res.ok) {
-                            alert("Event deleted.");
-                            await renderCalendar(year, month);
-                            detailsBox.style.display = "none";
-                          } else {
-                            alert("Failed to delete event.");
-                          }
-                        } catch (err) {
-                          console.error("Delete error:", err);
-                          alert("Could not connect to server.");
-                        }
-                      }
-                    });
-
-                    li.appendChild(delBtn);
-                  }
-
-                  eventList.appendChild(li);
-              });
-
-              detailsBox.style.display = "block";
-            });
+          else {
+            signInBtn.style.display = 'block';
+            accountDropdown.style.display = 'none';
+            showFormBtn.style.display = 'none';
           }
         }
-
-        row.appendChild(cell);
+        catch (err) {
+          console.error("Error with logged user", err);
+        }
       }
+      checkLoggedUser();
 
-      calendarBody.appendChild(row);
-    }
-  } catch (err) {
-    console.error("Error loading calendar:", err);
-    monthYearLabel.textContent = "Error loading calendar data.";
-  }
-}
-    document.addEventListener("click", (e) => {
-      const detailsBox = document.getElementById("event-details");
 
-      if (!e.target.closest(".event-cell") && !e.target.closest("#event-details")) {
+      // --- Calendar logic ---
+      const monthYearLabel = document.getElementById("month-year");
+      let currentUser = null;
+
+
+      const calendarBody = document.getElementById("calendar-body");
+      const prevBtn = document.getElementById("prev-month");
+      const nextBtn = document.getElementById("next-month");
+      const showFormBtn = document.getElementById("show-add-form");
+      const addForm = document.getElementById("add-event-form");
+      const formStatus = document.getElementById("form-status");
+
+      let today = new Date();
+      let currentMonth = today.getMonth();
+      let currentYear = today.getFullYear();
+
+      async function renderCalendar(year, month) {
+
+        const detailsBox = document.getElementById("event-details");
         detailsBox.style.display = "none";
+
+        try {
+          const response = await fetch(`/calendar/data/${year}/${month + 1}`);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+          const result = await response.json();
+          const eventDays = result.eventDays || [];
+          const days = result.data;
+
+          monthYearLabel.textContent = `${result.monthName} ${result.year}`;
+          calendarBody.innerHTML = "";
+
+          for (const week of days) {
+            const row = document.createElement("tr");
+
+            for (const day of week) {
+              const cell = document.createElement("td");
+
+              if (day) {
+                cell.textContent = day;
+                const eventsForDay = eventDays.filter(e => e.day === parseInt(day));
+
+                if (eventsForDay.length > 0) {
+                  cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "event-cell");
+
+                  // count of events per cell
+                  if (eventsForDay.length === 1) {
+                    cell.textContent = `${day}`;
+                  } else {
+                    cell.innerHTML = `${day} <br><small>(${eventsForDay.length} events)</small>`;
+                  }
+
+                  // Clicking the day shows details for all events
+                  cell.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const detailsBox = document.getElementById("event-details");
+                    const eventList = document.getElementById("event-list");
+                    const eventDate = document.getElementById("event-date");
+
+                    eventList.innerHTML = "";
+                    eventDate.textContent = `${result.monthName} ${day}, ${result.year}`;
+
+                    eventsForDay.forEach(ev => {
+                      const li = document.createElement("li");
+                      li.classList.add("mb-2");
+                      li.textContent = ev.title;
+
+                      if (currentUser && currentUser.role === "admin") {
+                        const delBtn = document.createElement("button");
+                        delBtn.textContent = "Delete";
+                        delBtn.classList.add("btn", "btn-sm", "btn-danger", "ml-2");
+
+                        delBtn.addEventListener("click", async (e) => {
+                          e.stopPropagation();
+                          if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}, ${result.year}?`)) {
+                            try {
+                              const res = await fetch(`/deleteEvent/${ev.id}`, { method: "DELETE" });
+                              if (res.ok) {
+                                alert("Event deleted.");
+                                await renderCalendar(year, month);
+                                detailsBox.style.display = "none";
+                              } else {
+                                alert("Failed to delete event.");
+                              }
+                            } catch (err) {
+                              console.error("Delete error:", err);
+                              alert("Could not connect to server.");
+                            }
+                          }
+                        });
+
+                        li.appendChild(delBtn);
+                      }
+
+                      eventList.appendChild(li);
+                    });
+
+                    detailsBox.style.display = "block";
+                  });
+                }
+              }
+
+              row.appendChild(cell);
+            }
+
+            calendarBody.appendChild(row);
+          }
+        } catch (err) {
+          console.error("Error loading calendar:", err);
+          monthYearLabel.textContent = "Error loading calendar data.";
+        }
       }
+      document.addEventListener("click", (e) => {
+        const detailsBox = document.getElementById("event-details");
 
-    });
+        if (!e.target.closest(".event-cell") && !e.target.closest("#event-details")) {
+          detailsBox.style.display = "none";
+        }
 
-    prevBtn.addEventListener("click", () => {
-      currentMonth--;
-      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-      renderCalendar(currentYear, currentMonth);
-    });
+      });
 
-    nextBtn.addEventListener("click", () => {
-      currentMonth++;
-      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-      renderCalendar(currentYear, currentMonth);
-    });
-
-    showFormBtn.addEventListener("click", () => {
-      addForm.style.display = "block";
-      showFormBtn.style.display = "none";
-    });
-
-    document.getElementById("cancelBtn").addEventListener("click", () => {
-      addForm.style.display = "none";
-      showFormBtn.style.display = "inline-block";
-      formStatus.textContent = "";
-    });
-
-    document.getElementById("add-event-form").addEventListener("submit", async (e) => {
-      
-      e.preventDefault();
-      
-      const titleValue = document.getElementById("eventTitle").value.trim();
-      const dateValue = document.getElementById("eventDate").value;
-      
-      if (!dateValue||!titleValue) {
-        formStatus.textContent = "Please provide both title and date.";
-        return;
-      }
-
-      try {
-        const res = await fetch("/addEvent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventDate: dateValue, title:titleValue}),
-        });
-
-        formStatus.textContent = res.ok ? "Event added." : "Could not add event.";
+      prevBtn.addEventListener("click", () => {
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
         renderCalendar(currentYear, currentMonth);
-      } catch {
-        formStatus.textContent = "Could not connect to server.";
-      }
-    });
+      });
 
-    // Initial render
-    renderCalendar(currentYear, currentMonth);
-  </script>
+      nextBtn.addEventListener("click", () => {
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        renderCalendar(currentYear, currentMonth);
+      });
+
+      showFormBtn.addEventListener("click", () => {
+        addForm.style.display = "block";
+        showFormBtn.style.display = "none";
+      });
+
+      document.getElementById("cancelBtn").addEventListener("click", () => {
+        addForm.style.display = "none";
+        showFormBtn.style.display = "inline-block";
+        formStatus.textContent = "";
+      });
+
+      document.getElementById("add-event-form").addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+
+        const titleValue = document.getElementById("eventTitle").value.trim();
+        const dateValue = document.getElementById("eventDate").value;
+
+        if (!dateValue || !titleValue) {
+          formStatus.textContent = "Please provide both title and date.";
+          return;
+        }
+
+        try {
+          const res = await fetch("/addEvent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventDate: dateValue, title: titleValue }),
+          });
+
+          formStatus.textContent = res.ok ? "Event added." : "Could not add event.";
+          renderCalendar(currentYear, currentMonth);
+        } catch {
+          formStatus.textContent = "Could not connect to server.";
+        }
+      });
+
+      // Initial render
+      renderCalendar(currentYear, currentMonth);
+    </script>
+
+    <script>
+      // For index.html, add the calendar UI only when iframe is detected
+      if (window !== window.parent) {
+        document.body.classList.add("in-iframe");
+      }
+    </script>
 </body>
+
 </html>

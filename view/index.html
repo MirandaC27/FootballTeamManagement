@@ -63,7 +63,24 @@
         </div>
     </nav>
 
+    <!-- SECTIONS (calendar, social feed, standings); 3 flexbox style -->
+    <div class="flex-container">
 
+        <!-- Standings Section (left column) -->
+        <div class="standings-col">
+        </div>
+
+        <!-- Social Feed Section (middle column) -->
+        <div class="social-feed-col">
+        </div>
+
+        <!-- Calendar Section (right column) -->
+        <div class="calendar-col">
+            <iframe src="/calendar.html" style="width:100%; height:600px; border:none; overflow:hidden;"></iframe>
+        </div>
+
+    </div>
+    
     <script>
         /**
         * Show sign in button if logged out or show account dropdown if signed in.
@@ -91,9 +108,6 @@
         }
         checkLoggedUser();
     </script>
-    
-   
-
 </body>
 
 </html>
