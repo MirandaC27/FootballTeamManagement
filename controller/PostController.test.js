@@ -12,23 +12,47 @@ beforeEach(function () {
 });
 
 /**
- * Retrieve all posts from database test.
+ * Retrieve all posts from database test when logged in.
  */
-test('Get all posts', async function () {
-    let req = {};
+test('Get all posts when logged in', async function () {
+    let req = { session: { user: { _id: "123" } } };
     let res = { json: jest.fn(), status: jest.fn(), send: jest.fn() };
 
     // Create a fake documents collection for the post model
     let posts = [
-        { _id: '1208213', owner_id: { _id: 'u1', name: 'Bob' }, type: 'image/png', path: '/uploads/a.png', caption: '' },
-        { _id: '1237213y', owner_id: { _id: 'u2', name: 'Boby' }, type: 'video/mp4', path: '/uploads/b.mp4', caption: 'asd' }
+        { _id: '1208213', owner_id: { _id: 'u1', name: 'Bob' }, type: 'image/png', path: '/uploads/a.png', caption: '', containsMinors: true },
+        { _id: '1237213y', owner_id: { _id: 'u2', name: 'Boby' }, type: 'video/mp4', path: '/uploads/b.mp4', caption: 'asd', containsMinors: false }
     ];
 
-    dao.readAll = jest.fn().mockReturnValue({ populate: jest.fn().mockResolvedValue(posts) });
+    dao.readAll.mockResolvedValue(posts);
     await controller.getAllPosts(req, res);
 
     expect(dao.readAll).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith(posts);
+    expect(res.status).not.toHaveBeenCalled();
+});
+
+/**
+ * Retrieve all posts from database test when not logged in.
+ */
+test('Get all posts without minors when not logged in', async function () {
+    let req = { session: {} };
+    let res = { json: jest.fn(), status: jest.fn(), send: jest.fn() };
+
+    // Create a fake documents collection for the post model
+    let posts = [
+        { _id: 'hasminor', owner_id: { _id: 'u1', name: 'Bob' }, type: 'image/png', path: '/uploads/a.png', caption: '', containsMinors: true },
+        { _id: 'nominor', owner_id: { _id: 'u2', name: 'Boby' }, type: 'video/mp4', path: '/uploads/b.mp4', caption: 'asd', containsMinors: false }
+    ];
+
+    dao.readAll.mockResolvedValue(posts);
+    await controller.getAllPosts(req, res);
+
+    // Only show post without minor
+    expect(dao.readAll).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith([
+        { _id: 'nominor', containsMinors: false }
+    ]);
     expect(res.status).not.toHaveBeenCalled();
 });
 
@@ -71,10 +95,10 @@ test('Upload new post without file', async function () {
  * Test the error catch block in getAllPosts function. 
  */
 test('Get all posts fails', async function () {
-    let req = {};
+    let req = { session: { user: { _id: "123" } } };
     let res = { json: jest.fn(), status: jest.fn(), send: jest.fn() };
 
-    dao.readAll = jest.fn().mockReturnValue({ populate: jest.fn().mockRejectedValue(new Error("err")) });
+    dao.readAll.mockRejectedValue(new Error("err"));
     await controller.getAllPosts(req, res);
 
     expect(res.status).toHaveBeenCalled();
@@ -99,4 +123,3 @@ test('Upload post fails', async function () {
     expect(res.status).toHaveBeenCalled();
     expect(res.send).toHaveBeenCalledWith('Error uploading file');
 });
-
