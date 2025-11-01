@@ -64,6 +64,10 @@
     </nav>
 
     <!-- banner -->
+    <div id="welcomeBanner" class="text-center" style="display:none;">
+        Welcome back, <span id="welcomeName"></span>!
+    </div>
+
     <div class="ticker">
         <span>⚽ littleLIGA — Stay updated with schedules, standings, and shared game highlights.</span>
     </div>
@@ -173,6 +177,8 @@
                 signInBtn.style.display = 'none';
                 accountDropdown.style.display = 'block';
                 postBox.style.display = 'block';
+                document.getElementById("welcomeBanner").style.display = "block";
+                document.getElementById("welcomeName").innerText = user.name;
                 allowCreatePost();
 
                 // show admin option only if user is an admin
@@ -285,7 +291,7 @@
             try {
                 await fetch("/upload", { method: "POST", body: formData });
                 statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
-                location.reload();
+                setTimeout(() => { location.reload() }, 1000);
 
             } catch (err) {
                 console.log(err);

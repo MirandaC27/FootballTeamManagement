@@ -44,14 +44,14 @@ const upload = multer({
  * @returns true if accepted or false if not
  */
 function checkFileType(file, cb) {
-  const filetypes = /jpeg|jpg|png|gif|mp4/;
+  const filetypes = /jpeg|jpg|png|gif|webp|svg|tiff|bmp|mp4|mov|avi|mkv|webm|wmv|m4v/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb('Error: accepted file types are jpeg, jpg, png, gif, mp4)');
+    cb('Error: accepted file types are jpeg, jpg, png, gif, webp, svg, tiff, bmp, mp4, mov, avi, mkv, webm, wmv, m4v');
   }
 }
 

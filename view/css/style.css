@@ -259,6 +259,15 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
+#welcomeBanner {
+    background-color: #f1f3f5; 
+    font-size: 0.9rem;
+    font-weight: 400;
+    padding: 6px 0;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0; 
+}
+
 /* css for standings table on index.html */
 .standings-header {
   background-color: #4c6ef5;
@@ -366,7 +375,7 @@ footer {
 }
 
 .ticker {
-  background: #f1f3f6;
+  background: #fafbff;
   color: #1f3458;
   padding: 12px 0;
   border-top: 1px solid #d3d8df;
