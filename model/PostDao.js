@@ -39,7 +39,7 @@ const postModel = mongoose.model('post', postSchema);
  * Read and return all post documents from the database.
  */
 async function readAll() {
-    return await postModel.find().populate('owner_id', 'name').sort({ uploadedAt: -1 });    
+    return await postModel.find().populate('owner_id', 'name username').sort({ uploadedAt: -1 });    
 }
 
 /**
