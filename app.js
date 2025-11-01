@@ -1,13 +1,14 @@
 const express = require('express');
 const morgan = require('morgan');
 const session = require('express-session');
+const multer = require('multer'); // required for file upload
 const path = require('path');
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'view')));
 
 // middleware
-app.use(morgan('dev')); 
+app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -17,6 +18,42 @@ app.use(session({
   saveUninitialized: true,
   cookie: { maxAge: 86400000 }
 }))
+
+// local storage (creates uploads folder)
+const Storage = multer.diskStorage({
+  destination: 'uploads',
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+/**
+ * Multer middleware for uploading a single image/video. 
+ */
+const upload = multer({
+  storage: Storage,
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  }
+}).single('media');
+
+/**
+ * Validate file type to ensure it's an image or video. 
+ * @param {*} file file object
+ * @param {*} cb callback function that handles file upload
+ * @returns true if accepted or false if not
+ */
+function checkFileType(file, cb) {
+  const filetypes = /jpeg|jpg|png|gif|mp4/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb('Error: accepted file types are jpeg, jpg, png, gif, mp4)');
+  }
+}
 
 function isAdmin(req, res, next) {
 
@@ -82,6 +119,15 @@ app.delete('/deleteWeek', ScheduleCont.deleteWeek);
 app.patch('/updateMatchupResult', ScheduleCont.updateMatchupResult);
 
 
+// post controller routes
+const PostCont = require("./controller/PostController");
+app.post('/upload', (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) return res.status(500).send(err);
+    PostCont.uploadPost(req, res);
+  })
+});
+
 
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);
@@ -90,5 +136,7 @@ console.log("TeamCont:", TeamCont);
 app.use(express.static('view'));
 
 console.log("ScheduleCont", ScheduleCont);
+console.log("PostCont", PostCont);
+
 // export for server.js
 module.exports = app; 
