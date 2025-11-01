@@ -309,10 +309,14 @@ footer {
 
 .feed-post {
     background: #ffffff;
-    border-radius: 12px;
+    border: 1px solid #e6e6e6;
     padding: 14px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Remove bottom gap after the last post */
+.feed-post:last-child {
+    margin-bottom: 0;
 }
 
 .feed-post .username {
@@ -336,9 +340,19 @@ footer {
 
 .post-header strong {
     font-size: 1rem;
+    font-weight: 600;
 }
 
 .post-header span {
     font-size: 0.85rem;
     color: #888;
+    color: #6b6b6b
+}
+
+.user-icon {
+  width: 35px;
+  height: 35px;
+  color: #2c2c2c;
+  min-width: 22px; 
+  margin-right: 8px;
 }
