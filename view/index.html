@@ -73,7 +73,10 @@
 
         <!-- Standings Section (left column) -->
         <div class="standings-col">
-            <h4 class="text-center standings-title">Standings</h4>
+            <h4 class="text-center mt-3 mb-1" style="font-weight:600;">
+                Standings
+            </h4>
+            <hr style="width:50%; margin:0 auto 15px auto; border-top: 2px solid #4a68f0;">
 
             <div class="standings-table-container">
                 <table class="table table-striped table-bordered">
@@ -286,6 +289,7 @@
             try { // display alert depending on backend's success
                 const response = await fetch("/upload", { method: "POST", body: formData });
                 statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
+                location.reload();
 
                 // Display the message for 3 seconds and reset all inputs
                 setTimeout(() => statusMessage.style.display = "none", 3000);
