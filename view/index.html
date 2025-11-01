@@ -106,6 +106,7 @@
                     <!-- media input -->
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
+                            <!-- file input -->
                             <label class="btn btn-outline-primary mr-2">
                                 📷 Image
                                 <input type="file" id="imageInput" accept="image/*" hidden>
@@ -116,18 +117,30 @@
                                 <input type="file" id="videoInput" accept="video/*" hidden>
                             </label>
                         </div>
-                        <label>
+
+                        <!-- checkbox -->
+                        <label style="color:red">
                             <input type="checkbox" name="containsMinor"> This post includes minors
                         </label>
+
+                        <!-- Cancel and Share button -->
                         <div class="d-flex justify-content-end align-items-center gap-2 mt-3">
                             <button id="cancel-post-btn" class="btn btn-light">Cancel</button>
-                            <button class="btn btn-primary">Share</button>
+                            <button id="share-post-btn" class="btn btn-primary">Share</button>
                         </div>
-
                     </div>
+
+                    <!-- items to send to backend (file, text, boolean for if contain minors)-->
+                    <form id="uploadForm" enctype="multipart/form-data" style="display:none">
+                        <input type="file" id="fileInput" name="media">
+                        <input type="hidden" name="caption" id="caption">
+                        <input type="hidden" name="containsMinors" id="containsMinors">
+                    </form>
+
+                    <p id="statusMessage"></p>
+                    <div id="mediaPreview" style="margin-top: 10px"></div>
                 </div>
             </div>
-
 
         </div>
 
@@ -139,6 +152,7 @@
 
     </div>
 
+    <!-- Footer -->
     <footer class="text-center p-3" style="font-size: 0.9rem; color:#aeaeae;">
         © 2025 littleLIGA Teen Soccer League
     </footer>
@@ -184,24 +198,6 @@
     </script>
 
     <script>
-        const createPostBtn = document.getElementById("createPostBtn");
-        const postForm = document.getElementById("postForm");
-        const cancelBtn = document.getElementById("cancel-post-btn");
-
-        // Show form when user clicks create post
-        createPostBtn.addEventListener("click", () => {
-            createPostBtn.style.display = "none";
-            postForm.style.display = "block";
-        });
-
-        // Hide form when user clicks cancel
-        cancelBtn.addEventListener("click", () => {
-            postForm.style.display = "none";
-            createPostBtn.style.display = "block";
-        });
-    </script>
-
-    <script>
         /**
          * Display a table of all teams from database.
          */
@@ -239,6 +235,122 @@
             return tr;
         }
         displayTeams();
+    </script>
+
+    <script>
+        // Script for buttons on the social feed form:
+        const createPostBtn = document.getElementById("createPostBtn");
+        const postForm = document.getElementById("postForm");
+        const cancelBtn = document.getElementById("cancel-post-btn");
+        const shareBtn = document.getElementById("share-post-btn");
+
+        // Show form when user clicks + Create Post
+        createPostBtn.addEventListener("click", () => {
+            createPostBtn.style.display = "none";
+            postForm.style.display = "block";
+        });
+
+        // Hide form when user clicks cancel, also clear all inputs
+        cancelBtn.addEventListener("click", () => {
+            postForm.style.display = "none";
+            createPostBtn.style.display = "block";
+            statusMessage.style.display = "none";
+
+            postText.value = "";
+            imageInput.value = "";
+            videoInput.value = "";
+            fileInput.value = "";
+            const minorsCheckbox = document.querySelector('input[name="containsMinor"]');
+            minorsCheckbox.checked = false;
+        });
+    </script>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const statusMessage = document.getElementById("statusMessage");
+        const fileInput = document.getElementById("fileInput");
+        const imageInput = document.getElementById("imageInput");
+        const videoInput = document.getElementById("videoInput");
+
+        /**
+         * Handle uploading file by alerting if was a success or failure.
+         * @param event object event listener
+         */
+        async function uploadFile(event) {
+            event.preventDefault();
+
+            // Get user text input and boolean for contain minor checkbox
+            document.getElementById("caption").value = document.getElementById("postText").value;
+            document.getElementById("containsMinors").value = document.querySelector("input[name='containsMinor']").checked;
+
+            const formData = new FormData(form);
+
+            try { // display alert depending on backend's success
+                const response = await fetch("/upload", { method: "POST", body: formData });
+                statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
+                
+                // Display the message for 3 seconds and reset all inputs
+                setTimeout(() => statusMessage.style.display = "none", 3000);
+                form.reset();
+                imageInput.value = "";
+                videoInput.value = "";
+                fileInput.value = "";
+
+            } catch (err) {
+                console.log(err);
+                statusMessage.innerHTML = `<div class="alert-fail">❌ Error uploading file</div>`;
+                setTimeout(() => statusMessage.style.display = "none", 3000);
+            }
+        }
+        form.addEventListener("submit", uploadFile);
+
+        // Check if image file was inputted for submission (make video input not required)
+        imageInput.addEventListener("change", () => {
+            if (imageInput.files.length > 0) {
+                fileInput.files = imageInput.files;
+                form.dispatchEvent(new Event("submit"));
+            }
+        });
+
+        // Check if video file was inputted for submission (make image input not required)
+        videoInput.addEventListener("change", () => {
+            if (videoInput.files.length > 0) {
+                fileInput.files = videoInput.files;
+                form.dispatchEvent(new Event("submit"));
+            }
+        });
+    </script>
+
+    <script>
+        const mediaPreview = document.getElementById("mediaPreview");
+
+        // Show image preview
+        imageInput.addEventListener("change", () => {
+            if (imageInput.files.length > 0) {
+                const file = imageInput.files[0];
+                mediaPreview.innerHTML = `
+            <img src="${URL.createObjectURL(file)}" 
+                 style="max-width: 300px; max-height: 300px; margin-top:10px; border-radius:8px; display:block;">
+        `;
+            }
+        });
+
+        // Video preview
+        videoInput.addEventListener("change", () => {
+            if (videoInput.files.length > 0) {
+                const file = videoInput.files[0];
+                mediaPreview.innerHTML = `
+            <video controls 
+                   style="width: 30%; height: 30%; margin-top:10px; border-radius:8px; display:block">
+                <source src="${URL.createObjectURL(file)}">
+            </video>`;
+            }
+        });
+
+        // Clear preview when cancel button is clicked
+        cancelBtn.addEventListener("click", () => {
+            mediaPreview.innerHTML = "";
+        });
     </script>
 </body>
 
