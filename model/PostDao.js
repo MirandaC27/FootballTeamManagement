@@ -22,10 +22,10 @@ const postSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    containsMinor: {
+    containsMinors: {
         type: Boolean,
         default: false
-    },
+    }
     /*
     comments: [{
         type: mongoose.Schema.Types.ObjectId,

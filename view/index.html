@@ -120,7 +120,7 @@
 
                         <!-- checkbox -->
                         <label style="color:red">
-                            <input type="checkbox" name="containsMinor"> This post includes minors
+                            <input type="checkbox" id="containsMinorsCheckbox"> This post includes minors
                         </label>
 
                         <!-- Cancel and Share button -->
@@ -260,9 +260,10 @@
             imageInput.value = "";
             videoInput.value = "";
             fileInput.value = "";
-            const minorsCheckbox = document.querySelector('input[name="containsMinor"]');
-            minorsCheckbox.checked = false;
+            document.getElementById("containsMinorsCheckbox").checked = false;
+            mediaPreview.innerHTML = "";
         });
+
     </script>
 
     <script>
@@ -279,16 +280,12 @@
         async function uploadFile(event) {
             event.preventDefault();
 
-            // Get user text input and boolean for contain minor checkbox
-            document.getElementById("caption").value = document.getElementById("postText").value;
-            document.getElementById("containsMinors").value = document.querySelector("input[name='containsMinor']").checked;
-
             const formData = new FormData(form);
 
             try { // display alert depending on backend's success
                 const response = await fetch("/upload", { method: "POST", body: formData });
                 statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
-                
+
                 // Display the message for 3 seconds and reset all inputs
                 setTimeout(() => statusMessage.style.display = "none", 3000);
                 form.reset();
@@ -302,29 +299,54 @@
                 setTimeout(() => statusMessage.style.display = "none", 3000);
             }
         }
+    </script>
+
+    <script>
+        // Script for the buttons (image, video, share) for Create Post form:
         form.addEventListener("submit", uploadFile);
 
-        // Check if image file was inputted for submission (make video input not required)
+        // Image button
         imageInput.addEventListener("change", () => {
             if (imageInput.files.length > 0) {
                 fileInput.files = imageInput.files;
-                form.dispatchEvent(new Event("submit"));
+
+                document.getElementById("caption").value = document.getElementById("postText").value;
+                document.getElementById("containsMinors").value =
+                    document.getElementById("containsMinorsCheckbox").checked ? "true" : "false";
             }
         });
 
-        // Check if video file was inputted for submission (make image input not required)
+        // Video button
         videoInput.addEventListener("change", () => {
             if (videoInput.files.length > 0) {
                 fileInput.files = videoInput.files;
-                form.dispatchEvent(new Event("submit"));
+
+                document.getElementById("caption").value = document.getElementById("postText").value;
+                document.getElementById("containsMinors").value =
+                    document.getElementById("containsMinorsCheckbox").checked ? "true" : "false";
             }
+        });
+
+        // Submit button
+        shareBtn.addEventListener("click", () => {
+            // all inputs required for database (text, containsMinor boolean)
+            document.getElementById("caption").value = document.getElementById("postText").value;
+            document.getElementById("containsMinors").value =
+                document.getElementById("containsMinorsCheckbox").checked ? "true" : "false";
+
+            // Require a file before sharing
+            if (!fileInput.files.length) {
+                window.alert('Please upload an image or video before sharing this post.');
+                return;
+            }
+            form.dispatchEvent(new Event("submit"));
         });
     </script>
 
     <script>
         const mediaPreview = document.getElementById("mediaPreview");
 
-        // Show image preview
+        // Image preview
         imageInput.addEventListener("change", () => {
             if (imageInput.files.length > 0) {
                 const file = imageInput.files[0];

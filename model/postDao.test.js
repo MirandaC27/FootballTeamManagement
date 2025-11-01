@@ -32,7 +32,7 @@ test('Create new post', async function () {
         type: "image/jpeg",
         path: "/uploads/testimage.jpg",
         caption: "abc",
-        containsMinor: true
+        containsMinors: true
     };
     let created = await dao.create(newData);
     let found = await dao.read(created._id);
@@ -49,7 +49,7 @@ test('Delete post', async function () {
         type: "image/jpeg",
         path: "/uploads/testimage.jpg",
         caption: "abc",
-        containsMinor: true
+        containsMinors: true
     };
     let created = await dao.create(newData);
     let deleted = await dao.del(created._id);
@@ -67,21 +67,21 @@ test('Read All', async function () {
         type: "image/jpeg",
         path: "/uploads/testimage.jpg",
         caption: "abc",
-        containsMinor: true
+        containsMinors: true
     };
     let newData2 = {
         owner_id: "68f321cef24c117cb0cc4a11",
         type: "image/png",
         path: "/uploads/testimage1.png",
         caption: "abc",
-        containsMinor: false
+        containsMinors: false
     };
     let newData3 = {
         owner_id: "68f321cef24d117cb0cc4a11",
         type: "video/mp4",
         path: "/uploads/testi2.mp4",
         caption: "abc",
-        containsMinor: true
+        containsMinors: true
     };
     await dao.create(newData1);
     await dao.create(newData2);
