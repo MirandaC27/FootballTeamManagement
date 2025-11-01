@@ -214,15 +214,21 @@ body {
   display: flex;
   padding: 20px;
   gap: 20px;
+  justify-content: space-between;
 }
 
-.standings-col, .calendar-col {
-  flex: 1;
+.standings-col {
+  flex: 0.9;
 }
 
 .social-feed-col {
-  flex: 2;
+  flex: 2.2;
 }
+
+.calendar-col {
+  flex: 1.1;
+}
+
 
 .post-box {
   background: white;
@@ -238,4 +244,65 @@ body {
 .right-button .btn {
   padding-left: 25px;
   padding-right: 25px;
+}
+
+.gap-2 {
+  gap: 15px;
+}
+
+.banner {
+  background: #e9eaeb;
+  color: #333;
+  padding: 8px 14px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* css for standings table on index.html */
+.standings-header {
+  background-color: #4c6ef5;
+  color: white;
+}
+
+.standings-col .container {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+}
+
+.standings-col .table {
+  width: 85%;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.standings-col {
+  padding-top: 0;
+}
+
+.standings-title {
+  margin-top: 0;
+  font-size: medium;
+  margin-bottom: 0.5rem;
+}
+
+.standings-table-container {
+  margin-top: 0;
+  width: 90%;
+}
+
+.standings-table-container table {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.standings-col h4 {
+  margin-bottom: 8px;
+}
+
+#footer {
+  background: #1e40af;
+  border-top: 2px solid #15327a;
+  padding-top: 60px;
 }
