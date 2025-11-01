@@ -127,13 +127,13 @@ app.post('/upload', (req, res) => {
     PostCont.uploadPost(req, res);
   })
 });
-
+app.get('/getAllPosts', PostCont.getAllPosts);
 
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);
 console.log("TeamCont:", TeamCont);
 
-app.use(express.static('view'));
+app.use('/uploads', express.static('uploads'));
 
 console.log("ScheduleCont", ScheduleCont);
 console.log("PostCont", PostCont);

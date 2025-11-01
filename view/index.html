@@ -141,7 +141,8 @@
                     <div id="mediaPreview" style="margin-top: 10px"></div>
                 </div>
             </div>
-
+            <!-- display all posts -->
+            <div id="feed" class="mt-4"></div>
         </div>
 
         <!-- Calendar Section (right column) -->
@@ -374,6 +375,53 @@
             mediaPreview.innerHTML = "";
         });
     </script>
+
+    <script>
+        /**
+         * Load all posts on feed.
+         */
+        async function loadPosts() {
+            const feed = document.getElementById("feed");
+            feed.innerHTML = "";
+
+            try {
+                let response = await fetch("/getAllPosts");
+                let posts = await response.json();
+
+                for (let post of posts) {
+                    const postCard = document.createElement("div");
+                    postCard.className = "feed-post";
+
+                    let media = "";
+                    if (post.type.startsWith("image")) {
+                        media = `<img src="${post.path}">`;
+                    } else if (post.type.startsWith("video")) {
+                        media = `<video controls><source src="${post.path}"></video>`;
+                    }
+
+                    postCard.innerHTML = `
+    <div class="post-header d-flex justify-content-between align-items-center mb-2">
+        <strong>${post.owner_id?.name}</strong>
+        <span style="color: gray; font-size: 0.85rem;">
+            ${new Date(post.uploadedAt).toLocaleString()}
+        </span>
+    </div>
+    ${media}
+    <p class="mt-2">${post.caption}</p>
+`;
+
+
+
+                    feed.appendChild(postCard);
+                }
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        loadPosts();
+    </script>
+
 </body>
 
 </html>

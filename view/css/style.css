@@ -306,3 +306,39 @@ footer {
   border-top: 2px solid #15327a;
   padding-top: 60px;
 }
+
+.feed-post {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.feed-post .username {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.feed-post .caption {
+    margin-top: 10px;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+
+.feed-post img,
+.feed-post video {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.post-header strong {
+    font-size: 1rem;
+}
+
+.post-header span {
+    font-size: 0.85rem;
+    color: #888;
+}

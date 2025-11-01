@@ -37,7 +37,12 @@ const uploadPost = async (req, res) => {
  */
 const getAllPosts = async (req, res) => {
     try {
-        const posts = await dao.readAll().populate('owner_id', 'name');
+        let posts = await dao.readAll();
+
+        if (!req.session.user) {
+            posts = posts.filter(post => !post.containsMinors);
+        }
+        
         res.json(posts);
     } catch (err) {
         res.status(500).send('Error getting posts');
