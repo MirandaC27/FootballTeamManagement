@@ -309,51 +309,66 @@ footer {
 }
 
 .feed-post {
-    background: #ffffff;
-    border: 1px solid #e6e6e6;
-    padding: 14px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 /* Remove bottom gap after the last post */
 .feed-post:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .feed-post .username {
-    font-weight: 600;
-    margin-bottom: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .feed-post .caption {
-    margin-top: 10px;
-    font-size: 0.95rem;
-    color: #333;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #333;
 }
 
 
 .feed-post img,
 .feed-post video {
-    width: 100%;
-    border-radius: 8px;
-    margin-top: 8px;
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 8px;
 }
 
 .post-header strong {
-    font-size: 1rem;
-    font-weight: 600;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .post-header span {
-    font-size: 0.85rem;
-    color: #888;
-    color: #6b6b6b
+  font-size: 0.85rem;
+  color: #888;
+  color: #6b6b6b
 }
 
 .user-icon {
   width: 35px;
   height: 35px;
   color: #2c2c2c;
-  min-width: 22px; 
+  min-width: 22px;
   margin-right: 8px;
+}
+
+.ticker {
+  background: #f1f3f6;
+  color: #1f3458;
+  padding: 12px 0;
+  border-top: 1px solid #d3d8df;
+  text-align: center;     
+  font-weight: 500;
+  white-space: nowrap;     
+}
+
+.ticker span {
+  display: inline-block;
+  margin: 0 auto;
 }
