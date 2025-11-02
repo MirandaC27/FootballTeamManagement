@@ -39,7 +39,7 @@ const postModel = mongoose.model('post', postSchema);
  * Read and return all post documents from the database.
  */
 async function readAll() {
-    return await postModel.find().populate('owner_id', 'name username').sort({ uploadedAt: -1 });    
+    return await postModel.find().populate('owner_id', 'name username').sort({ uploadedAt: -1 });
 }
 
 /**
@@ -78,11 +78,22 @@ async function deleteAll() {
     await postModel.deleteMany();
 }
 
+/**
+ * Update containsMinors boolean.
+ * @param {*} id post document id
+ * @param {*} containsMinors post containsMinor (boolean)
+ * @returns update
+ */
+async function updateContainsMinors(id, containsMinors) {
+    return await postModel.updateOne({ _id: id }, { $set: { containsMinors: containsMinors } });
+}
+
 module.exports = {
     postModel,
     readAll,
     read,
     create,
     del,
-    deleteAll
+    deleteAll,
+    updateContainsMinors
 };

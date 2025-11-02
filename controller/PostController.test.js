@@ -123,3 +123,37 @@ test('Upload post fails', async function () {
     expect(res.status).toHaveBeenCalled();
     expect(res.send).toHaveBeenCalledWith('Error uploading file');
 });
+
+/**
+ * Update containsMinors successfully test.
+ */
+test('Update containsMinors successfully', async function () {
+    let req = {
+        params: { id: 'a' },
+        body: { containsMinors: false }
+    };
+    let res = { send: jest.fn(), status: jest.fn() };
+
+    dao.updateContainsMinors.mockResolvedValue({});
+    await controller.updateContainsMinors(req, res);
+
+    expect(dao.updateContainsMinors).toHaveBeenCalledWith('a', false);
+    expect(res.status).not.toHaveBeenCalled();
+});
+
+/**
+ * Update containsMinors fails test.
+ */
+test('Update containsMinors fails', async function () {
+    let req = {
+        params: { id: 'a' },
+        body: { containsMinors: false }
+    };
+    let res = { send: jest.fn(), status: jest.fn() };
+
+    dao.updateContainsMinors.mockRejectedValue(new Error('err'));
+    await controller.updateContainsMinors(req, res);
+
+    expect(res.status).toHaveBeenCalled();
+    expect(res.send).toHaveBeenCalledWith('Error updating containsMinors');
+});

@@ -322,7 +322,8 @@ footer {
   border: 1px solid #e6e6e6;
   padding: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  padding-bottom: 40px;
+  padding-bottom: 50px;
+  position: relative;
 }
 
 .feed-post:last-child {
@@ -387,4 +388,28 @@ footer {
 .ticker span {
   display: inline-block;
   margin: 0 auto;
+}
+
+.toggle-minors {
+    cursor: pointer;
+}
+
+.admin-minor-toggle-bottom {
+    position: absolute;
+    bottom: 20px;
+    right: 12px;
+    font-size: 0.75rem;
+    color: #b90000;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+}
+
+.admin-minor-toggle-bottom input[type="checkbox"] {
+    transform: scale(0.8);
+    margin-right: 4px;
+}
+
+.admin-minor-toggle-bottom:hover {
+    opacity: 1;
 }

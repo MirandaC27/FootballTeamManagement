@@ -142,6 +142,7 @@ app.post('/upload', (req, res) => {
   })
 });
 app.get('/getAllPosts', PostCont.getAllPosts);
+app.post('/updateContainsMinors/:id', PostCont.updateContainsMinors);
 
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);

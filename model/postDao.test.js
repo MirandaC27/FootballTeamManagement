@@ -90,3 +90,21 @@ test('Read All', async function () {
     expect(lstPosts.length).toBe(3);
     expect(lstPosts[0].owner_id).toBe('68f321cef24b117cb0cc4a11');
 });
+
+/**
+ * Update containsMinors test.
+ */
+test('Update containsMinors', async function () {
+    let newData = {
+        owner_id: "68f321cef24b117cb0cc4a11",
+        type: "image/jpeg",
+        path: "/uploads/testimage.jpg",
+        caption: "..;da",
+        containsMinors: false
+    };
+    let created = await dao.create(newData);
+    await dao.updateContainsMinors(created._id, true);
+    let found = await dao.read(created._id);
+    expect(found.containsMinors).toBe(true);
+});
+

@@ -126,7 +126,7 @@
 
                         <!-- checkbox to indicate if post have minors (NFR) -->
                         <label style="color:red">
-                            <input type="checkbox" id="containsMinorsCheckbox"> This post includes minors
+                            <input type="checkbox" id="containsMinorsCheckbox"> This post contains minors
                         </label>
 
                         <!-- Cancel and Share button -->
@@ -292,7 +292,7 @@
             try {
                 await fetch("/upload", { method: "POST", body: formData });
                 statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
-                setTimeout(() => { location.reload() }, 1000);
+                setTimeout(() => { location.reload() }, 1500);
 
             } catch (err) {
                 console.log(err);
@@ -336,7 +336,7 @@
     <script>
         const mediaPreview = document.getElementById("mediaPreview");
 
-        // Image preview (use DOM to display interface)
+        // Image preview
         imageInput.addEventListener("change", () => {
             if (imageInput.files.length > 0) {
                 const file = imageInput.files[0];
@@ -346,7 +346,7 @@
             }
         });
 
-        // Video preview (use DOM to display interface)
+        // Video preview
         videoInput.addEventListener("change", () => {
             if (videoInput.files.length > 0) {
                 const file = videoInput.files[0];
@@ -368,6 +368,8 @@
          * Load all posts on feed.
          */
         async function loadPosts() {
+            let userResponse = await fetch('/loggedUser');
+            let user = await userResponse.json();
             const feed = document.getElementById("feed");
             feed.innerHTML = "";
 
@@ -375,56 +377,104 @@
                 let response = await fetch("/getAllPosts");
                 let posts = await response.json();
 
-                // Create HTML element for each post
+                // Create HTML elements for each post
                 for (let post of posts) {
                     const postCard = document.createElement("div");
                     postCard.className = "feed-post";
-
-                    // Create HTML to show either image or video
-                    let media = "";
-                    if (post.type.startsWith("image")) {
-                        media = `<img src="${post.path}">`;
-                    } else if (post.type.startsWith("video")) {
-                        media = `<video controls><source src="${post.path}"></video>`;
-                    }
-
-                    // Create each post card/section
-                    postCard.innerHTML = `
-                        <div class="post-header d-flex justify-content-between align-items-center mb-2">
-                            
-                            <!-- Post card's header (first line, top left) -->
-                            <div class="d-flex align-items-center">
-                                <!-- Emoji to represent user profile icon -->
-                                <svg class="user-icon" viewBox="0 0 24 24" fill="none">
-                                    <rect x="3" y="3" width="18" height="18" rx="4" fill="#556B8A"/>
-                                    <circle cx="12" cy="10" r="3" fill="#FFFFFF"/>
-                                    <path d="M7 17c0-2.5 2-4 5-4s5 1.5 5 4" fill="#FFFFFF"/>
-                                </svg>
-
-                                <!-- Show post owner's name and username -->
-                                <div class="ms-2 d-flex align-items-center">
-                                    <strong>${post.owner_id?.name}</strong>
-                                    <span style="color: gray; font-size: 0.9rem; margin-left: 6px;">
-                                        @${post.owner_id?.username}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            <!-- Show post uploaded date and time at top right in header -->
-                            <span style="color: gray; font-size: 0.85rem;">
-                                ${new Date(post.uploadedAt).toLocaleString()}
-                            </span>
-                        </div>
-                        
-                        <!-- Caption text that is shown above the image/video (below header) -->
-                        <p class="mt-2">${post.caption}</p>
-                        ${media}`;
+                    postCard.innerHTML = createPostCard(post, user);
                     feed.appendChild(postCard);
                 }
+                attachAdminMinorToggleHandler();
 
             } catch (err) {
                 console.error(err);
             }
+        }
+
+        /**
+         * Create a post card/section.
+         * @param post object
+         * @param user object
+         * @returns the div element to create the post card/section by DOM
+         */
+        function createPostCard(post, user) {
+            // Create HTML to show either image or video
+            let media = "";
+            if (post.type.startsWith("image")) {
+                media = `<img src="${post.path}">`;
+            } else if (post.type.startsWith("video")) {
+                media = `<video controls><source src="${post.path}"></video>`;
+            }
+            let adminMinorToggle = createAdminMinorToggle(post, user);
+
+            return `
+            <div class="post-header d-flex justify-content-between align-items-center mb-2">
+                <!-- Post card's header (first line, top left) -->
+                <div class="d-flex align-items-center">
+                    <!-- Emoji to represent user profile icon -->
+                    <svg class="user-icon" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="3" width="18" height="18" rx="4" fill="#556B8A"/>
+                        <circle cx="12" cy="10" r="3" fill="#FFFFFF"/>
+                        <path d="M7 17c0-2.5 2-4 5-4s5 1.5 5 4" fill="#FFFFFF"/>
+                    </svg>
+
+                    <!-- Show post owner's name and username -->
+                        <div class="ms-2 d-flex align-items-center">
+                            <strong>${post.owner_id?.name}</strong>
+                            <span style="color: gray; font-size: 0.9rem; margin-left: 6px;">
+                                @${post.owner_id?.username}
+                            </span>
+                        </div>
+                </div>
+                            
+                <!-- Show post uploaded date and time at top right in header -->
+                <span style="color: gray; font-size: 0.85rem;">
+                    ${new Date(post.uploadedAt).toLocaleString()}
+                </span>
+            </div>
+                        
+            <!-- Caption text that is shown above the image/video (below header) -->
+            <p class="mt-2">${post.caption}</p>
+            ${media}
+            ${adminMinorToggle ?? ""}`;
+        }
+
+        /**
+         * Create the contains minors checkbox in admin's view of landing page so that they can
+         * toggle if post has minor or not.
+         * @param post object
+         * @param user object
+         * @returns the div element to create the checkbox for contains minors toggle
+         */
+        function createAdminMinorToggle(post, user) {
+            if (user && user.role === "admin") {
+                return `
+                <div class="admin-minor-toggle-bottom">
+                    <label>
+                        <input type="checkbox" class="toggle-minors" data-post-id="${post._id}"
+                        ${post.containsMinors ? "checked" : ""}>Contains minors?
+                    </label>
+                </div>`;
+            }
+        }
+
+        /**
+         * Connect the checkbox to backend so that the toggle can update containsMinors boolean.
+         */
+        function attachAdminMinorToggleHandler() {
+            document.querySelectorAll(".toggle-minors").forEach(box => {
+                box.addEventListener("change", async (event) => {
+                    let postId = event.target.getAttribute("data-post-id");
+                    let value = event.target.checked;
+
+                    // Update the new value for containsMinors in dao
+                    await fetch(`/updateContainsMinors/${postId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ containsMinors: value })
+                    });
+                });
+            });
         }
         loadPosts();
     </script>

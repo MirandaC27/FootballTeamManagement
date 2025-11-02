@@ -49,7 +49,25 @@ const getAllPosts = async (req, res) => {
     }
 };
 
+/**
+ * Update containsMinors boolean for a post, admin only.
+ * @param {*} req request object
+ * @param {*} res response object
+ */
+const updateContainsMinors = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const containsMinors = req.body.containsMinors;
+        await dao.updateContainsMinors(postId, containsMinors);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('Error updating containsMinors');
+    }
+};
+
 module.exports = {
     uploadPost,
-    getAllPosts
+    getAllPosts,
+    updateContainsMinors
 };
