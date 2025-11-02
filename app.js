@@ -84,6 +84,20 @@ app.get('/getAllMinors', MinorCont.getAllMinors);
 const TeamCont = require('./controller/TeamController');
 app.get('/getAllTeams', TeamCont.getAllTeams);
 
+//match routes
+const MatchCont = require('./controller/MatchController');
+
+app.get('/matches', (req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'matches.html'));
+});
+
+app.get('/getAllMatches', MatchCont.getAllMatches);
+app.get('/getMatchDetails/:id', MatchCont.getMatchDetails);
+
+app.post('/createMatch', MatchCont.createNewMatch);
+app.delete('/deleteMatch/:id', MatchCont.deleteMatch);
+app.put('/updateMatch/:id', MatchCont.updateMatch);
+
 //calendar routes
 const EventCont = require('./controller/EventController');
 console.log("EventCont loaded:", EventCont);

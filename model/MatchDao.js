@@ -5,29 +5,31 @@
 
 const mongoose = require('mongoose');
 
-const matchSTATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
+const MATCH_STATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
 
 //match view schema
 const matchSchema = new mongoose.Schema({
     homeTeam: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'teamSchema',
+        //type: mongoose.Schema.Types.ObjectId,
+        //ref: 'team',
+        type: String,
         required: true
     },
     awayTeam:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'teamSchema',
+        //type: mongoose.Schema.Types.ObjectId,
+        //ref: 'team',
+        type: String,
         required: true
     },
     homeScore:{
         type: Number,
-        default: 0
+        default: -1
     },
     awayScore:{
         type: Number,
-        default: 0
+        default: -1
     },
-    matchDatetime:{
+    matchDate:{
         type: Date,
         required: true
     },
@@ -70,11 +72,11 @@ async function readById(id){
 }
 
 /**
- * find an existing match in the database.
+ * update an existing match in the database.
  * @param {*} id data for new match
  */
-async function updatebyId(id, newData){
-  return await matchModel.updatebyId(id, newData, {new:true});
+async function updateById(id, newData){
+  return await matchModel.findByIdAndUpdate(id, newData, {new:true});
 }
 
 /**
@@ -87,6 +89,7 @@ async function remove(id){
 
 /**
  * delete all existing matches in the database.
+ * @param {*} id data for new match
  */
 async function removeAll(){
   await matchModel.deleteMany();
@@ -97,7 +100,7 @@ module.exports = {
   matchModel,
   create,
   readAll,
-  updatebyId,
+  updateById,
   readById,
   remove,
   removeAll
