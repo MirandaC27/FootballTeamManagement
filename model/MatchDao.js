@@ -10,13 +10,15 @@ const MATCH_STATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancell
 //match view schema
 const matchSchema = new mongoose.Schema({
     homeTeam: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'team',
+        //type: mongoose.Schema.Types.ObjectId,
+        //ref: 'team',
+        type: String,
         required: true
     },
     awayTeam:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'team',
+        //type: mongoose.Schema.Types.ObjectId,
+        //ref: 'team',
+        type: String,
         required: true
     },
     homeScore:{
