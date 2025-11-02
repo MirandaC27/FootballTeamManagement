@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const session = require('express-session');
-const multer = require('multer'); // required for file upload
+const multer = require('multer');
 const path = require('path');
 const app = express();
 
