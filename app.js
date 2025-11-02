@@ -55,8 +55,11 @@ app.get('/matches', (req, res) => {
 });
 
 app.get('/getAllMatches', MatchCont.getAllMatches);
+app.get('/getMatchDetails/:id', MatchCont.getMatchDetails);
+
 app.post('/createMatch', MatchCont.createNewMatch);
 app.delete('/deleteMatch/:id', MatchCont.deleteMatch);
+app.put('/updateMatch/:id', MatchCont.updateMatch);
 
 //calendar routes
 const EventCont = require('./controller/EventController');

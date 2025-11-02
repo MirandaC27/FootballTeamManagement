@@ -68,76 +68,135 @@
           <th>Date</th>
           <th>Location</th>
           <th>Status</th>
-          <th>Delete</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="match-list"></tbody>
     </table>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', loadMatches);
+ <script>
+  document.addEventListener('DOMContentLoaded', loadMatches);
 
-    async function loadMatches() {
-      const res = await fetch('/getAllMatches');
-      const matches = await res.json();
-      const list = document.getElementById('match-list');
-      list.innerHTML = '';
+  let editMode = false;
+  let editMatchId = null;
 
-      matches.forEach(m => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${m.homeTeam}</td>
-          <td>${m.awayTeam}</td>
-          <td>${m.homeScore >= 0 && m.awayScore >= 0 ? `${m.homeScore} - ${m.awayScore}` : 'N/A'}</td>
-          <td>${new Date(m.matchDate).toLocaleDateString()}</td>
-          <td>${m.matchLocation}</td>
-          <td>${m.matchStatus}</td>
-          <td><button class="btn btn-danger btn-sm" onclick="deleteMatch('${m._id}')">X</button></td>
-        `;
-        list.appendChild(row);
-      });
-    }
+  async function loadMatches() {
+    const res = await fetch('/getAllMatches');
+    const matches = await res.json();
+    const list = document.getElementById('match-list');
+    list.innerHTML = '';
 
-    async function deleteMatch(id) {
-      await fetch('/deleteMatch/' + id, { method: 'DELETE' });
-      loadMatches();
-    }
-
-    const addForm = document.getElementById('add-match-form');
-    const showAddForm = document.getElementById('show-add-form');
-    const formStatus = document.getElementById('form-status');
-
-    showAddForm.addEventListener('click', () => {
-      addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+    matches.forEach(m => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${m.homeTeam}</td>
+        <td>${m.awayTeam}</td>
+        <td>${m.homeScore >= 0 && m.awayScore >= 0 ? `${m.homeScore} - ${m.awayScore}` : 'N/A'}</td>
+        <td>${new Date(m.matchDate).toLocaleDateString()}</td>
+        <td>${m.matchLocation}</td>
+        <td>${m.matchStatus}</td>
+        <td>
+          <button class="btn btn-info btn-sm mr-1" onclick="showEditForm('${m._id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteMatch('${m._id}')">Delete</button>
+        </td>
+      `;
+      list.appendChild(row);
     });
+  }
 
-    addForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const match = {
-        homeTeam: document.getElementById('homeTeam').value,
-        awayTeam: document.getElementById('awayTeam').value,
-        homeScore: parseInt(document.getElementById('homeScore').value),
-        awayScore: parseInt(document.getElementById('awayScore').value),
-        matchDate: document.getElementById('matchDate').value,
-        matchLocation: document.getElementById('matchLocation').value,
-        matchStatus: document.getElementById('matchStatus').value
-      };
+  async function deleteMatch(id) {
+    await fetch('/deleteMatch/' + id, { method: 'DELETE' });
+    loadMatches();
+  }
 
-      const res = await fetch('/createMatch', {
+  const addForm = document.getElementById('add-match-form');
+  const showAddForm = document.getElementById('show-add-form');
+  const formStatus = document.getElementById('form-status');
+
+  showAddForm.addEventListener('click', () => {
+    addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+    resetFormMode();
+  });
+
+  addForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const match = {
+      homeTeam: document.getElementById('homeTeam').value,
+      awayTeam: document.getElementById('awayTeam').value,
+      homeScore: parseInt(document.getElementById('homeScore').value),
+      awayScore: parseInt(document.getElementById('awayScore').value),
+      matchDate: document.getElementById('matchDate').value,
+      matchLocation: document.getElementById('matchLocation').value,
+      matchStatus: document.getElementById('matchStatus').value
+    };
+
+    let res;
+    if (editMode && editMatchId) {
+      // Update existing match
+      res = await fetch('/updateMatch/' + editMatchId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(match)
+      });
+    } else {
+      // Create new match
+      res = await fetch('/createMatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(match)
       });
+    }
 
-      if (res.ok) {
-        formStatus.innerText = 'Match added successfully!';
-        addForm.reset();
-        loadMatches();
-      } else {
-        formStatus.innerText = 'Failed to add match.';
-      }
-    });
-  </script>
+    if (res.ok) {
+      formStatus.innerText = editMode ? 'Match updated successfully!' : 'Match added successfully!';
+      addForm.reset();
+      resetFormMode();
+      loadMatches();
+    } else {
+      formStatus.innerText = editMode ? 'Failed to update match.' : 'Failed to add match.';
+    }
+  });
+
+  async function showEditForm(id) {
+    const res = await fetch(`/getMatchDetails/${id}`);
+    if (!res.ok) {
+      alert('Failed to load match details');
+      return;
+    }
+
+    const match = await res.json();
+
+    // Fill form fields with match data
+    document.getElementById('homeTeam').value = match.homeTeam;
+    document.getElementById('awayTeam').value = match.awayTeam;
+    document.getElementById('homeScore').value = match.homeScore;
+    document.getElementById('awayScore').value = match.awayScore;
+    document.getElementById('matchDate').value = match.matchDate.split('T')[0];
+    document.getElementById('matchLocation').value = match.matchLocation;
+    document.getElementById('matchStatus').value = match.matchStatus;
+
+    // Show the form in edit mode
+    addForm.style.display = 'block';
+    const submitButton = addForm.querySelector('button[type="submit"]');
+    submitButton.textContent = 'Update Match';
+    submitButton.classList.remove('btn-primary');
+    submitButton.classList.add('btn-warning');
+
+    editMode = true;
+    editMatchId = id;
+  }
+
+  function resetFormMode() {
+    const submitButton = addForm.querySelector('button[type="submit"]');
+    submitButton.textContent = 'Add Match';
+    submitButton.classList.remove('btn-warning');
+    submitButton.classList.add('btn-primary');
+    editMode = false;
+    editMatchId = null;
+  }
+</script>
+
 </body>
 </html>

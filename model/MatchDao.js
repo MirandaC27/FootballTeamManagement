@@ -72,10 +72,10 @@ async function readById(id){
 }
 
 /**
- * find an existing match in the database.
+ * update an existing match in the database.
  * @param {*} id data for new match
  */
-async function updatebyId(id, newData){
+async function updateById(id, newData){
   return await matchModel.findByIdAndUpdate(id, newData, {new:true});
 }
 
@@ -89,6 +89,7 @@ async function remove(id){
 
 /**
  * delete all existing matches in the database.
+ * @param {*} id data for new match
  */
 async function removeAll(){
   await matchModel.deleteMany();
@@ -99,7 +100,7 @@ module.exports = {
   matchModel,
   create,
   readAll,
-  updatebyId,
+  updateById,
   readById,
   remove,
   removeAll
