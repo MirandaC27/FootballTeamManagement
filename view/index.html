@@ -91,7 +91,7 @@
                             <th scope="col">Team</th>
                             <th scope="col">W</th>
                             <th scope="col">L</th>
-                            <th scope="col">Points</th>
+                            <th scope="col">Pts</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody">
@@ -207,13 +207,14 @@
 
     <script>
         /**
-         * Display a table of all teams from database (for standings table).
+         * Display a table (highest to lowest points) of all teams (for standings table).
          */
         async function displayTeams() {
             let response = await fetch('/getAllTeams');
             let teams = await response.json();
             let tbody = document.getElementById('userTableBody');
 
+            teams.sort((a, b) => (b.wins * 3) - (a.wins * 3));
             for (let team of teams) {
                 const tr = createTeamRow(team);
                 tbody.appendChild(tr);
