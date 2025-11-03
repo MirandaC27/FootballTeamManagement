@@ -354,6 +354,7 @@ footer {
   object-fit: contain;
   background: #f2f4f7;
   border-radius: 8px;
+  margin-bottom: 15px;
 }
 
 .post-header strong {
@@ -394,19 +395,14 @@ footer {
     cursor: pointer;
 }
 
-.admin-minor-toggle-bottom {
-    position: absolute;
-    bottom: 20px;
-    right: 12px;
-    font-size: 0.75rem;
-    color: #b90000;
-    opacity: 0.85;
-    display: flex;
-    align-items: center;
+.admin-minor-toggle-bottom label {
+    font-size: 0.8rem;
+    color: rgb(203, 4, 4);
+    cursor: pointer;
+    display: block;
+    margin-top: 4px;
 }
-
-.admin-minor-toggle-bottom input[type="checkbox"] {
-    transform: scale(0.8);
+.admin-minor-toggle-bottom input {
     margin-right: 4px;
 }
 

@@ -430,13 +430,13 @@
                 <!-- Show post uploaded date and time at top right in header -->
                 <span style="color: gray; font-size: 0.85rem;">
                     ${new Date(post.uploadedAt).toLocaleString()}
+                    ${adminMinorToggle ?? ""}
                 </span>
             </div>
                         
             <!-- Caption text that is shown above the image/video (below header) -->
-            <p class="mt-2">${post.caption}</p>
             ${media}
-            ${adminMinorToggle ?? ""}`;
+            <p class="mt-2">${post.caption}</p>`;
         }
 
         /**
