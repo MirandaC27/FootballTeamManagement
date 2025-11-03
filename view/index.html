@@ -292,7 +292,7 @@
             try {
                 await fetch("/upload", { method: "POST", body: formData });
                 statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
-                setTimeout(() => { location.reload() }, 1500);
+                setTimeout(() => { location.reload() }, 2000);
 
             } catch (err) {
                 console.log(err);
