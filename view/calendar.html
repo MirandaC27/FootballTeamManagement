@@ -209,6 +209,17 @@
       async function renderCalendar(year, month) {
 
         const detailsBox = document.getElementById("event-details");
+
+        // Restore the default details box HTML (so event-list and event-date exist)
+        detailsBox.innerHTML = `
+          <h4>Event Details</h4>
+          <p><strong>Date:</strong> <span id="event-date"></span></p>
+          <div id="event-list-container">
+            <strong>Events:</strong>
+            <ul id="event-list" class="pl-3 mb-0"></ul>
+          </div>
+        `;
+        // hide details until user clicks a cell
         detailsBox.style.display = "none";
 
         try {
@@ -262,6 +273,15 @@
                         delBtn.textContent = "Delete";
                         delBtn.classList.add("btn", "btn-sm", "btn-danger", "ml-2");
 
+                        const editBtn = document.createElement("button");
+                        editBtn.textContent = "Edit";
+                        editBtn.classList.add("btn", "btn-sm", "btn-warning", "ml-2");
+
+                        editBtn.addEventListener("click", (e) => {
+                          e.stopPropagation();
+                          openEditForm(ev, `${result.year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+                        });
+
                         delBtn.addEventListener("click", async (e) => {
                           e.stopPropagation();
                           if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}, ${result.year}?`)) {
@@ -281,6 +301,7 @@
                           }
                         });
 
+                        li.appendChild(editBtn);
                         li.appendChild(delBtn);
                       }
 
@@ -302,6 +323,7 @@
           monthYearLabel.textContent = "Error loading calendar data.";
         }
       }
+
       document.addEventListener("click", (e) => {
         const detailsBox = document.getElementById("event-details");
 
@@ -310,6 +332,83 @@
         }
 
       });
+
+      // --- Edit Event Logic ---
+      function openEditForm(eventObj, defaultDate) {
+      const detailsBox = document.getElementById("event-details");
+        detailsBox.innerHTML = `
+          <h4>Edit Event</h4>
+          <form id="edit-event-form" class="border p-3 bg-light rounded">
+            <div class="form-group">
+              <label for="editTitle">Event Title:</label>
+              <input type="text" id="editTitle" class="form-control" value="${eventObj.title}" required>
+            </div>
+            <div class="form-group">
+              <label for="editDate">Event Date:</label>
+              <input type="date" id="editDate" class="form-control" value="${defaultDate}" required>
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-primary">Save</button>
+              <button type="button" id="cancelEdit" class="btn btn-secondary ml-2">Cancel</button>
+            </div>
+            <p id="edit-status" class="text-center mt-3"></p>
+          </form>
+        `;
+
+        detailsBox.style.display = "block";
+
+        const form = document.getElementById("edit-event-form");
+        const statusText = document.getElementById("edit-status");
+        const cancelBtn = document.getElementById("cancelEdit");
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const newTitle = document.getElementById("editTitle").value.trim();
+          const newDate = document.getElementById("editDate").value;
+
+          if (!newTitle || !newDate) {
+            statusText.textContent = "Please provide both title and date.";
+            return;
+          }
+
+          try {
+            const res = await fetch(`/updateEvent/${eventObj.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ title: newTitle, eventDate: newDate })
+            });
+
+            if (res.ok) {
+              statusText.textContent = "Event updated successfully!";
+              await renderCalendar(currentYear, currentMonth);
+              setTimeout(() => { detailsBox.style.display = "none"; }, 1000);
+            } else {
+              statusText.textContent = "Could not update event.";
+            }
+          } catch (err) {
+            console.error("Update error:", err);
+            statusText.textContent = "Server error while updating.";
+          }
+        });
+
+        cancelBtn.addEventListener("click", () => {
+
+          // restore the default details box template
+          const detailsBox = document.getElementById("event-details");
+          detailsBox.innerHTML = `
+            <h4>Event Details</h4>
+            <p><strong>Date:</strong> <span id="event-date"></span></p>
+            <div id="event-list-container">
+              <strong>Events:</strong>
+              <ul id="event-list" class="pl-3 mb-0"></ul>
+            </div>
+          `;
+
+          detailsBox.style.display = "none";
+          renderCalendar(currentYear, currentMonth);
+        });
+      }
+
 
       prevBtn.addEventListener("click", () => {
         currentMonth--;

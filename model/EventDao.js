@@ -59,4 +59,5 @@ module.exports = {
   readAll,
   readById,
   remove,
+  update
 };

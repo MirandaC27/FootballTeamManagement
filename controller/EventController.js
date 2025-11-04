@@ -152,6 +152,7 @@ const getCalendarData = async (req, res) => {
 
 module.exports = {
     createNewEvent,
+    updateEvent,
     deleteEvent,
     getAllEvents,
     getCalendarData
