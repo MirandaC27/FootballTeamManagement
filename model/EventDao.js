@@ -43,6 +43,15 @@ async function remove(id) {
   return await Event.findByIdAndDelete(id);
 }
 
+/**
+ * update an existing event.
+ * @param {*} id event ID
+ * @param {*} updatedData new data (title, eventDate)
+ * @returns updated event
+ */
+async function update(id, updatedData) {
+  return await Event.findByIdAndUpdate(id, updatedData, { new: true });
+}
 
 module.exports = {
   eventModel: Event,

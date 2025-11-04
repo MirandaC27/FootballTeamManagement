@@ -48,6 +48,33 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+/**
+ * update an existing event and register it in the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
+const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { eventDate, title } = req.body;
+
+    const updatedFields = {};
+    if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
+    if (title) updatedFields.title = title;
+
+    const updated = await dao.update(id, updatedFields);
+
+    if (!updated) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.json({ message: "Event updated successfully", updated });
+  } catch (err) {
+    console.error("Error updating event:", err);
+    res.status(500).json({ message: "Server error while updating event" });
+  }
+};
+
 
 /**
  * get all events from the database.

@@ -121,6 +121,7 @@ app.get('/calendar/data/:year/:month', EventCont.getCalendarData);
 app.post('/addEvent', isAdmin, EventCont.createNewEvent);
 app.get('/getAllEvent', isAdmin, EventCont.getAllEvents);
 app.delete('/deleteEvent/:id', isAdmin, EventCont.deleteEvent);
+app.put('/updateEvent/:id', isAdmin, EventCont.updateEvent);
 
 
 // schedule controller routes
