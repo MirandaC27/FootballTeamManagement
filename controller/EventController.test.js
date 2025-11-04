@@ -195,3 +195,126 @@ test('Get calendar data with DAO error', async () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith('Error getting calendar data');
 });
+
+/*
+* update tests
+*/
+
+//update existing event successfully
+test('Update existing event successfully', async () => {
+    const req = {
+        params: { id: '123' },
+        body: { eventDate: '2025-10-25', title: 'Updated Title' }
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    const updatedEvent = { _id: '123', eventDate: new Date('2025-10-25T00:00:00'), title: 'Updated Title' };
+    dao.update = jest.fn().mockResolvedValue(updatedEvent);
+
+    await controller.updateEvent(req, res);
+
+    expect(dao.update).toHaveBeenCalledWith('123', {
+        eventDate: new Date('2025-10-25T00:00:00'),
+        title: 'Updated Title'
+    });
+    expect(res.json).toHaveBeenCalledWith({
+        message: 'Event updated successfully',
+        updated: updatedEvent
+    });
+});
+
+//update non-existent event
+test('Update event not found', async () => {
+    const req = {
+        params: { id: '999' },
+        body: { title: 'Does not exist' }
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    dao.update = jest.fn().mockResolvedValue(null);
+
+    await controller.updateEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Event not found' });
+});
+
+//update event with DAO error
+test('Update event with DAO error', async () => {
+    const req = {
+        params: { id: '123' },
+        body: { title: 'Should fail' }
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    dao.update = jest.fn().mockRejectedValue(new Error('DB Error'));
+
+    await controller.updateEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Server error while updating event' });
+});
+
+//update event's title and only title
+test('Update event with only title provided keeps same date', async () => {
+    
+    const existingDate = new Date('2025-10-20T00:00:00');
+
+    const req = {
+        params: { id: '123' },
+        body: { title: 'Title Only' } // no eventDate
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    const updatedEvent = { _id: '123', eventDate: existingDate, title: 'Title Only' };
+    dao.update = jest.fn().mockResolvedValue(updatedEvent);
+
+    await controller.updateEvent(req, res);
+
+
+    expect(dao.update).toHaveBeenCalledWith('123', { title: 'Title Only' });
+
+
+    expect(res.json).toHaveBeenCalledWith({
+        message: 'Event updated successfully',
+        updated: {
+            _id: '123',
+            eventDate: existingDate,
+            title: 'Title Only'
+        }
+    });
+});
+
+//update event's date and only the date
+test('Update event with only date provided keeps same title', async () => {
+    const originalTitle = 'Original Title';
+    const newDate = '2025-11-01';
+    const req = {
+        params: { id: '456' },
+        body: { eventDate: newDate } // no title
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    const updatedEvent = {
+        _id: '456',
+        eventDate: new Date(`${newDate}T00:00:00`),
+        title: originalTitle
+    };
+    dao.update = jest.fn().mockResolvedValue(updatedEvent);
+
+    await controller.updateEvent(req, res);
+
+
+    expect(dao.update).toHaveBeenCalledWith('456', {
+        eventDate: new Date('2025-11-01T00:00:00')
+    });
+
+    expect(res.json).toHaveBeenCalledWith({
+        message: 'Event updated successfully',
+        updated: {
+            _id: '456',
+            eventDate: new Date('2025-11-01T00:00:00'),
+            title: originalTitle
+        }
+    });
+});
