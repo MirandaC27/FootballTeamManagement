@@ -118,6 +118,16 @@
           <input type="date" name="eventDate" id="eventDate" class="form-control" required>
         </div>
 
+        <div class="form-group">
+          <label for="eventTag">Tag:</label>
+          <select id="eventTag" class="form-control" required>
+            <option value="">Select Tag</option>
+            <option value="practice">Practice</option>
+            <option value="match">Match</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+
         <div class="text-center">
           <button type="submit" class="btn btn-primary">Add</button>
           <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
@@ -246,12 +256,36 @@
                 if (eventsForDay.length > 0) {
                   cell.classList.add("bg-warning", "font-weight-bold", "position-relative", "event-cell");
 
-                  // count of events per cell
-                  if (eventsForDay.length === 1) {
-                    cell.textContent = `${day}`;
-                  } else {
-                    cell.innerHTML = `${day} <br><small>(${eventsForDay.length} events)</small>`;
-                  }
+                  // keep the day number
+                  const dayNumber = document.createElement("div");
+                  dayNumber.textContent = day;
+
+                  // create a container for tag dots
+                  const dotContainer = document.createElement("div");
+                  dotContainer.classList.add("tag-dots");
+
+                  const tagColors = { practice: "green", match: "red", event: "blue" };
+                  const uniqueTags = [...new Set(eventsForDay.map(e => e.tag))];
+
+                  uniqueTags.forEach(tag => {
+                    const dot = document.createElement("span");
+                    dot.classList.add("tag-dot");
+                    dot.style.color = tagColors[tag] || "gray";
+                    dot.textContent = "•";
+                    dotContainer.appendChild(dot);
+                  });
+                  
+                  /*
+                  // optional: event count if multiple
+                  if (eventsForDay.length > 1) {
+                    const countLabel = document.createElement("small");
+                    countLabel.textContent = ` (${eventsForDay.length} events)`;
+                    dotContainer.appendChild(countLabel);
+                  }*/
+
+                  cell.innerHTML = ""; // clear any default text
+                  cell.appendChild(dayNumber);
+                  cell.appendChild(dotContainer);
 
                   // Clicking the day shows details for all events
                   cell.addEventListener("click", (e) => {
@@ -263,50 +297,71 @@
                     eventList.innerHTML = "";
                     eventDate.textContent = `${result.monthName} ${day}, ${result.year}`;
 
-                    eventsForDay.forEach(ev => {
-                      const li = document.createElement("li");
-                      li.classList.add("mb-2");
-                      li.textContent = ev.title;
+                    // Group events by tag
+                    const grouped = { practice: [], match: [], event: [] };
+                    eventsForDay.forEach(ev => grouped[ev.tag]?.push(ev));
 
-                      if (currentUser && currentUser.role === "admin") {
-                        const delBtn = document.createElement("button");
-                        delBtn.textContent = "Delete";
-                        delBtn.classList.add("btn", "btn-sm", "btn-danger", "ml-2");
+                    eventList.innerHTML = ""; // Clear before appending
 
-                        const editBtn = document.createElement("button");
-                        editBtn.textContent = "Edit";
-                        editBtn.classList.add("btn", "btn-sm", "btn-warning", "ml-2");
+                    Object.keys(grouped).forEach(tag => {
+                      if (grouped[tag].length === 0) return;
 
-                        editBtn.addEventListener("click", (e) => {
-                          e.stopPropagation();
-                          openEditForm(ev, `${result.year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
-                        });
+                      // Create a header for each tag group
+                      const tagHeader = document.createElement("li");
+                      tagHeader.innerHTML = `<span class="tag-${tag}">${tag.charAt(0).toUpperCase() + tag.slice(1)}</span>`;
+                      tagHeader.classList.add("mt-2", "mb-1");
+                      eventList.appendChild(tagHeader);
 
-                        delBtn.addEventListener("click", async (e) => {
-                          e.stopPropagation();
-                          if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}, ${result.year}?`)) {
-                            try {
-                              const res = await fetch(`/deleteEvent/${ev.id}`, { method: "DELETE" });
-                              if (res.ok) {
-                                alert("Event deleted.");
-                                await renderCalendar(year, month);
-                                detailsBox.style.display = "none";
-                              } else {
-                                alert("Failed to delete event.");
+                      // Add events under each tag
+                      grouped[tag].forEach(ev => {
+                        const li = document.createElement("li");
+                        li.classList.add("mb-2");
+                        li.innerHTML = `<strong>${ev.title}</strong> <span class="badge badge-secondary tag-badge">${ev.tag}</span>`;
+
+                        if (currentUser && currentUser.role === "admin") {
+                          const delBtn = document.createElement("button");
+                          delBtn.textContent = "Delete";
+                          delBtn.classList.add("btn", "btn-sm", "btn-danger", "ml-2");
+
+                          const editBtn = document.createElement("button");
+                          editBtn.textContent = "Edit";
+                          editBtn.classList.add("btn", "btn-sm", "btn-warning", "ml-2");
+
+                          editBtn.addEventListener("click", (e) => {
+                            e.stopPropagation();
+                            openEditForm(
+                              ev,
+                              `${result.year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+                            );
+                          });
+
+                          delBtn.addEventListener("click", async (e) => {
+                            e.stopPropagation();
+                            if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}, ${result.year}?`)) {
+                              try {
+                                const res = await fetch(`/deleteEvent/${ev.id}`, { method: "DELETE" });
+                                if (res.ok) {
+                                  alert("Event deleted.");
+                                  await renderCalendar(year, month);
+                                  detailsBox.style.display = "none";
+                                } else {
+                                  alert("Failed to delete event.");
+                                }
+                              } catch (err) {
+                                console.error("Delete error:", err);
+                                alert("Could not connect to server.");
                               }
-                            } catch (err) {
-                              console.error("Delete error:", err);
-                              alert("Could not connect to server.");
                             }
-                          }
-                        });
+                          });
 
-                        li.appendChild(editBtn);
-                        li.appendChild(delBtn);
-                      }
+                          li.appendChild(editBtn);
+                          li.appendChild(delBtn);
+                        }
 
-                      eventList.appendChild(li);
+                        eventList.appendChild(li);
+                      });
                     });
+
 
                     detailsBox.style.display = "block";
                   });
@@ -347,6 +402,16 @@
               <label for="editDate">Event Date:</label>
               <input type="date" id="editDate" class="form-control" value="${defaultDate}" required>
             </div>
+
+            <div class="form-group">
+            <label for="editTag">Tag:</label>
+              <select id="editTag" class="form-control" required>
+                <option value="practice" ${eventObj.tag === "practice" ? "selected" : ""}>Practice</option>
+                <option value="match" ${eventObj.tag === "match" ? "selected" : ""}>Match</option>
+                <option value="event" ${eventObj.tag === "event" ? "selected" : ""}>Event</option>
+              </select>
+            </div>
+
             <div class="text-center">
               <button type="submit" class="btn btn-primary">Save</button>
               <button type="button" id="cancelEdit" class="btn btn-secondary ml-2">Cancel</button>
@@ -365,9 +430,11 @@
           e.preventDefault();
           const newTitle = document.getElementById("editTitle").value.trim();
           const newDate = document.getElementById("editDate").value;
+          const newTag = document.getElementById("editTag").value;
 
-          if (!newTitle || !newDate) {
-            statusText.textContent = "Please provide both title and date.";
+
+          if (!newTitle || !newDate || !newTag) {
+            statusText.textContent = "Please provide title, date, and tag.";
             return;
           }
 
@@ -375,8 +442,9 @@
             const res = await fetch(`/updateEvent/${eventObj.id}`, {
               method: "PUT",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title: newTitle, eventDate: newDate })
+              body: JSON.stringify({ title: newTitle, eventDate: newDate, tag: newTag })
             });
+
 
             if (res.ok) {
               statusText.textContent = "Event updated successfully!";
@@ -385,7 +453,9 @@
             } else {
               statusText.textContent = "Could not update event.";
             }
-          } catch (err) {
+          } 
+          
+          catch (err) {
             console.error("Update error:", err);
             statusText.textContent = "Server error while updating.";
           }
@@ -439,9 +509,10 @@
 
         const titleValue = document.getElementById("eventTitle").value.trim();
         const dateValue = document.getElementById("eventDate").value;
+        const tagValue = document.getElementById("eventTag").value;
 
-        if (!dateValue || !titleValue) {
-          formStatus.textContent = "Please provide both title and date.";
+        if (!dateValue || !titleValue || !tagValue) {
+          formStatus.textContent = "Please provide title, date, and tag.";
           return;
         }
 
@@ -449,7 +520,7 @@
           const res = await fetch("/addEvent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ eventDate: dateValue, title: titleValue }),
+            body: JSON.stringify({ eventDate: dateValue, title: titleValue, tag: tagValue }),
           });
 
           formStatus.textContent = res.ok ? "Event added." : "Could not add event.";

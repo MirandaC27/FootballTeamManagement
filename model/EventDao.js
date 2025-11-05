@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+const TAGS = ["practice", "match", "event"];
 
 // event schema: (may edit later depending on what features get added)
 const eventSchema = new mongoose.Schema({
   eventDate: { type: Date, required: true },
-  title: { type: String, required: true }
+  title: { type: String, required: true },
+  tag: {type: String, required: true, enum: ["practice", "match", "event"]}
 });
 
 
