@@ -118,6 +118,16 @@
           <input type="date" name="eventDate" id="eventDate" class="form-control" required>
         </div>
 
+        <div class="form-group">
+          <label for="eventTag">Tag:</label>
+          <select id="eventTag" class="form-control" required>
+            <option value="">Select Tag</option>
+            <option value="practice">Practice</option>
+            <option value="match">Match</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+
         <div class="text-center">
           <button type="submit" class="btn btn-primary">Add</button>
           <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
@@ -347,6 +357,16 @@
               <label for="editDate">Event Date:</label>
               <input type="date" id="editDate" class="form-control" value="${defaultDate}" required>
             </div>
+
+            <div class="form-group">
+            <label for="editTag">Tag:</label>
+              <select id="editTag" class="form-control" required>
+                <option value="practice" ${eventObj.tag === "practice" ? "selected" : ""}>Practice</option>
+                <option value="match" ${eventObj.tag === "match" ? "selected" : ""}>Match</option>
+                <option value="event" ${eventObj.tag === "event" ? "selected" : ""}>Event</option>
+              </select>
+            </div>
+
             <div class="text-center">
               <button type="submit" class="btn btn-primary">Save</button>
               <button type="button" id="cancelEdit" class="btn btn-secondary ml-2">Cancel</button>
@@ -365,11 +385,19 @@
           e.preventDefault();
           const newTitle = document.getElementById("editTitle").value.trim();
           const newDate = document.getElementById("editDate").value;
+          const newTag = document.getElementById("editTag").value;
 
-          if (!newTitle || !newDate) {
-            statusText.textContent = "Please provide both title and date.";
+
+          if (!newTitle || !newDate || !newTag) {
+            statusText.textContent = "Please provide title, date, and tag.";
             return;
           }
+
+          await fetch(`/updateEvent/${eventObj.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle, eventDate: newDate, tag: newTag }),
+          });
 
           try {
             const res = await fetch(`/updateEvent/${eventObj.id}`, {
@@ -439,9 +467,10 @@
 
         const titleValue = document.getElementById("eventTitle").value.trim();
         const dateValue = document.getElementById("eventDate").value;
+        const tagValue = document.getElementById("eventTag").value;
 
-        if (!dateValue || !titleValue) {
-          formStatus.textContent = "Please provide both title and date.";
+        if (!dateValue || !titleValue || !tagValue) {
+          formStatus.textContent = "Please provide title, date, and tag.";
           return;
         }
 
@@ -449,7 +478,7 @@
           const res = await fetch("/addEvent", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ eventDate: dateValue, title: titleValue }),
+            body: JSON.stringify({ eventDate: dateValue, title: titleValue, tag: tagValue }),
           });
 
           formStatus.textContent = res.ok ? "Event added." : "Could not add event.";

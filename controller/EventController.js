@@ -1,5 +1,6 @@
 const dao = require('../model/EventDao');
 const calendarArray = require('../CalendarConfig');
+const TAGS = ["practice", "match", "event"];
 
 /**
  * Create a new event and register it in the database.
@@ -8,14 +9,18 @@ const calendarArray = require('../CalendarConfig');
  */
 const createNewEvent = async (req, res) => {
     try{
-        const{ eventDate, title } = req.body;
+        const{ eventDate, title, tag } = req.body;
         
-        if(!eventDate || !title){
-            return res.status(400).send('date and title are required');
+        if(!eventDate || !title || !tag){
+          return res.status(400).send('date, title and tag are required');
+        }
+
+        if (!TAGS.includes(tag)) {
+          return res.status(400).send("Invalid tag. Must be practice, match, or event.");
         }
 
         const localDate = new Date(`${eventDate}T00:00:00`);
-        await dao.create({ eventDate: localDate, title });
+        await dao.create({ eventDate: localDate, title, tag });
         res.status(200).json({ message: "Event added successfully" });
     }
 
@@ -61,6 +66,13 @@ const updateEvent = async (req, res) => {
     const updatedFields = {};
     if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
     if (title) updatedFields.title = title;
+    if (tag) {
+      if (!TAGS.includes(tag)) {
+        return res.status(400).json({ message: "Invalid tag." });
+      }
+      updatedFields.tag = tag;
+    }
+
 
     const updated = await dao.update(id, updatedFields);
 
@@ -113,7 +125,8 @@ function eventByMonth(events, year, monthIndex){
     .map(m => ({
         day: new Date(m.eventDate).getDate(),
         id:m._id,
-        title: m.title
+        title: m.title,
+        tag: m.tag
     }));
 
 }
