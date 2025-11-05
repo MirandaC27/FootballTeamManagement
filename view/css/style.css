@@ -229,6 +229,32 @@ body {
   flex: 1.1;
 }
 
+/*event tag*/
+
+/* Tag badges shown in event details */
+  .tag-match {
+    color: #b30000;
+    font-weight: bold;
+  }
+  
+  .tag-practice {
+    color: #007a00;
+    font-weight: bold;
+  }
+
+  .tag-event {
+    color: #0044cc;
+    font-weight: bold;
+  }
+
+  .tag-badge {
+    font-size: 0.8rem;
+    margin-left: 4px;
+  }
+
+
+
+
 
 .post-box {
   background: white;

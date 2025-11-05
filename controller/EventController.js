@@ -61,7 +61,7 @@ const deleteEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { eventDate, title } = req.body;
+    const { eventDate, title, tag } = req.body;
 
     const updatedFields = {};
     if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
