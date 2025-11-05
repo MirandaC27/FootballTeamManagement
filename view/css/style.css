@@ -435,3 +435,12 @@ footer {
 .admin-minor-toggle-bottom:hover {
     opacity: 1;
 }
+
+/*css for match viewer*/
+.clickable-row{
+  cursor: pointer;
+}
+.clickable-row:hover {
+  background-color: grey;
+}
+/*.match-container{}

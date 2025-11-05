@@ -110,7 +110,11 @@
     list.innerHTML = '';
 
     matches.forEach(m => {
+      const matchviewerURL = `matchviewer.html?id=${m._id}`;
+      
       const row = document.createElement('tr');
+      row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
+      row.className = 'clickable-row';
       row.innerHTML = `
         <td>${m.homeTeam}</td>
         <td>${m.awayTeam}</td>
@@ -119,8 +123,8 @@
         <td>${m.matchLocation}</td>
         <td>${m.matchStatus}</td>
         <td>
-          <button class="btn btn-info btn-sm mr-1" onclick="showEditForm('${m._id}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteMatch('${m._id}')">Delete</button>
+          <button class="btn btn-info btn-sm mr-1" onclick="event.stopPropagation(); showEditForm('${m._id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMatch('${m._id}')">Delete</button>
         </td>
       `;
       list.appendChild(row);

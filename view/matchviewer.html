@@ -66,7 +66,7 @@
     <!--container for the match-->
     <div class="card shadow text-center">
         <div class="card-body">
-            <h5 class="card-title">Match Tracker</h5>
+            <h5 class="card-title">Match Viewer</h5>
         </div>
     </div>
 
@@ -97,39 +97,36 @@
         }
         checkLoggedUser();
 
-        const matchID = '3409tj5ognfkgjb';
-        const matchURL = `../match/${matchID}`;
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('id');
 
-        async function displayMatch(){
-            try{
-                const res = await fetch(matchURL);
-                if(!res.ok){
-                    throw new error('Could not find match data.');
-                }
-
-                const matchData = await res.json();
-
-                const dateObj = new Date(matchData.matchDatetime);
-                const formatTime = toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-                const formatDate = toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
-
-                document.getElementById('datetime').textContent = `${formatDate} at ${formatTime}`;
-                document.getElementById('location').textContent = `Location: ${matchData.matchLocation}`;
-                document.getElementById('status').textContent = `${matchData.matchStatus}`;
-
-                document.getElementById('home-name').textContent = matchData.homeTeam.name;
-                document.getElementById('home-score').textContent = matchData.homeScore;
-                document.getElementById('away-name').textContent = matchData.awayTeam.name;
-                document.getElementById('away-score').textContent = matchData.awayScore;
+            if (matchId){
+                loadMatch(matchId);
             }
-            catch (err){
-                console.error('Display error: ', err);
+            else{
+                console.error("Error: No Match ID found in the URL.");
             }
+        });
 
+        async function loadMatch(id){
+            const res = await fetch(`/getMatchDetails/${id}`);
+
+            if (!res.ok) {
+                alert('Failed to load match details');
+            return;
+            }
+            const match = await res.json();
+            
+            document.getElementById('homeTeam').textContent = match.homeTeam;
+            document.getElementById('awayTeam').textContent = match.awayTeam;
+            document.getElementById('homeScore').textContent = match.homeScore;
+            document.getElementById('awayScore').textContent = match.awayScore;
+            document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
+            document.getElementById('matchLocation').textContent = match.matchLocation;
+            document.getElementById('matchStatus').textContent = match.matchStatus;
         }
 
-        document.addEventListener('ContentLoaded', displayMatch);
-        
 
     </script>
 
