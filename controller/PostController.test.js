@@ -16,7 +16,7 @@ beforeEach(function () {
  */
 test('Get all posts when logged in', async function () {
     let req = { session: { user: { _id: "123" } } };
-    let res = { json: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     // Create a fake documents collection for the post model
     let posts = [
@@ -37,7 +37,7 @@ test('Get all posts when logged in', async function () {
  */
 test('Get all posts without minors when not logged in', async function () {
     let req = { session: {} };
-    let res = { json: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     // Create a fake documents collection for the post model
     let posts = [
@@ -50,9 +50,16 @@ test('Get all posts without minors when not logged in', async function () {
 
     // Only show post without minor
     expect(dao.readAll).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith([
-        { _id: 'nominor', containsMinors: false }
+    expect(res.json).toHaveBeenCalledWith([{
+            _id: 'nominor',
+            owner_id: { _id: 'u2', name: 'Boby' },
+            type: 'video/mp4',
+            path: '/uploads/b.mp4',
+            caption: 'asd',
+            containsMinors: false
+        }
     ]);
+
     expect(res.status).not.toHaveBeenCalled();
 });
 
@@ -65,7 +72,7 @@ test('Upload new post', async function () {
         body: { caption: 'asd', containsMinors: true },
         session: { user: { username: 'bob' } }
     }
-    let res = { send: jest.fn(), status: jest.fn() };
+    let res = { send: jest.fn(), status: jest.fn().mockReturnThis() };
 
     dao.create.mockResolvedValue({});
     await controller.uploadPost(req, res);
@@ -84,7 +91,7 @@ test('Upload new post without file', async function () {
         body: {},
         session: { user: { username: 'bob' } }
     };
-    let res = { send: jest.fn(), status: jest.fn() };
+    let res = { send: jest.fn(), status: jest.fn().mockReturnThis() };
     await controller.uploadPost(req, res);
 
     expect(res.status).toHaveBeenCalled();
@@ -96,7 +103,7 @@ test('Upload new post without file', async function () {
  */
 test('Get all posts fails', async function () {
     let req = { session: { user: { _id: "123" } } };
-    let res = { json: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     dao.readAll.mockRejectedValue(new Error("err"));
     await controller.getAllPosts(req, res);
@@ -115,7 +122,7 @@ test('Upload post fails', async function () {
         session: { user: { _id: '111' } }
     };
 
-    let res = { send: jest.fn(), status: jest.fn() };
+    let res = { send: jest.fn(), status: jest.fn().mockReturnThis() };
 
     dao.create.mockRejectedValue(new Error("err"));
     await controller.uploadPost(req, res);
@@ -132,7 +139,7 @@ test('Update containsMinors successfully', async function () {
         params: { id: 'a' },
         body: { containsMinors: false }
     };
-    let res = { send: jest.fn(), status: jest.fn() };
+    let res = { send: jest.fn(), status: jest.fn().mockReturnThis() };
 
     dao.updateContainsMinors.mockResolvedValue({});
     await controller.updateContainsMinors(req, res);
@@ -149,7 +156,7 @@ test('Update containsMinors fails', async function () {
         params: { id: 'a' },
         body: { containsMinors: false }
     };
-    let res = { send: jest.fn(), status: jest.fn() };
+    let res = { send: jest.fn(), status: jest.fn().mockReturnThis() };
 
     dao.updateContainsMinors.mockRejectedValue(new Error('err'));
     await controller.updateContainsMinors(req, res);

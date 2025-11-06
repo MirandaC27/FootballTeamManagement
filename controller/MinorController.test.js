@@ -10,7 +10,7 @@ jest.mock("../model/MinorDao");
  */
 beforeEach(function () {
     jest.useFakeTimers();
-    jest.clearAllMocks(); 
+    jest.clearAllMocks();
 });
 
 /**
@@ -18,7 +18,7 @@ beforeEach(function () {
  */
 test('Reassign minor within season', async function () {
     let req = { params: { minorId: "121212", newTeamId: "00d" } };
-    let res = { redirect: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { redirect: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     // Mock the current date and the dao model call
     jest.setSystemTime(new Date('2025-10-26'));
@@ -36,7 +36,7 @@ test('Reassign minor within season', async function () {
  */
 test('Reassign minor to a team that doesn\'t exists', async function () {
     let req = { params: { minorId: "121212", newTeamId: "00d" } };
-    let res = { redirect: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { redirect: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     // Mock the current date and the dao model call 
     jest.setSystemTime(new Date('2025-10-26'));
@@ -54,7 +54,7 @@ test('Reassign minor to a team that doesn\'t exists', async function () {
  */
 test('Reassign minor but before season starts', async function () {
     let req = { params: { minorId: "121212", newTeamId: "00d" } };
-    let res = { redirect: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { redirect: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     // Mock the current date and the dao model call
     jest.setSystemTime(new Date('2024-10-26'));
@@ -71,7 +71,7 @@ test('Reassign minor but before season starts', async function () {
  */
 test('Reassign minor but after season starts', async function () {
     let req = { params: { minorId: "121212", newTeamId: "00d" } };
-    let res = { redirect: jest.fn(), status: jest.fn(), send: jest.fn() };
+    let res = { redirect: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     // Mock the current date and dao model call
     jest.setSystemTime(new Date('2025-12-26'));
@@ -95,10 +95,16 @@ test('Get all minors', async function () {
         { _id: 'm1', name: 'Bob', date_of_birth: '2010-10-10', parent_id: '1212', team_id: '2121' },
         { _id: 'm2', name: 'Bobby', date_of_birth: '2010-10-10', parent_id: '1212', team_id: '2121' },
     ];
-    dao.minorModel.find.mockResolvedValue(minors);
+
+    // Mock .find().populate().populate()
+    const populate2 = jest.fn().mockResolvedValue(minors);
+    const populate1 = jest.fn(() => ({ populate: populate2 }));
+    dao.minorModel.find = jest.fn(() => ({ populate: populate1 }));
     await controller.getAllMinors(req, res);
-    
+
     expect(dao.minorModel.find).toHaveBeenCalled();
+    expect(populate1).toHaveBeenCalledWith('team_id', 'name');
+    expect(populate2).toHaveBeenCalledWith('parent_id', 'name');
     expect(res.json).toHaveBeenCalledWith(minors);
     expect(res.status).not.toHaveBeenCalled();
 });
