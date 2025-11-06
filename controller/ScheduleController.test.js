@@ -80,7 +80,7 @@ test('Get a specified week from the database', async function () {
     // Mock that week was found
     dao.findWeek.mockResolvedValue(week1);
     await controller.createWeek(req, res);
-    req = { body: { weekNumber: 1 }, session: {} };
+    req = { query: { weekNumber: 1 }, session: {} };
     await controller.getSpecificWeek(req, res);
 
     expect(dao.findWeek).toHaveBeenCalled();
