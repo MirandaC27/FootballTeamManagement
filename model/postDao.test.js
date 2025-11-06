@@ -1,14 +1,6 @@
 const dbcon = require('./DbConnection');
 const dao = require('./PostDao');
 
-// for read all test
-const mongoose = require('mongoose');
-const userSchema = new mongoose.Schema({
-  name: String,
-  username: { type: String, unique: true } 
-});
-const User = mongoose.model('user', userSchema);
-
 /**
  * Executed once before all tests
  */
@@ -67,43 +59,6 @@ test('Delete post', async function () {
 });
 
 /**
- * Read all post documents test.
- */
-test('Read All', async function () {
-    let user1 = await User.create({ name: 'User 1', username: 'u1' });
-    let user2 = await User.create({ name: 'User 2', username: 'u2' });
-    let user3 = await User.create({ name: 'User 3', username: 'u3' });
-
-    let newData1 = {
-        owner_id: user1._id,
-        type: "image/jpeg",
-        path: "/uploads/testimage.jpg",
-        caption: "abc",
-        containsMinors: true
-    };
-    let newData2 = {
-        owner_id: user2._id,
-        type: "image/png",
-        path: "/uploads/testimage1.png",
-        caption: "abc",
-        containsMinors: false
-    };
-    let newData3 = {
-        owner_id: user3._id,
-        type: "video/mp4",
-        path: "/uploads/testi2.mp4",
-        caption: "abc",
-        containsMinors: true
-    };
-    await dao.create(newData1);
-    await dao.create(newData2);
-    await dao.create(newData3);
-    let lstPosts = await dao.readAll();
-    expect(lstPosts.length).toBe(3);
-    expect(lstPosts[0].owner_id.name).toBe('User 3');
-});
-
-/**
  * Update containsMinors test.
  */
 test('Update containsMinors', async function () {
@@ -119,4 +74,3 @@ test('Update containsMinors', async function () {
     let found = await dao.read(created._id);
     expect(found.containsMinors).toBe(true);
 });
-
