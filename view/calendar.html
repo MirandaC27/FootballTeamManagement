@@ -107,26 +107,30 @@
         </table>
       </div>
 
-      <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
-        <div class="form-group">
-          <label for="eventTitle">Event Title:</label>
-          <input type="text" name="eventTitle" id="eventTitle" class="form-control" required>
-        </div>
+        <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
+          <div class="form-group">
+            <label for="eventTag">Tag:</label>
+            <select id="eventTag" class="form-control" required>
+              <option value="">Select Type</option>
+              <option value="practice">Practice</option>
+              <option value="match">Match</option>
+              <option value="event">Event</option>
+            </select>
+          </div>
 
-        <div class="form-group">
-          <label for="eventDate">Add Event Date:</label>
-          <input type="date" name="eventDate" id="eventDate" class="form-control" required>
-        </div>
+          
+          <div id="dynamic-fields"></div>
 
-        <div class="form-group">
-          <label for="eventTag">Tag:</label>
-          <select id="eventTag" class="form-control" required>
-            <option value="">Select Tag</option>
-            <option value="practice">Practice</option>
-            <option value="match">Match</option>
-            <option value="event">Event</option>
-          </select>
-        </div>
+          <div class="form-group mt-3">
+            <label for="eventDate">Date:</label>
+            <input type="date" name="eventDate" id="eventDate" class="form-control" required>
+          </div>
+
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
+          </div>
+        </form>
 
         <div class="text-center">
           <button type="submit" class="btn btn-primary">Add</button>
@@ -503,6 +507,107 @@
         formStatus.textContent = "";
       });
 
+      const tagSelect = document.getElementById("eventTag");
+      const dynamicFields = document.getElementById("dynamic-fields");
+
+      // Dynamically adjust form inputs
+      tagSelect.addEventListener("change", () => {
+        const selected = tagSelect.value;
+        dynamicFields.innerHTML = "";
+
+        switch (selected) {
+          case "practice":
+            dynamicFields.innerHTML = `
+              <div class="form-group">
+                <label for="teamName">Team Name:</label>
+                <input type="text" id="teamName" class="form-control" required>
+              </div>`;
+            break;
+
+          case "match":
+            dynamicFields.innerHTML = `
+              <div class="form-group">
+                <label for="team1">Team 1:</label>
+                <input type="text" id="team1" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="team2">Team 2:</label>
+                <input type="text" id="team2" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="matchType">Match Type:</label>
+                <select id="matchType" class="form-control" required>
+                  <option value="none">Regular</option>
+                  <option value="playoff">Playoff</option>
+                  <option value="championship">Championship</option>
+                </select>
+              </div>`;
+            break;
+
+          case "event":
+            dynamicFields.innerHTML = `
+              <div class="form-group">
+                <label for="eventTitle">Event Title:</label>
+                <input type="text" id="eventTitle" class="form-control" required>
+              </div>`;
+            break;
+        }
+      });
+
+      // --- Helper: build title based on tag ---
+      function buildTitle(tag) {
+        if (tag === "practice") {
+          const team = document.getElementById("teamName")?.value.trim();
+          if (!team) throw new Error("Team name is required.");
+          return `${team} practice`;
+        }
+        if (tag === "match") {
+          const team1 = document.getElementById("team1")?.value.trim();
+          const team2 = document.getElementById("team2")?.value.trim();
+          const matchType = document.getElementById("matchType")?.value;
+          if (!team1 || !team2) throw new Error("Both team names are required.");
+          return matchType !== "none" ? `${team1} vs. ${team2} (${matchType})` : `${team1} vs. ${team2}`;
+        }
+        if (tag === "event") {
+          const title = document.getElementById("eventTitle")?.value.trim();
+          if (!title) throw new Error("Event title is required.");
+          return title;
+        }
+        throw new Error("Please select a valid tag.");
+      }
+
+      // --- Unified form submit handler ---
+      addForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const tag = tagSelect.value;
+        const date = document.getElementById("eventDate").value;
+
+        try {
+          const title = buildTitle(tag);
+
+          const res = await fetch("/addEvent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventDate: date, title, tag }),
+          });
+
+          if (res.ok) {
+            formStatus.textContent = "Event added successfully!";
+            addForm.reset();
+            dynamicFields.innerHTML = ""; // reset form fields
+            await renderCalendar(currentYear, currentMonth);
+          } else {
+            formStatus.textContent = "Could not add event.";
+          }
+        } catch (err) {
+          formStatus.textContent = err.message;
+        }
+      });
+
+
+
+      
+/*
       document.getElementById("add-event-form").addEventListener("submit", async (e) => {
 
         e.preventDefault();
@@ -529,6 +634,8 @@
           formStatus.textContent = "Could not connect to server.";
         }
       });
+      */
+
 
       // Initial render
       renderCalendar(currentYear, currentMonth);
