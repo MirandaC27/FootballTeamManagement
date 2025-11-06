@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Admin - Manage Playoff Brackets</title>
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: Arial, sans-serif;
+        }
+
+        .card {
+            border-radius: 1rem;
+        }
+
+        table {
+            background: white;
+            border-collapse: collapse;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f7ff;
+        }
+
+        .btn-primary,
+        .btn-danger {
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+    <!--nav bar-->
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+        <nav class="navbar navbar-dark bg-primary">
+
+            <!--logo-->
+            <a class="navbar-brand" href="/index.html">
+                <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+                littleLIGA
+            </a>
+        </nav>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!--options-->
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="/index.html">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="#">League</a>
+                <a class="nav-item nav-link" href="#">Matches</a>
+                <a class="nav-item nav-link" href="#">Team</a>
+                <a class="nav-item nav-link" href="/calendar.html">Calendar</a>
+            </div>
+        </div>
+
+        <!--sign in button-->
+        <div id="signin-btn" class="ms-auto">
+            <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
+        </div>
+
+        <!--account and log out dropdown-->
+        <div id="account-dropdown" class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                </svg> Account
+            </button>
+            <ul class="dropdown-menu">
+                <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
+                <li><a class="dropdown-item" href="/logout">Log out</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--Playoff Brackets-->
+    <div class="container">
+        <h2 class="text-center mb-4">🏆 Manage Playoff Brackets</h2>
+
+        <!-- Action Cards -->
+        <div class="row justify-content-center mb-4">
+            <!-- Delete Bracket -->
+            <div class="col-md-5 mb-3">
+                <div class="card shadow text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Delete Current Bracket</h5>
+                        <p class="card-text text-muted">Remove the currently loaded playoff bracket.</p>
+                        <button class="btn btn-danger" id="deleteBracketBtn">Delete Bracket</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Matchup -->
+            <div class="col-md-5 mb-3">
+                <div class="card shadow text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Add Matchup</h5>
+                        <p class="card-text text-muted">Add a matchup to a specific round in the bracket.</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <select id="roundSelect" class="form-select w-50"></select>
+                            <button class="btn btn-primary" onclick="goToAddMatchup()">Go</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bracket Table -->
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title">📋 Current Bracket Overview</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-center" id="bracketTable">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Round</th>
+                                <th>Home Team</th>
+                                <th>Away Team</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" class="text-muted">Loading bracket...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Functions for brackets-->
+    <script>
+        // Load the bracket on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const size = parseInt(params.get('size'));
+
+            if (size) {
+                try {
+                    const qualifyingTeams = await fetchQualifyingTeams(size); // sorted highest to lowest
+                    const currentYear = new Date().getFullYear();
+                    const timestamp = Date.now(); // milliseconds since epoch
+                    const bracketName = `Bracket_${currentYear}_${timestamp}`;
+                    const rounds = generateInitialRounds(qualifyingTeams);
+
+                    const response = await fetch('/createBracket', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: bracketName, numTeams: size, rounds })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to create bracket');
+
+                    const bracket = await response.json();
+                    window.currentBracket = bracket;
+                    displayBracket(bracket);
+                    populateRoundsDropdown(bracket);
+                } catch (err) {
+                    console.error(err);
+                    alert('Error generating bracket');
+                }
+            } else {
+                loadBrackets(); // fallback if no size param
+            }
+        });
+
+        // Example: fetch top N teams (replace with your API call)
+        async function fetchQualifyingTeams(size) {
+            const res = await fetch('/getAllTeams');
+            const teams = await res.json();
+            // Sort by rank (highest to lowest)
+            teams.sort((a, b) => b.rank - a.rank);
+            return teams.slice(0, size).map(t => t.name);
+        }
+
+        // Generate initial rounds using seeded teams
+        function generateInitialRounds(teams) {
+            let rounds = [], roundNumber = 1;
+            let currentTeams = [...teams];
+
+            while (currentTeams.length >= 2) {
+                let matchups = [];
+                while (currentTeams.length > 1) {
+                    const home = currentTeams.shift();   // highest rank
+                    const away = currentTeams.pop();     // lowest rank
+                    matchups.push({ homeTeam: home, awayTeam: away, result: null });
+                }
+                rounds.push({ roundNumber, roundMatchups: matchups });
+                currentTeams = matchups.map(() => 'TBD'); // winners unknown
+                roundNumber++;
+            }
+
+            return rounds;
+        }
+
+        // Display bracket in table
+        function displayBracket(bracket, roundFilter = null) {
+            const tbody = document.querySelector("#bracketTable tbody");
+            tbody.innerHTML = '';
+            bracket.rounds.forEach(round => {
+                if (roundFilter && round.roundNumber !== roundFilter) return;
+                round.roundMatchups.forEach(match => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>Round ${round.roundNumber}</td>
+                            <td>${match.homeTeam}</td>
+                            <td>${match.awayTeam}</td>
+                            <td>${match.result || '-'}</td>`;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        // Populate rounds dropdown
+        function populateRoundsDropdown(bracket) {
+            const select = document.getElementById('roundSelect');
+            select.innerHTML = '';
+            bracket.rounds.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.roundNumber;
+                opt.textContent = `Round ${r.roundNumber}`;
+                select.appendChild(opt);
+            });
+            select.addEventListener('change', e => displayBracket(bracket, parseInt(e.target.value)));
+        }
+
+        // Load existing brackets
+        async function loadBrackets() {
+            try {
+                const res = await fetch('/getAllBrackets');
+                const brackets = await res.json();
+                if (brackets.length > 0) {
+                    window.currentBracket = brackets[0]; // pick first
+                    displayBracket(brackets[0]);
+                    populateRoundsDropdown(brackets[0]);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Delete current bracket
+        document.getElementById('deleteBracketBtn').addEventListener('click', async () => {
+            if (!window.currentBracket) return alert('No bracket to delete');
+            const name = window.currentBracket.name;
+            if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+
+            try {
+                const res = await fetch(`/deleteBracket/${name}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('Bracket deleted');
+                    window.currentBracket = null;
+                    document.querySelector("#bracketTable tbody").innerHTML = '<tr><td colspan="4">No bracket selected</td></tr>';
+                    document.getElementById('roundSelect').innerHTML = '';
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting bracket');
+            }
+        });
+    </script>
+
+    <script>
+        /**
+        * Show sign in button if logged out or show account dropdown if signed in.
+        */
+        async function checkLoggedUser() {
+            let response = await fetch('/loggedUser');
+            let user = await response.json();
+            const signInBtn = document.getElementById('signin-btn');
+            const accountDropdown = document.getElementById('account-dropdown');
+
+            if (user) {
+                signInBtn.style.display = 'none';
+                accountDropdown.style.display = 'block';
+
+                // show admin option only if user is an admin
+                if (user.role === 'admin') {
+                    document.getElementById('admin').style.display = 'block';
+                } else {
+                    document.getElementById('admin').style.display = 'none';
+                }
+            } else {
+                signInBtn.style.display = 'block';
+                accountDropdown.style.display = 'none';
+            }
+            checkAdminAccess(user);
+        }
+
+    </script>
+
+</body>
+
+</html>

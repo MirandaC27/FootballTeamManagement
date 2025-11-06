@@ -63,27 +63,37 @@
         </div>
     </nav>
 
+    <button
+    class="btn btn-danger position-fixed bottom-0 end-0 m-4 shadow"
+    style="
+        border-radius: 12px; 
+        padding: 10px 20px; 
+        min-width: 200px; 
+        height: auto;
+        font-weight: 500;
+    "
+    title="Regenerate schedule"
+    onclick="clearAllWeeks()"
+    >
+    🔄 Regenerate Schedule
+    </button>
+
     <!--Schedule Display-->
-    <div>
-        <title>Week 1 Schedule</title>
-        <style>
-            table {
-            border-collapse: collapse;
-            width: 60%;
-            margin: 20px auto;
-            }
-            th, td {
-            border: 1px solid #333;
-            padding: 8px 12px;
-            text-align: center;
-            }
-            th {
-            background-color: #eee;
-            }
-        </style>
-        </head>
-        <body>
-        <h2 style="text-align:center;">Week 1 Schedule</h2>
+    <div class="schedule-container">
+        <div class="header">
+            <h2>Season Schedule</h2>
+            <div class="week-selector">
+            <label for="weekSelect" class="form-label">Select Week:</label>
+            <select id="weekSelect" onchange="loadWeekSchedule()">
+                <!-- <option value="1" selected>Week 1</option>
+                <option value="2">Week 2</option>
+                <option value="3">Week 3</option>
+                <option value="4">Week 4</option> -->
+                <!-- You can dynamically generate these if you know total weeks -->
+            </select>
+            </div>
+        </div>
+
         <table id="scheduleTable">
             <thead>
             <tr>
@@ -93,10 +103,100 @@
             </tr>
             </thead>
             <tbody>
-            <!-- Matchups will be inserted here -->
+            <!-- Matchups will be dynamically inserted here -->
             </tbody>
         </table>
     </div>
+
+    <style>
+    /* Center container and style it cleanly */
+    .schedule-container {
+        width: 85%;
+        max-width: 850px;
+        margin: 50px auto;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 30px 40px;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    h2 {
+        color: #222;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .week-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .week-selector label {
+        font-weight: 500;
+    }
+
+    .week-selector select {
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        background-color: #f9f9f9;
+        transition: all 0.2s ease;
+    }
+
+    .week-selector select:hover {
+        border-color: #007bff;
+        background-color: #eef5ff;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    thead {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f7ff;
+        transition: background-color 0.2s ease;
+    }
+
+    th {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    td {
+        font-size: 15px;
+        color: #333;
+    }
+    </style>
 
     <!-- Calendar Section -->
     <div id="calendar-section" class="calendar-container" style="display:none; padding:20px;">
@@ -104,20 +204,25 @@
 
         <!-- previous and next month buttons -->
         <div class="calendar-nav mb-3">
-        <button id="prev-month" class="btn btn-outline-primary">&lt; Previous</button>
-        <span id="month-year" class="mx-3 font-weight-bold"></span>
-        <button id="next-month" class="btn btn-outline-primary">Next &gt;</button>
+            <button id="prev-month" class="btn btn-outline-primary">&lt; Previous</button>
+            <span id="month-year" class="mx-3 font-weight-bold"></span>
+            <button id="next-month" class="btn btn-outline-primary">Next &gt;</button>
         </div>
 
         <!-- days of the week at top -->
         <table id="calendar-table" class="table table-bordered text-center">
-        <thead class="thead-light">
-            <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th>
-            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-            </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
+            <thead class="thead-light">
+                <tr>
+                    <th>Sun</th>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                </tr>
+            </thead>
+            <tbody id="calendar-body"></tbody>
         </table>
     </div>
 
@@ -148,109 +253,265 @@
         }
         checkLoggedUser();
     </script>
-    
+
     <!--calendar page-->
     <script>
-    // Show the calendar section when Calendar link is clicked
-    document.getElementById('calendar-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCalendar();
-    });
-
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-
-    async function showCalendar() {
-        document.getElementById('calendar-section').style.display = 'block';
-        await loadCalendar(currentYear, currentMonth);
-    }
-
-    async function loadCalendar(year, monthIndex) {
-        const res = await fetch(`/calendar/data/${monthIndex}?year=${year}`);
-        const data = await res.json();
-        renderCalendar(data);
-    }
-
-    function renderCalendar(data) {
-        const body = document.getElementById('calendar-body');
-        const monthYear = document.getElementById('month-year');
-        monthYear.textContent = `${data.monthName} ${data.year}`;
-        body.innerHTML = '';
-
-        data.data.forEach(week => {
-        const tr = document.createElement('tr');
-        week.forEach(day => {
-            const td = document.createElement('td');
-            td.textContent = day || '';
-            if (day) td.classList.add('day');
-            tr.appendChild(td);
+        // Show the calendar section when Calendar link is clicked
+        document.getElementById('calendar-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            showCalendar();
         });
-        body.appendChild(tr);
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        async function showCalendar() {
+            document.getElementById('calendar-section').style.display = 'block';
+            await loadCalendar(currentYear, currentMonth);
+        }
+
+        async function loadCalendar(year, monthIndex) {
+            const res = await fetch(`/calendar/data/${monthIndex}?year=${year}`);
+            const data = await res.json();
+            renderCalendar(data);
+        }
+
+        function renderCalendar(data) {
+            const body = document.getElementById('calendar-body');
+            const monthYear = document.getElementById('month-year');
+            monthYear.textContent = `${data.monthName} ${data.year}`;
+            body.innerHTML = '';
+
+            data.data.forEach(week => {
+                const tr = document.createElement('tr');
+                week.forEach(day => {
+                    const td = document.createElement('td');
+                    td.textContent = day || '';
+                    if (day) td.classList.add('day');
+                    tr.appendChild(td);
+                });
+                body.appendChild(tr);
+            });
+        }
+
+        document.getElementById('prev-month').addEventListener('click', async () => {
+            currentMonth--;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            await loadCalendar(currentYear, currentMonth);
         });
-    }
 
-    document.getElementById('prev-month').addEventListener('click', async () => {
-        currentMonth--;
-        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-        await loadCalendar(currentYear, currentMonth);
-    });
-
-    document.getElementById('next-month').addEventListener('click', async () => {
-        currentMonth++;
-        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-        await loadCalendar(currentYear, currentMonth);
-    });
-
-
-    async function loadWeek1Schedule() {
-      try {
-        const response = await fetch(`/getSpecificWeek?weekNumber=1`); // Your backend endpoint
-        if (!response.ok) throw new Error('Failed to fetch week 1');
-
-        const weekData = await response.json();
-        const tbody = document.querySelector("#scheduleTable tbody");
-        tbody.innerHTML = ''; // clear table
-
-        weekData.weekMatchups.forEach(match => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${match.homeTeam}</td>
-            <td>${match.awayTeam}</td>
-            <td>${match.result || '-'}</td>
-          `;
-          tbody.appendChild(tr);
+        document.getElementById('next-month').addEventListener('click', async () => {
+            currentMonth++;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            await loadCalendar(currentYear, currentMonth);
         });
-      } catch (err) {
-        console.error(err);
-        alert('Error loading schedule');
-      }
-    }
-
-    // Load the table when the page loads
-    window.addEventListener('DOMContentLoaded', loadWeek1Schedule);
     </script>
 
+    <!--Load Schedule Table-->
+    <script>
+        async function clearAllWeeks() {
+            const responseDel = await fetch('/deleteAllWeeks', { method: 'DELETE' });
+            const responseCreate = await generateSeasonSchedule()
+            window.location.href = "admin-current-schedule.html";
+        }
 
+        async function loadWeekOptions() {
+            try {
+            const response = await fetch('/getAllWeeks', { cache: 'no-store' });
+            if (!response.ok) throw new Error('Failed to fetch available weeks');
+
+            const weeks = await response.json();
+            const select = document.getElementById('weekSelect');
+            select.innerHTML = '';
+
+            if (!weeks || weeks.length === 0) {
+                select.innerHTML = `<option disabled>No weeks available</option>`;
+                document.querySelector("#scheduleTable tbody").innerHTML =
+                `<tr><td colspan="3">No weeks found.</td></tr>`;
+                return;
+            }
+
+            //Sort by weekNumber (in case backend returns unordered)
+            weeks.sort((a, b) => a.weekNumber - b.weekNumber);
+
+            //Populate dropdown
+            weeks.forEach(week => {
+                const opt = document.createElement('option');
+                opt.value = week.weekNumber;
+                opt.textContent = `Week ${week.weekNumber}`;
+                select.appendChild(opt);
+            });
+
+            //Store data in memory to avoid re-fetching
+            window.scheduleData = weeks;
+
+            //Auto-load the first week
+            select.value = weeks[0].weekNumber;
+            renderWeek(weeks[0]);
+            } catch (err) {
+            console.error(err);
+            document.getElementById('weekSelect').innerHTML =
+                `<option disabled>Error loading weeks</option>`;
+            document.querySelector("#scheduleTable tbody").innerHTML =
+                `<tr><td colspan="3" style="color:red;">Error loading weeks</td></tr>`;
+            }
+        }
+
+        //Render a week's schedule (no need to fetch again)
+        function renderWeek(weekData) {
+            const tbody = document.querySelector("#scheduleTable tbody");
+            tbody.innerHTML = "";
+
+            if (!weekData.weekMatchups || weekData.weekMatchups.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3">No matchups available for this week.</td></tr>`;
+            return;
+            }
+
+            weekData.weekMatchups.forEach(match => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${match.homeTeam}</td>
+                <td>${match.awayTeam}</td>
+                <td>${match.result || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+            });
+        }
+
+        //Change week when user selects another
+        function loadWeekSchedule() {
+            const selectedWeek = parseInt(document.getElementById("weekSelect").value);
+            const selectedData = window.scheduleData.find(w => w.weekNumber === selectedWeek);
+            if (selectedData) renderWeek(selectedData);
+        }
+
+        async function generateSeasonSchedule() {
+            let response = await fetch('/getAllTeams', { cache: 'no-store' });
+            let teams = await response.json();
+            let teamsAndQuality = [];
+            for (let team of teams) {
+                let totalGamesPlayed = team.priorSeasonWins + team.priorSeasonLosses;
+                let teamQuality = team.priorSeasonWins / totalGamesPlayed;
+                let teamWithQuality = {
+                    name: team.name,
+                    strength: teamQuality
+                };
+                teamsAndQuality.push(teamWithQuality);
+            }
+            let defaultWeeks = 2;
+            let schedule = generateSchedule(teamsAndQuality, defaultWeeks);
+
+            const responseDel = await fetch('/deleteAllWeeks', { method: 'DELETE' });
+
+            for (let i = 0; i < schedule.length; i++) {
+                const matches = schedule[i];
+                const weekNumber = i + 1;
+                if (weekNumber > 0) {
+                    const res = await fetch('/createWeek', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            weekNumber,
+                            matchups: matches
+                        })
+                    });
+                    if (!res.ok) {
+                        console.error(`Failed to save week ${weekNumber}:`, await res.text());
+                    }
+                }
+            }
+            return schedule
+        }
+
+        function generateSchedule(teams, numWeeks) {
+            let schedule = [];
+            // avoiding repeat matchups
+            let matchHistory = new Set();
+            for (let week = 1; week <= numWeeks; week++) {
+                let shuffled = shuffleTeams([...teams]);
+                let weeksMatches = [];
+                while (shuffled.length > 1) {
+                    let teamA = shuffled.shift();
+                    // get possible opponents teamA has not faced
+                    let possibleOpponents = shuffled.filter(t => {
+                        const key1 = `${teamA.name}-${t.name}`;
+                        const key2 = `${t.name}-${teamA.name}`;
+                        return !matchHistory.has(key1) && !matchHistory.has(key2);
+                    });
+                    if (possibleOpponents.length == 0) {
+                        continue;
+                    }
+                    // sort possible opponents by most similar strenth
+                    possibleOpponents.sort((a, b) =>
+                        Math.abs(teamA.strength - a.strength) - Math.abs(teamA.strength - b.strength)
+                    );
+                    let opponent;
+                    // choose similar strength opponent 80% of time, random opponent 20% of time
+                    if (Math.random() < 0.8) {
+                        opponent = possibleOpponents[0];
+                    }
+                    else {
+                        // choose random opponent out of possible choices
+                        opponent = possibleOpponents[Math.floor(Math.random() * possibleOpponents.length)];
+                    }
+                    // remove opponent from list
+                    shuffled.splice(shuffled.indexOf(opponent), 1);
+                    // add matchup to the weeks matches
+                    let matchup = {
+                        week,
+                        homeTeam: teamA.name,
+                        awayTeam: opponent.name
+                    };
+                    weeksMatches.push(matchup);
+                    matchHistory.add(`${teamA.name}-${opponent.name}`);
+                    matchHistory.add(`${opponent.name}-${teamA.name}`);
+                }
+                // add the weeks matches to the season schedule
+                schedule.push(weeksMatches);
+            }
+            // return the entire seasons schedule
+            return schedule;
+        }
+
+        function shuffleTeams(teams) {
+            let currentIndex = teams.length;
+            while (currentIndex != 0) {
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [teams[currentIndex], teams[randomIndex]] = [teams[randomIndex], teams[currentIndex]];
+            }
+            return teams;
+        }
+
+        // Load the table when the page loads
+        window.addEventListener('DOMContentLoaded', loadWeekOptions);
+
+    </script>
 
     <!-- calendar -->
     <div id="calendar-section" class="calendar-container" style="display:none;">
-    <h1 id="calendar-title">Calendar</h1>
+        <h1 id="calendar-title">Calendar</h1>
 
-    <div class="calendar-nav">
-        <button id="prev-month">&lt; Previous</button>
-        <span id="month-year"></span>
-        <button id="next-month">Next &gt;</button>
-    </div>
+        <div class="calendar-nav">
+            <button id="prev-month">&lt; Previous</button>
+            <span id="month-year"></span>
+            <button id="next-month">Next &gt;</button>
+        </div>
 
-    <table id="calendar-table">
-        <thead>
-        <tr>
-            <th>Sun</th><th>Mon</th><th>Tue</th>
-            <th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-        </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
-    </table>
+        <table id="calendar-table">
+            <thead>
+                <tr>
+                    <th>Sun</th>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                </tr>
+            </thead>
+            <tbody id="calendar-body"></tbody>
+        </table>
     </div>
 
 

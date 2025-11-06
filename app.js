@@ -131,8 +131,18 @@ app.get('/getSpecificWeek', ScheduleCont.getSpecificWeek);
 app.post('/createWeek', ScheduleCont.createWeek);
 app.put('/upsertWeek', ScheduleCont.upsertWeek);
 app.delete('/deleteWeek', ScheduleCont.deleteWeek);
+app.delete('/deleteAllWeeks', ScheduleCont.deleteAllWeeks);
 app.patch('/updateMatchupResult', ScheduleCont.updateMatchupResult);
 
+// playoff controller routes
+const PlayoffCont = require("./controller/PlayoffController");
+app.get('/getAllBrackets', PlayoffCont.getAllBrackets);
+app.get('/getBracketByName', PlayoffCont.getBracketByName);
+app.post('/createBracket', PlayoffCont.createBracket);
+app.post('/addMatchup/:name/:roundNumber', PlayoffCont.addMatchup);
+app.put('/updateResult/:name/:roundNumber', PlayoffCont.updatePlayoffMatchupResult);
+app.delete('/deleteBracket/:name', PlayoffCont.deleteBracket);
+app.delete('/deleteAllBrackets', PlayoffCont.deleteAllBrackets);
 
 // post controller routes
 const PostCont = require("./controller/PostController");

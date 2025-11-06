@@ -99,6 +99,19 @@ const updateMatchupResult = async(req, res) => {
     }
 }
 
+/**
+ * Deletes all weeks from the schedule
+ * @param {*} req 
+ * @param {*} res 
+ */
+const deleteAllWeeks = async(req, res) => {
+    try {
+        const allDeleted = await dao.deleteAll();
+        res.json(allDeleted);
+    } catch (err) {
+        res.status(500).send('Error deleting all weeks.');
+    }
+}
 
 
 module.exports = {
@@ -108,4 +121,5 @@ module.exports = {
     upsertWeek,
     deleteWeek,
     updateMatchupResult,
+    deleteAllWeeks
 };

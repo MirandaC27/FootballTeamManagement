@@ -8,6 +8,45 @@
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/style.css">
     <title>Manage Schedule - Soccer League Management</title>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        .card {
+            border-radius: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            text-align: center;
+            font-weight: 600;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .dropdown-btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select {
+            max-width: 180px;
+        }
+    </style>
 </head>
 
 <body>
@@ -64,19 +103,41 @@
     </nav>
 
     <!--Show options for generating schedules-->
-    <div class="card shadow text-center">
-        <div class="card-body">
-            <h5 class="card-title">📅 Generate Season Schedule</h5>
-            <p class="card-text text-muted">Generate the schedule for the season.</p>
-            <a href="#" class="btn btn-primary stretched-link" onclick="showGeneratedSchedule()">Go</a>
-        </div>
-    </div>
+    <div class="container py-4">
+        <h2 class="text-center mb-4">Admin Controls</h2>
 
-    <div class="card shadow text-center">
-        <div class="card-body">
-            <h5 class="card-title">Generate Playoff Bracket</h5>
-            <p class="card-text text-muted">Generate a playoff bracket for this season.</p>
-            <a href="admin-manage-playoffs.html" class="btn btn-primary stretched-link">Go</a>
+        <!-- Control Cards -->
+        <div class="row g-4">
+            <!-- Generate Season Schedule -->
+            <div class="col-md-6">
+                <div class="card shadow text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">📅 Generate Season Schedule</h5>
+                        <p class="card-text text-muted">Automatically generate a balanced season schedule.</p>
+                        <a href="#" class="btn btn-primary" onclick="showGeneratedSchedule()">Generate</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Playoff Bracket -->
+            <div class="col-md-6">
+                <div class="card shadow text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">🏆 Generate Playoff Bracket</h5>
+                        <p class="card-text text-muted">Select playoff size and generate the bracket.</p>
+                        <div class="dropdown-btn-group">
+                            <select id="playoffSize" class="form-select">
+                                <option value="">Select Teams...</option>
+                                <option value="2">2 Teams</option>
+                                <option value="4">4 Teams</option>
+                                <option value="6">6 Teams (Top 2 Byes)</option>
+                                <option value="8">8 Teams</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="redirectToPlayoffs()">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -107,6 +168,10 @@
         }
         checkLoggedUser();
 
+    </script>
+
+    <!--Schedule Generation-->
+    <script>
 
         async function showGeneratedSchedule() {
             await generateSeasonSchedule();
@@ -114,7 +179,7 @@
         }
 
         async function generateSeasonSchedule() {
-            let response = await fetch('/getAllTeams', { cache: 'no-store'});
+            let response = await fetch('/getAllTeams', { cache: 'no-store' });
             let teams = await response.json();
             let teamsAndQuality = [];
             for (let team of teams) {
@@ -129,13 +194,15 @@
             let defaultWeeks = 2;
             let schedule = generateSchedule(teamsAndQuality, defaultWeeks);
 
+            const responseDel = await fetch('/deleteAllWeeks', { method: 'DELETE' });
+
             for (let i = 0; i < schedule.length; i++) {
                 const matches = schedule[i];
                 const weekNumber = i + 1;
                 if (weekNumber > 0) {
                     const res = await fetch('/createWeek', {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             weekNumber,
                             matchups: matches
@@ -168,7 +235,7 @@
                         continue;
                     }
                     // sort possible opponents by most similar strenth
-                    possibleOpponents.sort((a, b) => 
+                    possibleOpponents.sort((a, b) =>
                         Math.abs(teamA.strength - a.strength) - Math.abs(teamA.strength - b.strength)
                     );
                     let opponent;
@@ -186,7 +253,7 @@
                     let matchup = {
                         week,
                         homeTeam: teamA.name,
-                        awayTeam: opponent.name 
+                        awayTeam: opponent.name
                     };
                     weeksMatches.push(matchup);
                     matchHistory.add(`${teamA.name}-${opponent.name}`);
@@ -204,14 +271,26 @@
             while (currentIndex != 0) {
                 let randomIndex = Math.floor(Math.random() * currentIndex);
                 currentIndex--;
-            [teams[currentIndex], teams[randomIndex]] = [teams[randomIndex], teams[currentIndex]];
+                [teams[currentIndex], teams[randomIndex]] = [teams[randomIndex], teams[currentIndex]];
             }
             return teams;
         }
 
-
     </script>
 
+    <!--Playoff Generation-->
+    <script>
+
+        function redirectToPlayoffs() {
+            const size = document.getElementById('playoffSize').value;
+            if (!size) {
+                alert("Please select a playoff size first!");
+                return;
+            }
+            window.location.href = `admin-manage-playoffs.html?size=${size}`;
+        }
+
+    </script>
 </body>
 
 </html>

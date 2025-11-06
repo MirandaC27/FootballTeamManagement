@@ -71,9 +71,9 @@ test('Read All', async function() {
     await dao.create(1, matchups);
     //await dao.create(2, matchups);
     //await dao.create(3, matchups);
-    let lstUsers = await dao.getAll();
+    let lstWeeks = await dao.getAll();
     //expect(lstUsers.length).toBe(3);
-    expect(lstUsers[0].weekNumber).toBe(1);
+    expect(lstWeeks[0].weekNumber).toBe(1);
 });
 
 /**

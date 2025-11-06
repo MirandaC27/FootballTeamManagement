@@ -69,7 +69,7 @@ test('Get all weeks from database', async function () {
  * Get a week from the database test.
  */
 test('Get a specified week from the database', async function () {
-    let req = { body: { weekNumber: 1 }, session: {} };
+    let req = { body: { weekNumber: 1, weekMatchups: matchups }, session: {} };
     let res = { status: jest.fn(), send: jest.fn(), json: jest.fn() };
 
     let week1 = [
@@ -79,6 +79,8 @@ test('Get a specified week from the database', async function () {
 
     // Mock that week was found
     dao.findWeek.mockResolvedValue(week1);
+    await controller.createWeek(req, res);
+    req = { body: { weekNumber: 1 }, session: {} };
     await controller.getSpecificWeek(req, res);
 
     expect(dao.findWeek).toHaveBeenCalled();
@@ -122,6 +124,19 @@ test('Delete a week from the database test.', async function () {
     await controller.deleteWeek(req, res);
 
     expect(dao.delByWeekNumber).toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+});
+
+/**
+ * Delete all weeks from the database test.
+ */
+test('Delete all weeks from the database test.', async function () {
+    let req = {};
+    let res = { status: jest.fn(), send: jest.fn(), json: jest.fn() };
+
+    await controller.deleteAllWeeks(req, res);
+
+    expect(dao.deleteAll).toHaveBeenCalled();
     expect(res.status).not.toHaveBeenCalled();
 });
 
