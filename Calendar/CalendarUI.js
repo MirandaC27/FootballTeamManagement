@@ -1,0 +1,287 @@
+//UI scripts
+
+// CalendarUI.js
+import { fetchCalendarData, addEvent, updateEvent, deleteEvent } from './CalendarAPI.js';
+import { buildTitle, resetDetailsBox } from './CalendarHelpers.js';
+
+let currentUser = null;
+let currentMonth, currentYear;
+
+export function initCalendar(user) {
+  currentUser = user;
+
+  const monthYearLabel = document.getElementById('month-year');
+  const calendarBody = document.getElementById('calendar-body');
+  const addForm = document.getElementById('add-event-form');
+  const formStatus = document.getElementById('form-status');
+  const showFormBtn = document.getElementById('show-add-form');
+  const tagSelect = document.getElementById('eventTag');
+  const dynamicFields = document.getElementById('dynamic-fields');
+
+  const today = new Date();
+  currentMonth = today.getMonth();
+  currentYear = today.getFullYear();
+
+  // Month navigation
+  document.getElementById('prev-month').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar(currentYear, currentMonth);
+  });
+  document.getElementById('next-month').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar(currentYear, currentMonth);
+  });
+
+  // Show/hide form
+  showFormBtn.addEventListener('click', () => {
+    addForm.style.display = 'block';
+    showFormBtn.style.display = 'none';
+  });
+  document.getElementById('cancelBtn').addEventListener('click', () => {
+    addForm.style.display = 'none';
+    showFormBtn.style.display = 'inline-block';
+    formStatus.textContent = '';
+  });
+
+  // Dynamic field generation by tag
+  tagSelect.addEventListener('change', () => {
+    const selected = tagSelect.value;
+    dynamicFields.innerHTML = '';
+    if (selected === 'practice') {
+      dynamicFields.innerHTML = `
+        <div class="form-group">
+          <label for="teamName">Team Name:</label>
+          <input type="text" id="teamName" class="form-control" required>
+        </div>`;
+    } else if (selected === 'match') {
+      dynamicFields.innerHTML = `
+        <div class="form-group">
+          <label for="team1">Team 1:</label>
+          <input type="text" id="team1" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="team2">Team 2:</label>
+          <input type="text" id="team2" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="matchType">Match Type:</label>
+          <select id="matchType" class="form-control" required>
+            <option value="none">Regular</option>
+            <option value="playoff">Playoff</option>
+            <option value="championship">Championship</option>
+          </select>
+        </div>`;
+    } else if (selected === 'event') {
+      dynamicFields.innerHTML = `
+        <div class="form-group">
+          <label for="eventTitle">Event Title:</label>
+          <input type="text" id="eventTitle" class="form-control" required>
+        </div>`;
+    }
+  });
+
+  // Add new event
+  addForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const tag = tagSelect.value;
+    const date = document.getElementById('eventDate').value;
+
+    try {
+      const title = buildTitle(tag);
+      const ok = await addEvent({ eventDate: date, title, tag });
+      formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
+      if (ok) {
+        addForm.reset();
+        dynamicFields.innerHTML = '';
+        await renderCalendar(currentYear, currentMonth);
+      }
+    } catch (err) {
+      formStatus.textContent = err.message;
+    }
+  });
+
+  // Click-away handler for details box
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.event-cell') && !e.target.closest('#event-details')) {
+      document.getElementById('event-details').style.display = 'none';
+    }
+  });
+
+  renderCalendar(currentYear, currentMonth);
+}
+
+// Core calendar rendering
+export async function renderCalendar(year, month) {
+  const monthYearLabel = document.getElementById('month-year');
+  const calendarBody = document.getElementById('calendar-body');
+  const detailsBox = document.getElementById('event-details');
+  resetDetailsBox();
+
+  try {
+    const result = await fetchCalendarData(year, month);
+    const eventDays = result.eventDays || [];
+    const days = result.data;
+
+    monthYearLabel.textContent = `${result.monthName} ${result.year}`;
+    calendarBody.innerHTML = '';
+
+    for (const week of days) {
+      const row = document.createElement('tr');
+      for (const day of week) {
+        const cell = document.createElement('td');
+        if (!day) { row.appendChild(cell); continue; }
+
+        cell.textContent = day;
+        const eventsForDay = eventDays.filter(e => e.day === parseInt(day));
+
+        if (eventsForDay.length > 0) {
+          cell.classList.add('bg-warning', 'font-weight-bold', 'position-relative', 'event-cell');
+
+          const dayNumber = document.createElement('div');
+          dayNumber.textContent = day;
+          const dotContainer = document.createElement('div');
+          dotContainer.classList.add('tag-dots');
+          const tagColors = { practice: 'green', match: 'red', event: 'blue' };
+
+          const uniqueTags = [...new Set(eventsForDay.map(e => e.tag))];
+          uniqueTags.forEach(tag => {
+            const dot = document.createElement('span');
+            dot.classList.add('tag-dot');
+            dot.style.color = tagColors[tag] || 'gray';
+            dot.textContent = '•';
+            dotContainer.appendChild(dot);
+          });
+
+          cell.innerHTML = '';
+          cell.appendChild(dayNumber);
+          cell.appendChild(dotContainer);
+
+          cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showEventDetails(eventsForDay, result, day, month, year);
+          });
+        }
+
+        row.appendChild(cell);
+      }
+      calendarBody.appendChild(row);
+    }
+  } catch (err) {
+    console.error('Error rendering calendar:', err);
+    monthYearLabel.textContent = 'Error loading calendar data.';
+  }
+}
+
+// Details panel and edit/delete controls
+export function showEventDetails(eventsForDay, result, day, month, year) {
+  const detailsBox = document.getElementById('event-details');
+  const eventList = document.getElementById('event-list');
+  const eventDate = document.getElementById('event-date');
+  eventList.innerHTML = '';
+  eventDate.textContent = `${result.monthName} ${day}, ${result.year}`;
+
+  const grouped = { practice: [], match: [], event: [] };
+  eventsForDay.forEach(ev => grouped[ev.tag]?.push(ev));
+
+  Object.keys(grouped).forEach(tag => {
+    if (!grouped[tag].length) return;
+    const tagHeader = document.createElement('li');
+    tagHeader.innerHTML = `<span class="tag-${tag}">${tag.charAt(0).toUpperCase() + tag.slice(1)}</span>`;
+    tagHeader.classList.add('mt-2', 'mb-1');
+    eventList.appendChild(tagHeader);
+
+    grouped[tag].forEach(ev => {
+      const li = document.createElement('li');
+      li.classList.add('mb-2');
+      li.innerHTML = `<strong>${ev.title}</strong> <span class="badge badge-secondary tag-badge">${ev.tag}</span>`;
+
+      if (currentUser && currentUser.role === 'admin') {
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.classList.add('btn', 'btn-sm', 'btn-warning', 'ml-2');
+        editBtn.addEventListener('click', () => openEditForm(ev, `${result.year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`));
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = 'Delete';
+        delBtn.classList.add('btn', 'btn-sm', 'btn-danger', 'ml-2');
+        delBtn.addEventListener('click', async () => {
+          if (confirm(`Delete event "${ev.title}" on ${result.monthName} ${day}?`)) {
+            const ok = await deleteEvent(ev.id);
+            if (ok) {
+              alert('Event deleted.');
+              await renderCalendar(year, month);
+              detailsBox.style.display = 'none';
+            } else alert('Failed to delete event.');
+          }
+        });
+
+        li.appendChild(editBtn);
+        li.appendChild(delBtn);
+      }
+
+      eventList.appendChild(li);
+    });
+  });
+
+  detailsBox.style.display = 'block';
+}
+
+// Edit form UI
+export function openEditForm(eventObj, defaultDate) {
+  const detailsBox = document.getElementById('event-details');
+  detailsBox.innerHTML = `
+    <h4>Edit Event</h4>
+    <form id="edit-event-form" class="border p-3 bg-light rounded">
+      <div class="form-group">
+        <label for="editTitle">Event Title:</label>
+        <input type="text" id="editTitle" class="form-control" value="${eventObj.title}" required>
+      </div>
+      <div class="form-group">
+        <label for="editDate">Event Date:</label>
+        <input type="date" id="editDate" class="form-control" value="${defaultDate}" required>
+      </div>
+      <div class="form-group">
+        <label for="editTag">Tag:</label>
+        <select id="editTag" class="form-control" required>
+          <option value="practice" ${eventObj.tag === 'practice' ? 'selected' : ''}>Practice</option>
+          <option value="match" ${eventObj.tag === 'match' ? 'selected' : ''}>Match</option>
+          <option value="event" ${eventObj.tag === 'event' ? 'selected' : ''}>Event</option>
+        </select>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" id="cancelEdit" class="btn btn-secondary ml-2">Cancel</button>
+      </div>
+      <p id="edit-status" class="text-center mt-3"></p>
+    </form>
+  `;
+  detailsBox.style.display = 'block';
+
+  const form = document.getElementById('edit-event-form');
+  const statusText = document.getElementById('edit-status');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newTitle = document.getElementById('editTitle').value.trim();
+    const newDate = document.getElementById('editDate').value;
+    const newTag = document.getElementById('editTag').value;
+    if (!newTitle || !newDate || !newTag) {
+      statusText.textContent = 'Please provide title, date, and tag.';
+      return;
+    }
+
+    const ok = await updateEvent(eventObj.id, { title: newTitle, eventDate: newDate, tag: newTag });
+    statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
+    if (ok) {
+      await renderCalendar(currentYear, currentMonth);
+      setTimeout(() => { detailsBox.style.display = 'none'; }, 1000);
+    }
+  });
+
+  document.getElementById('cancelEdit').addEventListener('click', async () => {
+    resetDetailsBox();
+    detailsBox.style.display = 'none';
+    await renderCalendar(currentYear, currentMonth);
+  });
+}

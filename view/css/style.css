@@ -100,6 +100,44 @@ body {
   font-weight: bold;
 }
 
+/* === CALENDAR IFRAME MODE === */
+body.in-iframe .navbar,
+body.in-iframe h1,
+body.in-iframe #signin-btn,
+body.in-iframe #account-dropdown {
+  display: none !important;
+}
+
+body.in-iframe #show-add-form {
+  display: none !important;
+}
+
+body.in-iframe {
+  transform: scale(0.85);
+  transform-origin: top left;
+  width: 120%;
+}
+
+
+
+/* === CALENDAR SIDEBAR === */
+#event-details {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+/* === ADD FORM === */
+#add-event-form {
+  margin-top: 15px;
+}
+
+#form-status {
+  font-weight: bold;
+  color: #333;
+}
+
+
 /*match form*/
 #add-match-form {
   max-width: 400px;
@@ -230,6 +268,18 @@ body {
 }
 
 /*event tag*/
+
+/* calendar tag dots*/
+.tag-dots {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  font-size: 1.2em;
+}
+
+.tag-dot {
+  line-height: 1;
+}
 
 /* Tag badges shown in event details */
   .tag-match {
