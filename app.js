@@ -7,6 +7,9 @@ const app = express();
 
 app.use(express.static(path.join(__dirname, 'view')));
 
+//route for calendar front end
+app.use('/Calendar', express.static(path.join(__dirname, 'Calendar')));
+
 // middleware
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));

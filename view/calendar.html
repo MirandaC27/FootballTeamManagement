@@ -2,119 +2,123 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/style.css">
-    <title>Home - Soccer League Management</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendar - Soccer League Management</title>
+
+  <!-- Bootstrap + custom CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous"
+  />
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
+  <!-- Navbar -->
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="/index.html">
+      <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+      littleLIGA
+    </a>
 
-    <!--nav bar-->
-    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
-        <nav class="navbar navbar-dark bg-primary">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-            <!--logo-->
-            <a class="navbar-brand" href="/index.html">
-                <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
-                littleLIGA
-            </a>
-        </nav>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/index.html">Home</a>
+        <a class="nav-item nav-link" href="#">League</a>
+        <a class="nav-item nav-link" href="/match.html">Matches</a>
+        <a class="nav-item nav-link" href="#">Team</a>
+        <a class="nav-item nav-link active" href="/calendar.html">Calendar</a>
+      </div>
+    </div>
 
-        <!--options-->
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-item nav-link active" href="/index.html">Home <span class="sr-only">(current)</span></a>
-                <a class="nav-item nav-link" href="#">League</a>
-                <a class="nav-item nav-link" href="/match.html">Matches</a>
-                <a class="nav-item nav-link" href="#">Team</a>
-                <a class="nav-item nav-link" href="/calendar.html">Calendar</a>
-            </div>
-        </div>
+    <!-- Account Controls -->
+    <div id="signin-btn" class="ms-auto">
+      <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
+    </div>
+    <div id="account-dropdown" class="dropdown">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          class="bi bi-person" viewBox="0 0 16 16">
+          <path
+            d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 
+            1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 
+            10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+        </svg> Account
+      </button>
+      <ul class="dropdown-menu">
+        <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
+        <li><a class="dropdown-item" href="/logout">Log out</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        <!--sign in button-->
-        <div id="signin-btn" class="ms-auto">
-            <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
-        </div>
-
-        <!--account and log out dropdown-->
-        <div id="account-dropdown" class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
-                    viewBox="0 0 16 16">
-                    <path
-                        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                </svg> Account
-            </button>
-            <ul class="dropdown-menu">
-                <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
-                <li><a class="dropdown-item" href="/logout">Log out</a></li>
-            </ul>
-        </div>
-    </nav>
-
-
-
-    <!-- Left: Calendar Section -->
+  <!-- Main Calendar Layout -->
+  <div class="container mt-4 mb-5 d-flex flex-column flex-md-row">
     <div class="flex-grow-1 mr-md-4">
       <h1 class="text-center mb-4">Calendar</h1>
 
-      <div class="d-flex justify-content-center align-items-center mb-3">
-        <button id="prev-month" class="btn btn-outline-primary mr-3">&lt; Previous</button>
+      <!-- Month Navigation -->
+      <div class="calendar-nav mb-3">
+        <button id="prev-month" class="btn btn-outline-primary">&lt; Previous</button>
         <h4 id="month-year" class="m-0 font-weight-bold"></h4>
-        <button id="next-month" class="btn btn-outline-primary ml-3">Next &gt;</button>
+        <button id="next-month" class="btn btn-outline-primary">Next &gt;</button>
       </div>
 
+      <!-- Add Event Button -->
       <div class="text-center mb-3">
         <button id="show-add-form" class="btn btn-success">+ Add Event</button>
       </div>
 
+      <!-- Calendar Table -->
       <div class="table-responsive">
         <table id="calendar-table" class="table table-bordered text-center">
           <thead class="thead-light">
             <tr>
-              <th>Sun</th>
-              <th>Mon</th>
-              <th>Tue</th>
-              <th>Wed</th>
-              <th>Thu</th>
-              <th>Fri</th>
-              <th>Sat</th>
+              <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+              <th>Thu</th><th>Fri</th><th>Sat</th>
             </tr>
           </thead>
           <tbody id="calendar-body"></tbody>
         </table>
       </div>
 
+      <!-- Add Event Form -->
       <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
-        <div class="form-group">
-          <label for="eventTitle">Event Title:</label>
-          <input type="text" name="eventTitle" id="eventTitle" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-          <label for="eventDate">Add Event Date:</label>
-          <input type="date" name="eventDate" id="eventDate" class="form-control" required>
-        </div>
-
         <div class="form-group">
           <label for="eventTag">Tag:</label>
           <select id="eventTag" class="form-control" required>
-            <option value="">Select Tag</option>
+            <option value="">Select Type</option>
             <option value="practice">Practice</option>
             <option value="match">Match</option>
             <option value="event">Event</option>
           </select>
+        </div>
+
+        <div id="dynamic-fields"></div>
+
+        <div class="form-group mt-3">
+          <label for="eventDate">Date:</label>
+          <input type="date" id="eventDate" class="form-control" required />
         </div>
 
         <div class="text-center">
@@ -126,114 +130,30 @@
       <p id="form-status" class="text-center mt-3"></p>
     </div>
 
-    <!-- Right: Event Details -->
-    <div id="event-details" class="border p-3 bg-light rounded mt-3 mt-md-0"
-      style="display:none; min-width:280px; max-width:350px;">
+    <!-- Sidebar (Event Details) -->
+    <aside id="event-details" class="calendar-sidebar border p-3 bg-light rounded mt-3 mt-md-0" style="display:none;">
       <h4>Event Details</h4>
       <p><strong>Date:</strong> <span id="event-date"></span></p>
-
       <div id="event-list-container">
         <strong>Events:</strong>
         <ul id="event-list" class="pl-3 mb-0"></ul>
       </div>
-    </div>
+    </aside>
+  </div>
 
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-      crossorigin="anonymous"></script>
+  <script type="module">
+    import { checkLoggedUser } from "../Calendar/CalendarAuth.js";
+    import { initCalendar } from "../Calendar/CalendarUI.js";
 
-    <script>
-
-        detailsBox.style.display = "block";
-
-        const form = document.getElementById("edit-event-form");
-        const statusText = document.getElementById("edit-status");
-        const cancelBtn = document.getElementById("cancelEdit");
-
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const newTitle = document.getElementById("editTitle").value.trim();
-          const newDate = document.getElementById("editDate").value;
-          const newTag = document.getElementById("editTag").value;
-
-
-          if (!newTitle || !newDate || !newTag) {
-            statusText.textContent = "Please provide title, date, and tag.";
-            return;
-          }
-
-        });
-
-        cancelBtn.addEventListener("click", () => {
-
-          // restore the default details box template
-          const detailsBox = document.getElementById("event-details");
-          detailsBox.innerHTML = `
-            <h4>Event Details</h4>
-            <p><strong>Date:</strong> <span id="event-date"></span></p>
-            <div id="event-list-container">
-              <strong>Events:</strong>
-              <ul id="event-list" class="pl-3 mb-0"></ul>
-            </div>
-          `;
-
-          detailsBox.style.display = "none";
-          renderCalendar(currentYear, currentMonth);
-        });
-      }
-
-
-      prevBtn.addEventListener("click", () => {
-        currentMonth--;
-        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-        renderCalendar(currentYear, currentMonth);
-      });
-
-      nextBtn.addEventListener("click", () => {
-        currentMonth++;
-        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-        renderCalendar(currentYear, currentMonth);
-      });
-
-      showFormBtn.addEventListener("click", () => {
-        addForm.style.display = "block";
-        showFormBtn.style.display = "none";
-      });
-
-      document.getElementById("cancelBtn").addEventListener("click", () => {
-        addForm.style.display = "none";
-        showFormBtn.style.display = "inline-block";
-        formStatus.textContent = "";
-      });
-
-      document.getElementById("add-event-form").addEventListener("submit", async (e) => {
-
-        e.preventDefault();
-
-        const titleValue = document.getElementById("eventTitle").value.trim();
-        const dateValue = document.getElementById("eventDate").value;
-        const tagValue = document.getElementById("eventTag").value;
-
-        if (!dateValue || !titleValue || !tagValue) {
-          formStatus.textContent = "Please provide title, date, and tag.";
-          return;
-        }
-
-
-      });
-
-      // Initial render
-      renderCalendar(currentYear, currentMonth);
-    </script>
-
-    <script>
-      // For index.html, add the calendar UI only when iframe is detected
-      if (window !== window.parent) {
-        document.body.classList.add("in-iframe");
-      }
-    </script>
+    (async () => {
+      const user = await checkLoggedUser(); // returns user object or null
+      initCalendar(user); // pass user into CalendarUI
+    })();
+  </script>
 </body>
-
 </html>
