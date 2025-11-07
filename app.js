@@ -26,7 +26,8 @@ app.use(session({
 const Storage = multer.diskStorage({
   destination: 'uploads',
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    let rename = Date.now() + '-' + file.originalname; 
+    cb(null, rename);
   },
 });
 
