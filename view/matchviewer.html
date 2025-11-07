@@ -33,11 +33,11 @@
         <!--options-->
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-item nav-link active" href="/index.html">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="/index.html">Home <span class="sr-only">(current)</span></a>
                 <a class="nav-item nav-link" href="#">League</a>
-                <a class="nav-item nav-link" href="#">Matches</a>
+                <a class="nav-item nav-link" href="/match.html">Matches</a>
                 <a class="nav-item nav-link" href="#">Team</a>
-                <a class="nav-item nav-link" href="#">Calendar</a>
+                <a class="nav-item nav-link" href="/calendar.html">Calendar</a>
             </div>
         </div>
 
@@ -64,14 +64,39 @@
     </nav>
 
     <!--container for the match-->
-    <div class="card shadow text-center">
-        <div class="card-body">
-            <h5 class="card-title">Match Viewer</h5>
-        </div>
-    </div>
-
     <main>
-        <div class="matchviewer-container"></div>
+        <!--<div class="section-header"><h5>Match Viewer</h5></div>-->
+        <section class="viewer-container">
+            <div class="viewer-header">
+                <span id="matchStatus" class="match-status"></span>
+                <span class="seperator">•</span>
+                <span id="matchLocation"></span>
+            </div>
+
+            <div class="viewer-content">
+                <div class="team-content Home">
+                    <h2 id="homeTeam" class="team-name"></h2>
+                </div>
+
+                <div class="score-content">
+                    <span id="homeScore" class="score-number"></span>
+                    <span class="score-seperator">:</span>
+                    <span id="awayScore" class="score-number"></span>
+                </div>
+
+                <div class="team-content Away">
+                    <h2 id="awayTeam" class="team-name"></h2>
+                </div>
+            </div>
+
+            <div class="viewer-footer">
+                <div class="date-time">
+                    <span id="matchDate"></span>
+                    <!--<span class="seperator">•</span>-->
+                    <!--<span id="match"></span>-->
+                </div>
+            </div>
+        </section>
     </main>
 
     <script>

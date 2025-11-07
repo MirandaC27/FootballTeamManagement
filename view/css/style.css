@@ -439,6 +439,48 @@ footer {
   cursor: pointer;
 }
 .clickable-row:hover {
-  background-color: grey;
+  background-color: lightgrey;
 }
-/*.match-container{}
+/*.match-container{}*/
+main { 
+  max-width: 960px; 
+  margin: 20px auto; 
+  background-color: var(--score-bg); 
+  border-radius: 8px; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+}
+        
+ /* 1. Header Styles: Centered and Dominant */
+.viewer-container { 
+  text-align: center; 
+  padding: 25px 20px; 
+  border-bottom: 1px solid #eee; 
+}
+.viewer-header { 
+  font-size: 0.85em; 
+  color: var(--secondary-text-color); 
+  margin-bottom: 15px; 
+}
+        
+.viewer-content { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin: 20px 0;
+  text-align: center;
+}
+        
+.team-content { 
+    flex-basis: 35%; /* Gives teams adequate space */
+    padding: 0 10px;
+}
+.team-name { font-size: 1.6em; font-weight: 800; margin: 5px 0; color: var(--text-color); }
+
+.score-content { 
+    flex-basis: 15%; /* Keeps the score tightly centered */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.score-number { font-size: 3.5em; font-weight: 900; color: var(--text-color); line-height: 1; }
+.score-separator { font-size: 2.5em; color: var(--secondary-text-color); margin: 0 5px; }
