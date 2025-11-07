@@ -149,7 +149,7 @@
           <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMatch('${m._id}')">Delete</button>
         </td>
       `;
-      list.appendChild(row);
+      upcominglist.appendChild(row);
     });
 
     pastMatches.forEach(m => {
@@ -170,7 +170,7 @@
           <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMatch('${m._id}')">Delete</button>
         </td>
       `;
-      list.appendChild(row);
+      pastList.appendChild(row);
     });
   }
 
