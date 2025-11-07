@@ -4,6 +4,21 @@
 import { fetchCalendarData, addEvent, updateEvent, deleteEvent } from './CalendarAPI.js';
 import { buildTitle, resetDetailsBox } from './CalendarHelpers.js';
 
+function restoreDetailsLayout() {
+  const detailsBox = document.getElementById('event-details');
+  if (!detailsBox) return;
+
+  detailsBox.innerHTML = `
+    <h4>Event Details</h4>
+    <p><strong>Date:</strong> <span id="event-date"></span></p>
+    <div id="event-list-container">
+      <strong>Events:</strong>
+      <ul id="event-list" class="pl-3 mb-0"></ul>
+    </div>
+  `;
+}
+
+
 let currentUser = null;
 let currentMonth, currentYear;
 
@@ -104,8 +119,13 @@ export function initCalendar(user) {
 
   // Click-away handler for details box
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.event-cell') && !e.target.closest('#event-details')) {
-      document.getElementById('event-details').style.display = 'none';
+    const detailsBox = document.getElementById('event-details');
+    const withinDetails = e.target.closest('#event-details');
+    const withinEventCell = e.target.closest('.event-cell');
+
+    // Only hide if the click is completely outside both the details box and event cells
+    if (!withinEventCell && !withinDetails) {
+      if (detailsBox) detailsBox.style.display = 'none';
     }
   });
 
@@ -177,8 +197,13 @@ export async function renderCalendar(year, month) {
 // Details panel and edit/delete controls
 export function showEventDetails(eventsForDay, result, day, month, year) {
   const detailsBox = document.getElementById('event-details');
+
+  restoreDetailsLayout();
+
   const eventList = document.getElementById('event-list');
   const eventDate = document.getElementById('event-date');
+
+  if (!eventList || !eventDate) return; // safety fallback
   eventList.innerHTML = '';
   eventDate.textContent = `${result.monthName} ${day}, ${result.year}`;
 
@@ -201,7 +226,10 @@ export function showEventDetails(eventsForDay, result, day, month, year) {
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
         editBtn.classList.add('btn', 'btn-sm', 'btn-warning', 'ml-2');
-        editBtn.addEventListener('click', () => openEditForm(ev, `${result.year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`));
+        editBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); 
+          openEditForm(ev, `${result.year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+        });
 
         const delBtn = document.createElement('button');
         delBtn.textContent = 'Delete';

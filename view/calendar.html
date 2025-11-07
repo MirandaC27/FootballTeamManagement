@@ -18,7 +18,7 @@
 
 <body>
   <!-- Navbar -->
-  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+  <nav id="main-navbar" class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
     <a class="navbar-brand" href="/index.html">
       <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
       littleLIGA
@@ -153,7 +153,17 @@
     (async () => {
       const user = await checkLoggedUser(); // returns user object or null
       initCalendar(user); // pass user into CalendarUI
-    })();
+
+      if (window.self !== window.top) {
+        const navbar = document.getElementById('main-navbar');
+        if (navbar) navbar.style.display = 'none';
+
+        document.body.style.paddingTop = '0';
+        const container = document.querySelector('.container');
+        if (container) container.style.marginTop = '0';
+      }
+
+  })();
   </script>
 </body>
 </html>
