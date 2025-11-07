@@ -63,6 +63,12 @@
         </div>
     </nav>
 
+    <header class="page-nav-header">
+        <button id="backButton" class="btn back-btn" type="button">
+            &larr; Back to Schedule
+        </button>
+    </header>
+
     <!--container for the match-->
     <main>
         <!--<div class="section-header"><h5>Match Viewer</h5></div>-->
@@ -100,6 +106,20 @@
     </main>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... existing loadMatch(SAMPLE_MATCH_DATA); and setupTabListeners(); ...
+
+            // New logic for the back button
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.addEventListener('click', () => {
+                    // Tells the browser to go back one step in its history
+                    window.history.back(); 
+                });
+            }
+        });
+        
         /**
         * Show sign in button if logged out or show account dropdown if signed in.
         */
