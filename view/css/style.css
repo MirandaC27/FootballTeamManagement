@@ -504,6 +504,7 @@ main {
 .viewer-container { 
   text-align: center; 
   padding: 25px 20px; 
+  color: white;
   border-bottom: 1px solid #eee; 
 }
 .viewer-header { 
