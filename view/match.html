@@ -81,8 +81,8 @@
     <div id="form-status" class="mt-3 text-center"></div>
 
     <!-- show all matches -->
-    <h3 class="mt-4 text-center">All Matches</h3>
-    <table class="table table-striped" id="matches-table">
+    <h3 class="mt-4 text-center">Upcoming Matches</h3>
+    <table class="table table-striped" id="upcoming-matches-table">
       <thead>
         <tr>
           <th>Home Team</th>
@@ -94,7 +94,23 @@
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="match-list"></tbody>
+      <tbody id="upcoming-list"></tbody>
+    </table>
+
+    <h3 class="mt-4 text-center">Past Matches</h3>
+    <table class="table table-striped" id="past-matches-table">
+      <thead>
+        <tr>
+          <th>Home Team</th>
+          <th>Away Team</th>
+          <th>Score</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="past-list"></tbody>
     </table>
   </div>
 
@@ -107,10 +123,36 @@
   async function loadMatches() {
     const res = await fetch('/getAllMatches');
     const matches = await res.json();
-    const list = document.getElementById('match-list');
-    list.innerHTML = '';
+    const upcominglist = document.getElementById('upcoming-list');
+    const pastList = document.getElementById('past-list');
+    upcominglist.innerHTML = '';
+    pastList.innerHTML = '';
 
-    matches.forEach(m => {
+    const upcomingMatches = matches.filter(m => m.matchStatus === 'Scheduled');
+    const pastMatches = matches.filter(m => m.matchStatus === 'Final');
+
+    upcomingMatches.forEach(m => {
+      const matchviewerURL = `matchviewer.html?id=${m._id}`;
+      
+      const row = document.createElement('tr');
+      row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
+      row.className = 'clickable-row';
+      row.innerHTML = `
+        <td>${m.homeTeam}</td>
+        <td>${m.awayTeam}</td>
+        <td>${m.homeScore >= 0 && m.awayScore >= 0 ? `${m.homeScore} - ${m.awayScore}` : 'N/A'}</td>
+        <td>${new Date(m.matchDate).toLocaleDateString()}</td>
+        <td>${m.matchLocation}</td>
+        <td>${m.matchStatus}</td>
+        <td>
+          <button class="btn btn-info btn-sm mr-1" onclick="event.stopPropagation(); showEditForm('${m._id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMatch('${m._id}')">Delete</button>
+        </td>
+      `;
+      list.appendChild(row);
+    });
+
+    pastMatches.forEach(m => {
       const matchviewerURL = `matchviewer.html?id=${m._id}`;
       
       const row = document.createElement('tr');
