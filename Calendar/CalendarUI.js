@@ -15,6 +15,10 @@ function restoreDetailsLayout() {
       <strong>Events:</strong>
       <ul id="event-list" class="pl-3 mb-0"></ul>
     </div>
+    <div id="event-location-container" class="mt-3">
+      <strong>Location:</strong>
+      <p id="event-location" class="mb-0 text-muted"></p>
+    </div>
   `;
 }
 
@@ -102,10 +106,11 @@ export function initCalendar(user) {
     e.preventDefault();
     const tag = tagSelect.value;
     const date = document.getElementById('eventDate').value;
+    const location = document.getElementById('eventLocation').value.trim();
 
     try {
       const title = buildTitle(tag);
-      const ok = await addEvent({ eventDate: date, title, tag });
+      const ok = await addEvent({ eventDate: date, title, tag, location });
       formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
       if (ok) {
         addForm.reset();
@@ -202,6 +207,7 @@ export function showEventDetails(eventsForDay, result, day, month, year) {
 
   const eventList = document.getElementById('event-list');
   const eventDate = document.getElementById('event-date');
+  const eventLocation = document.getElementById('event-location');
 
   if (!eventList || !eventDate) return; // safety fallback
   eventList.innerHTML = '';
@@ -253,6 +259,18 @@ export function showEventDetails(eventsForDay, result, day, month, year) {
     });
   });
 
+  // Display location if all events share one, otherwise show a list
+  if (eventsForDay.length > 0) {
+    const uniqueLocations = [...new Set(eventsForDay.map(e => e.location).filter(Boolean))];
+    if (uniqueLocations.length === 1) {
+      eventLocation.textContent = uniqueLocations[0];
+    } else if (uniqueLocations.length > 1) {
+      eventLocation.innerHTML = uniqueLocations.map(loc => `<div>• ${loc}</div>`).join('');
+    } else {
+      eventLocation.textContent = 'No location specified';
+    }
+  }
+
   detailsBox.style.display = 'block';
 }
 
@@ -278,6 +296,10 @@ export function openEditForm(eventObj, defaultDate) {
           <option value="event" ${eventObj.tag === 'event' ? 'selected' : ''}>Event</option>
         </select>
       </div>
+      <div class="form-group">
+        <label for="editLocation">Location:</label>
+        <input type="text" id="editLocation" class="form-control" value="${eventObj.location || ''}" placeholder="Enter event location" required>
+      </div>
       <div class="text-center">
         <button type="submit" class="btn btn-primary">Save</button>
         <button type="button" id="cancelEdit" class="btn btn-secondary ml-2">Cancel</button>
@@ -294,12 +316,13 @@ export function openEditForm(eventObj, defaultDate) {
     const newTitle = document.getElementById('editTitle').value.trim();
     const newDate = document.getElementById('editDate').value;
     const newTag = document.getElementById('editTag').value;
-    if (!newTitle || !newDate || !newTag) {
-      statusText.textContent = 'Please provide title, date, and tag.';
+    const newLocation = document.getElementById('editLocation').value.trim();
+    if (!newTitle || !newDate || !newTag || !newLocation) {
+      statusText.textContent = 'Please provide title, date, tag, and location.';
       return;
     }
 
-    const ok = await updateEvent(eventObj.id, { title: newTitle, eventDate: newDate, tag: newTag });
+    const ok = await updateEvent(eventObj.id, { title: newTitle, eventDate: newDate, tag: newTag, location: newLocation });
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);
