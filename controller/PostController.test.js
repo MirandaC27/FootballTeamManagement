@@ -94,8 +94,9 @@ test('Upload new post without file', async function () {
     let res = { send: jest.fn(), status: jest.fn().mockReturnThis() };
     await controller.uploadPost(req, res);
 
-    expect(res.status).toHaveBeenCalled();
-    expect(res.send).toHaveBeenCalledWith("Error no file uploaded");
+    expect(dao.create).toHaveBeenCalled();
+    expect(res.send).toHaveBeenCalledWith('Successfully uploaded');
+    expect(res.status).not.toHaveBeenCalled();
 });
 
 /**
