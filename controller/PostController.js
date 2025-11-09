@@ -2,21 +2,25 @@ const dao = require('../model/PostDao');
 // const commentDao = require('../model/commentDao');
 
 /**
- * Upload a post with image or video.
+ * Upload a post with image or video or just text.
  * @param {*} req request object containing data
  * @param {*} res response object used to send back
  * @returns 
  */
 const uploadPost = async (req, res) => {
-    if (!req.file) {
-        return res.status(500).send("Error no file uploaded");
-    }
-
     try {
+        let filePath = null;
+        let fileType = null;
+
+        if (req.file) {
+            filePath = `/uploads/${req.file.filename}`;
+            fileType = req.file.mimetype;
+        }
+
         const newPost = {
             owner_id: req.session.user._id,
-            path: `/uploads/${req.file.filename}`,
-            type: req.file.mimetype,
+            path: filePath,
+            type: fileType,
             caption: req.body.caption,
             containsMinors: req.body.containsMinors
         };

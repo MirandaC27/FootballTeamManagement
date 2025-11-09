@@ -108,7 +108,7 @@
                 <!-- feed form (shown after clicking Create Post button) -->
                 <!-- caption input -->
                 <div id="postForm" class="post-form" style="display:none">
-                    <textarea id="postText" class="form-control mb-3" rows="3" placeholder="Add comment"></textarea>
+                    <textarea id="postText" class="form-control mb-3" rows="3" placeholder="Enter a message"></textarea>
 
                     <!-- file (image, video) input -- only 1 file allowed -->
                     <div class="d-flex justify-content-between align-items-center">
@@ -289,6 +289,15 @@
             event.preventDefault();
             const formData = new FormData(form);
 
+            // Make sure it's a media file
+            if (fileInput.files.length > 0) {
+                const fileType = fileInput.files[0].type;
+                if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+                    alert("Only image and video files are allowed.");
+                    return;
+                }
+            }
+
             try {
                 await fetch("/upload", { method: "POST", body: formData });
                 statusMessage.innerHTML = `<div class="alert-success">✅ Successfully uploaded!</div>`;
@@ -326,8 +335,7 @@
                 document.getElementById("containsMinorsCheckbox").checked ? "true" : "false";
 
             if (!fileInput.files.length) {
-                window.alert("Please upload an image or video before sharing this post.");
-                return;
+                document.getElementById("fileInput").removeAttribute("name");
             }
             form.dispatchEvent(new Event("submit"));
         });
@@ -400,9 +408,9 @@
         function createPostCard(post, user) {
             // Create HTML to show either image or video
             let media = "";
-            if (post.type.startsWith("image")) {
+            if (post.type && post.type.startsWith("image")) {
                 media = `<img src="${post.path}">`;
-            } else if (post.type.startsWith("video")) {
+            } else if (post.type && post.type.startsWith("video")) {
                 media = `<video controls><source src="${post.path}"></video>`;
             }
             let adminMinorToggle = createAdminMinorToggle(post, user);

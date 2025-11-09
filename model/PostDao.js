@@ -8,11 +8,13 @@ const postSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        required: true
+        required: false,
+        default: null
     },
     path: {
         type: String,
-        required: true
+        required: false,
+        default: null
     },
     caption: {
         type: String,
