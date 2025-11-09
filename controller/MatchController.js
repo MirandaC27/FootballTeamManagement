@@ -94,7 +94,6 @@ const getAllMatches = async (req, res) => {
     }
 };
 
-
 /**
  * Get full match details, including team info.
  * @param {*} req request object containing data
