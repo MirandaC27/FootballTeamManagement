@@ -30,3 +30,5 @@ export function resetDetailsBox() {
   if (eventList) eventList.innerHTML = '';
   if (eventDate) eventDate.textContent = '';
 }
+
+

@@ -15,7 +15,8 @@ beforeEach(() => {
 /*
 * create event tests
 */
-//fail to create an empty event without a date or a title
+
+// Fail to create an empty event without date, title, or tag
 test('Create empty event', async () => {
     const req = { body: {} };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -23,35 +24,56 @@ test('Create empty event', async () => {
     await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date and title are required');
+    expect(res.send).toHaveBeenCalledWith('date, title and tag are required');
 });
 
-//fail to create a event without a date
-test('Create a event without a date', async () => {
-    const req = { body: {title: 'no date yet'} };
+// Fail to create an event without a date
+test('Create an event without a date', async () => {
+    const req = { body: { title: 'no date', tag: 'practice' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date and title are required');
+    expect(res.send).toHaveBeenCalledWith('date, title and tag are required');
 });
 
-
-//fail to create event without a title.
-test('Create a event without a title', async () => {
-    const req = { body: {title: 'no date yet'} };
+// Fail to create an event without a title
+test('Create an event without a title', async () => {
+    const req = { body: { eventDate: '2025-10-24', tag: 'match' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date and title are required');
+    expect(res.send).toHaveBeenCalledWith('date, title and tag are required');
 });
 
-//create a new event with date and title
+// Fail to create an event without a tag
+test('Create an event without a tag', async () => {
+    const req = { body: { eventDate: '2025-10-24', title: 'No Tag' } };
+    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+
+    await controller.createNewEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith('date, title and tag are required');
+});
+
+// Fail to create an event with invalid tag
+test('Create an event with invalid tag', async () => {
+    const req = { body: { eventDate: '2025-10-24', title: 'Invalid Tag', tag: 'holiday' } };
+    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+
+    await controller.createNewEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith('Invalid tag. Must be practice, match, or event.');
+});
+
+// Create a new event successfully
 test('Create new event successfully', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'Final' } };
+    const req = { body: { eventDate: '2025-10-24', title: 'Final', tag: 'practice' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     dao.create.mockResolvedValue({});
@@ -61,14 +83,15 @@ test('Create new event successfully', async () => {
     expect(dao.create).toHaveBeenCalledWith({
         eventDate: new Date('2025-10-24T00:00:00'),
         title: 'Final',
+        tag: 'practice'
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: 'Event added successfully' });
 });
 
-//create event that has an error from the Database
+// Create event that has an error from the Database
 test('Create new event with DAO error', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'Semi' } };
+    const req = { body: { eventDate: '2025-10-24', title: 'Semi', tag: 'match' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     dao.create.mockRejectedValue(new Error('DB Error'));
@@ -78,7 +101,6 @@ test('Create new event with DAO error', async () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith('Could not create event');
 });
-
 
 /*
 * delete event tests
@@ -200,22 +222,23 @@ test('Get calendar data with DAO error', async () => {
 * update tests
 */
 
-//update existing event successfully
-test('Update existing event successfully', async () => {
+// Update existing event successfully including tag
+test('Update existing event successfully with tag', async () => {
     const req = {
         params: { id: '123' },
-        body: { eventDate: '2025-10-25', title: 'Updated Title' }
+        body: { eventDate: '2025-10-25', title: 'Updated Title', tag: 'match' }
     };
     const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    const updatedEvent = { _id: '123', eventDate: new Date('2025-10-25T00:00:00'), title: 'Updated Title' };
+    const updatedEvent = { _id: '123', eventDate: new Date('2025-10-25T00:00:00'), title: 'Updated Title', tag: 'match' };
     dao.update = jest.fn().mockResolvedValue(updatedEvent);
 
     await controller.updateEvent(req, res);
 
     expect(dao.update).toHaveBeenCalledWith('123', {
         eventDate: new Date('2025-10-25T00:00:00'),
-        title: 'Updated Title'
+        title: 'Updated Title',
+        tag: 'match'
     });
     expect(res.json).toHaveBeenCalledWith({
         message: 'Event updated successfully',
@@ -253,6 +276,23 @@ test('Update event with DAO error', async () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({ message: 'Server error while updating event' });
+});
+
+
+// Fail to update event with invalid tag
+test('Update event with invalid tag', async () => {
+    const req = {
+        params: { id: '123' },
+        body: { tag: 'holiday' }
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    dao.update = jest.fn(); // should not be called
+
+    await controller.updateEvent(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid tag.' });
 });
 
 //update event's title and only title
@@ -318,3 +358,4 @@ test('Update event with only date provided keeps same title', async () => {
         }
     });
 });
+
