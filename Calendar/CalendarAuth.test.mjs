@@ -1,4 +1,8 @@
-const { checkLoggedUser } = require('./CalendarAuth');
+let checkLoggedUser;
+
+beforeAll(async () => {
+  ({ checkLoggedUser } = await import('./CalendarAuth.js'));
+});
 
 global.fetch = jest.fn();
 
@@ -35,7 +39,9 @@ describe('CalendarAuth', () => {
     const user = await checkLoggedUser();
     expect(user.role).toBe('user');
     expect(document.getElementById('admin').style.display).toBe('none');
-    expect(document.getElementById('form-status').textContent).toBe('You must be an admin to add or delete a event.');
+    expect(document.getElementById('form-status').textContent).toBe(
+      'You must be an admin to add or delete a event.'
+    );
   });
 
   test('checkLoggedUser returns null on invalid user', async () => {

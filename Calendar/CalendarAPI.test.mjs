@@ -1,4 +1,9 @@
-const { fetchCalendarData, addEvent, updateEvent, deleteEvent } = require('./CalendarAPI');
+let fetchCalendarData, addEvent, updateEvent, deleteEvent;
+
+beforeAll(async () => {
+  ({ fetchCalendarData, addEvent, updateEvent, deleteEvent } =
+    await import('./CalendarAPI.js'));
+});
 
 global.fetch = jest.fn();
 

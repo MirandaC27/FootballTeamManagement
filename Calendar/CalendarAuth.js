@@ -1,4 +1,8 @@
 //calendar authorization
+/**
+ * authorize that a user is an admin
+ * @returns the current role of a user
+ */
 export async function checkLoggedUser() {
         try {
           let response = await fetch('/loggedUser');

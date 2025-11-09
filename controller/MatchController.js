@@ -94,21 +94,6 @@ const getAllMatches = async (req, res) => {
     }
 };
 
-/**
- * Get a singular match from the database.
- * @param {*} req request object containing data
- * @param {*} res response object used to send back
- */
-const getMatch = async (req, res) => {
-    try{
-        const matchId = req.params.id;
-        const match = await matchDao.matchModel.findById(matchId);
-        res.status(200).json(match);
-    } catch (err) {
-        console.error('Could not get match:', err);
-        res.status(500).send('Could not get match');
-    }
-};
 
 /**
  * Get full match details, including team info.

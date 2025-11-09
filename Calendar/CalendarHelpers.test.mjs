@@ -1,4 +1,8 @@
-const { buildTitle, resetDetailsBox } = require('./CalendarHelpers');
+let buildTitle, resetDetailsBox;
+
+beforeAll(async () => {
+  ({ buildTitle, resetDetailsBox } = await import('./CalendarHelpers.js'));
+});
 
 describe('CalendarHelpers', () => {
   beforeEach(() => {

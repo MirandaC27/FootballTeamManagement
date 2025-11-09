@@ -1,4 +1,10 @@
 // CalendarHelpers.js
+
+/**
+ * build an event title based on the given tag for event
+ * @param {*} tag tag of current of event
+ * @returns resulting title
+ */
 export function buildTitle(tag) {
   if (tag === 'practice') {
     const team = document.getElementById('teamName')?.value.trim();

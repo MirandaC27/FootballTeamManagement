@@ -96,9 +96,9 @@ test('Remove non-existent event returns null', async () => {
 */
 //find existing events
 test('Read all events', async () => {
-    let event1 = {eventDate: new Date('2024-07-01'), title: 'Event 1'};
-    let event2 = {eventDate: new Date('2024-07-02'), title: 'Event 2'};
-    let event3 = {eventDate: new Date('2024-07-03'), title: 'Event 3'};
+    let event1 = {eventDate: new Date('2024-07-01'), title: 'Event 1', tag:'practice'};
+    let event2 = {eventDate: new Date('2024-07-02'), title: 'Event 2', tag:'event'};
+    let event3 = {eventDate: new Date('2024-07-03'), title: 'Event 3', tag:'match'};
     await dao.create(event1);
     await dao.create(event2);
     await dao.create(event3);
@@ -109,7 +109,7 @@ test('Read all events', async () => {
 
 //find existing events by ID
 test('Read event by ID', async () => {
-    let newData = {eventDate: new Date('2024-08-20'), title: 'Final Event'};
+    let newData = {eventDate: new Date('2024-08-20'), title: 'Final Event', tag:'match'};
     let created = await dao.create(newData);
     let found = await dao.readById(created._id);
     expect(found).not.toBeNull();
