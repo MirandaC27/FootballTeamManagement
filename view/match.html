@@ -146,7 +146,7 @@
         <td>${m.matchStatus}</td>
         <td>
           <button class="btn btn-info btn-sm mr-1" onclick="event.stopPropagation(); showEditForm('${m._id}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMatch('${m._id}')">Delete</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); confirmDelete('${m._id}')">Delete</button>
         </td>
       `;
       upcominglist.appendChild(row);
@@ -174,9 +174,21 @@
     });
   }
 
+  function confirmDelete(id) {
+    if (confirm('Are you sure you want to delete this match? This action cannot be undone.')) {
+      deleteMatch(id);
+    }
+  }
+
+
   async function deleteMatch(id) {
-    await fetch('/deleteMatch/' + id, { method: 'DELETE' });
-    loadMatches();
+    const res = await fetch('/deleteMatch/' + id, { method: 'DELETE' });
+    if (res.ok) {
+      showStatus('Match deleted successfully!', 'success');
+      loadMatches();
+    } else {
+      showStatus('Failed to delete match.', 'danger');
+    }
   }
 
   const addForm = document.getElementById('add-match-form');
@@ -219,12 +231,15 @@
     }
 
     if (res.ok) {
-      formStatus.innerText = editMode ? 'Match updated successfully!' : 'Match added successfully!';
+      const message = editMode ? 'Match updated successfully!' : 'Match added successfully!';
+      showStatus(message, 'success');
       addForm.reset();
+      addForm.style.display = 'none';
       resetFormMode();
       loadMatches();
     } else {
-      formStatus.innerText = editMode ? 'Failed to update match.' : 'Failed to add match.';
+      const message = editMode ? 'Failed to update match.' : 'Failed to add match.';
+      showStatus(message, 'danger');
     }
   });
 
@@ -262,8 +277,15 @@
     submitButton.textContent = 'Add Match';
     submitButton.classList.remove('btn-warning');
     submitButton.classList.add('btn-primary');
-    editMode = false
+    editMode = false;
     editMatchId = null;
+  }
+
+  function showStatus(message, type) {
+    formStatus.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+    setTimeout(() => {
+    formStatus.innerHTML = '';
+    }, 3000);
   }
 </script>
 
