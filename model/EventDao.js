@@ -5,7 +5,8 @@ const TAGS = ["practice", "match", "event"];
 const eventSchema = new mongoose.Schema({
   eventDate: { type: Date, required: true },
   title: { type: String, required: true },
-  tag: {type: String, required: true, enum: ["practice", "match", "event"]}
+  tag: {type: String, required: true, enum: ["practice", "match", "event"]},
+  location: {type: String, required: true}
 });
 
 
@@ -48,7 +49,7 @@ async function remove(id) {
 /**
  * update an existing event.
  * @param {*} id event ID
- * @param {*} updatedData new data (title, eventDate)
+ * @param {*} updatedData new data (title, eventDate, eventLocation)
  * @returns updated event
  */
 async function update(id, updatedData) {

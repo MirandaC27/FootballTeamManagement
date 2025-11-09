@@ -21,19 +21,20 @@ beforeEach(async () => {
 
 //create a new event with title, date, and tag
 test('Create new event', async () => {
-    let newData = {eventDate: new Date('2024-05-10'), title: 'Quarter Final', tag: 'practice'};
+    let newData = {eventDate: new Date('2024-05-10'), title: 'Quarter Final', tag: 'practice', location: 'Loyola University'};
     let created = await dao.create(newData);
     let found = await dao.readById(created._id);
     expect(created._id).not.toBeNull();
     expect(found.title).toBe(created.title);
     expect(found.tag).toBe('practice');
+    expect(found.location).toBe('Loyola University');
 });
 
 //fail to create a event with no title
 test('Create fails with missing title', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ eventDate: new Date(), tag: 'match' });
+        await dao.create({ eventDate: new Date(), tag: 'match', location: 'Loyola University' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -43,7 +44,7 @@ test('Create fails with missing title', async () => {
 test('Create fails with missing date', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'no date yet.', tag: 'event' });
+        await dao.create({ title: 'no date yet.', tag: 'event', location: 'Loyola University' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -53,7 +54,7 @@ test('Create fails with missing date', async () => {
 test('Create fails with missing tag', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'No Tag', eventDate: new Date() });
+        await dao.create({ title: 'No Tag', eventDate: new Date(), location: 'Loyola University' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -63,7 +64,17 @@ test('Create fails with missing tag', async () => {
 test('Create fails with invalid tag', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'Invalid Tag', eventDate: new Date(), tag: 'holiday' });
+        await dao.create({ title: 'Invalid Tag', eventDate: new Date(), tag: 'holiday', location: 'Loyola University' });
+    } catch (err) {
+        expect(err.name).toBe('ValidationError');
+    }
+});
+
+//fail to create a event with no location
+test('Create fails with missing location', async () => {
+    expect.assertions(1);
+    try {
+        await dao.create({ title: 'No location set.', eventDate: new Date(), tag: 'event' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -76,7 +87,7 @@ test('Create fails with invalid tag', async () => {
 
 //delete an existing event
 test('Delete event', async () => {
-    let newData = {eventDate: new Date('2024-06-15'), title: 'Semi Final', tag: 'match'};
+    let newData = {eventDate: new Date('2024-06-15'), title: 'Semi Final', tag: 'match', location: 'Loyola University'};
     let created = await dao.create(newData);
     let deleted = await dao.remove(created._id);
     let found = await dao.readById(created._id);
@@ -96,9 +107,9 @@ test('Remove non-existent event returns null', async () => {
 */
 //find existing events
 test('Read all events', async () => {
-    let event1 = {eventDate: new Date('2024-07-01'), title: 'Event 1', tag:'practice'};
-    let event2 = {eventDate: new Date('2024-07-02'), title: 'Event 2', tag:'event'};
-    let event3 = {eventDate: new Date('2024-07-03'), title: 'Event 3', tag:'match'};
+    let event1 = {eventDate: new Date('2024-07-01'), title: 'Event 1', tag:'practice', location: 'Loyola University'};
+    let event2 = {eventDate: new Date('2024-07-02'), title: 'Event 2', tag:'event', location: 'Towson University'};
+    let event3 = {eventDate: new Date('2024-07-03'), title: 'Event 3', tag:'match', location: 'Morgan State University'};
     await dao.create(event1);
     await dao.create(event2);
     await dao.create(event3);
@@ -109,12 +120,13 @@ test('Read all events', async () => {
 
 //find existing events by ID
 test('Read event by ID', async () => {
-    let newData = {eventDate: new Date('2024-08-20'), title: 'Final Event', tag:'match'};
+    let newData = {eventDate: new Date('2024-08-20'), title: 'Final Event', tag:'match', location: 'Loyola University'};
     let created = await dao.create(newData);
     let found = await dao.readById(created._id);
     expect(found).not.toBeNull();
     expect(found._id).toEqual(created._id);
     expect(found.title).toEqual(created.title);
+    expect(found.location).toEqual(created.location);
 });
 
 //look for a non-existent event
@@ -136,10 +148,10 @@ test('Read all returns empty array when no events', async () => {
 
 //update a whole event
 test('Update existing event with new title, date, and tag', async () => {
-    let oldEvent = { eventDate: new Date('2025-10-10'), title: 'Update me!', tag: 'practice' };
+    let oldEvent = { eventDate: new Date('2025-10-10'), title: 'Update me!', tag: 'practice', location: 'Loyola University' };
     let created = await dao.create(oldEvent);
 
-    let newEvent = { eventDate: new Date('2025-11-11'), title: 'Updated.', tag: 'match' };
+    let newEvent = { eventDate: new Date('2025-11-11'), title: 'Updated.', tag: 'match', location: 'Towson University' };
     let updated = await dao.update(created._id, newEvent);
 
     expect(updated).not.toBeNull();
@@ -147,11 +159,12 @@ test('Update existing event with new title, date, and tag', async () => {
     expect(updated.title).toBe(newEvent.title);
     expect(updated.eventDate.toISOString()).toBe(newEvent.eventDate.toISOString());
     expect(updated.tag).toBe('match');
+    expect(updated.location).toBe('Towson University');
 });
 
-//update only the title (date and tag should stay the same)
-test('Update event with only title keeps same date and tag', async () => {
-    let oldEvent = { eventDate: new Date('2025-09-15'), title: 'Original', tag: 'event' };
+//update only the title (date, tag, and location should stay the same)
+test('Update event with only title keeps same date, tag, and location', async () => {
+    let oldEvent = { eventDate: new Date('2025-09-15'), title: 'Original', tag: 'event', location: 'Loyola University' };
     let created = await dao.create(oldEvent);
 
     let updated = await dao.update(created._id, { title: 'Title Only' });
@@ -160,11 +173,12 @@ test('Update event with only title keeps same date and tag', async () => {
     expect(updated.title).toBe('Title Only');
     expect(updated.eventDate.toISOString()).toBe(created.eventDate.toISOString());
     expect(updated.tag).toBe('event');
+    expect(updated.location).toBe('Loyola University');
 });
 
-//update only the date (title and tag should stay the same)
-test('Update event with only date keeps same title and tag', async () => {
-    let oldEvent = { eventDate: new Date('2025-08-10'), title: 'Keep Title', tag: 'practice' };
+//update only the date (title, tag, and location should stay the same)
+test('Update event with only date keeps same title, tag, and location', async () => {
+    let oldEvent = { eventDate: new Date('2025-08-10'), title: 'Keep Title', tag: 'practice', location: 'Loyola University' };
     let created = await dao.create(oldEvent);
 
     const newDate = new Date('2025-09-01');
@@ -174,11 +188,12 @@ test('Update event with only date keeps same title and tag', async () => {
     expect(updated.title).toBe('Keep Title');
     expect(updated.tag).toBe('practice');
     expect(updated.eventDate.toISOString()).toBe(newDate.toISOString());
+    expect(updated.location).toBe('Loyola University');
 });
 
-//update only the tag (title and date should stay the same)
-test('Update event with only tag keeps same title and date', async () => {
-    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice' };
+//update only the tag (title, date, and location should stay the same)
+test('Update event with only tag keeps same title, date, and location', async () => {
+    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice', location: 'Loyola University' };
     let created = await dao.create(oldEvent);
 
     let updated = await dao.update(created._id, { tag: 'match' });
@@ -187,6 +202,21 @@ test('Update event with only tag keeps same title and date', async () => {
     expect(updated.title).toBe('Keep Everything');
     expect(updated.eventDate.toISOString()).toBe(created.eventDate.toISOString());
     expect(updated.tag).toBe('match');
+    expect(updated.location).toBe('Loyola University');
+});
+
+//update only the location (title, date, and tag should stay the same)
+test('Update event with only location keeps same title, date, and tag', async () => {
+    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice', location: 'Loyola University' };
+    let created = await dao.create(oldEvent);
+
+    let updated = await dao.update(created._id, { location: 'Towson University' });
+
+    expect(updated).not.toBeNull();
+    expect(updated.title).toBe('Keep Everything');
+    expect(updated.eventDate.toISOString()).toBe(created.eventDate.toISOString());
+    expect(updated.tag).toBe('practice');
+    expect(updated.location).toBe('Towson University');
 });
 
 //attempt to update non-existent event

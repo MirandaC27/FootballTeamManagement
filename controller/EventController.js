@@ -9,10 +9,10 @@ const TAGS = ["practice", "match", "event"];
  */
 const createNewEvent = async (req, res) => {
     try{
-        const{ eventDate, title, tag } = req.body;
+        const{ eventDate, title, tag, location } = req.body;
         
-        if(!eventDate || !title || !tag){
-          return res.status(400).send('date, title and tag are required');
+        if(!eventDate || !title || !tag || !location){
+          return res.status(400).send('date, title, tag, and location are required');
         }
 
         if (!TAGS.includes(tag)) {
@@ -20,7 +20,7 @@ const createNewEvent = async (req, res) => {
         }
 
         const localDate = new Date(`${eventDate}T00:00:00`);
-        await dao.create({ eventDate: localDate, title, tag });
+        await dao.create({ eventDate: localDate, title, tag, location });
         res.status(200).json({ message: "Event added successfully" });
     }
 
@@ -61,7 +61,7 @@ const deleteEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { eventDate, title, tag } = req.body;
+    const { eventDate, title, tag, location } = req.body;
 
     const updatedFields = {};
     if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
@@ -72,6 +72,7 @@ const updateEvent = async (req, res) => {
       }
       updatedFields.tag = tag;
     }
+    if (location) updatedFields.location = location;
 
 
     const updated = await dao.update(id, updatedFields);
@@ -126,7 +127,8 @@ function eventByMonth(events, year, monthIndex){
         day: new Date(m.eventDate).getDate(),
         id:m._id,
         title: m.title,
-        tag: m.tag
+        tag: m.tag,
+        location: m.location
     }));
 
 }
