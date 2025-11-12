@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
         integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/style.css">
-    <title>Home - Soccer League Management</title>
+    <title>Home - littleLIGA</title>
 </head>
 
 <body>
@@ -69,7 +69,7 @@
     </div>
 
     <div class="ticker">
-        <span>⚽ littleLiga — Stay updated with schedules, standings, and shared game highlights.</span>
+        <span>⚽ Stay updated with schedules, standings, and shared game highlights.</span>
     </div>
 
     <!-- large banner (with parallax scrolling effect)-->
@@ -80,17 +80,17 @@
     </div>
     <div class="overlay-bottom"></div>
 
+    <!-- welcome section -->
     <div class="welcome-section">
         <div class="welcome-content">
             <h2>Welcome to littleLIGA!</h2>
             <p>
-                littleLiga is a community-based soccer league for teens. 
-                Our mission is to create a fun, competitive, and inclusive space where players 
+                littleLiga is a community-based soccer league for teens.
+                Our mission is to create a fun, competitive, and inclusive space where players
                 can grow in skill, teamwork, and sportsmanship.
             </p>
         </div>
     </div>
-
 
     <!-- SECTIONS (standings, social feed, calendar) -->
     <div class="flex-container">
@@ -434,6 +434,8 @@
                 media = `<video controls><source src="${post.path}"></video>`;
             }
             let adminMinorToggle = createAdminMinorToggle(post, user);
+            let likeButton = createLikeButton(post, user);
+            let commentButton = createCommentButton(post, user);
 
             return `
             <div class="post-header d-flex justify-content-between align-items-center mb-2">
@@ -461,10 +463,14 @@
                     ${adminMinorToggle ?? ""}
                 </span>
             </div>
-                        
-            <!-- Caption text that is shown above the image/video (below header) -->
+            
             ${media}
-            <p class="mt-2">${post.caption}</p>`;
+            <p class="mt-2">${post.caption}</p>
+            
+            <div class="post-footer">
+                ${createLikeButton(post, user)}
+                ${createCommentButton(post, user)}
+            </div>`;
         }
 
         /**
@@ -503,6 +509,63 @@
                     });
                 });
             });
+        }
+
+        /**
+        * Create the like reaction button for a post.
+        * @param post object
+        * @param user object
+        * @returns the button element to create the like button
+        */
+        function createLikeButton(post, user) {
+            const liked = user && post.likedBy?.includes(user._id);
+            const likeCount = post.likes || 0;
+
+            // Thumbs up outline
+            const unclickedThumb = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="like-icon outline" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 10V21H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
+            </svg>`;
+
+            // Filled in thumbs up (when user clicked on it)
+            const clickedThumb = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="like-icon filled" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M7 10v11H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
+            </svg>`;
+
+            return `
+            <button 
+                class="footer-btn like-btn ${liked ? "active" : ""}" 
+                data-post-id="${post._id}" 
+                ${!user ? "disabled" : ""}>
+                ${liked ? clickedThumb : unclickedThumb}
+                <span class="post-like-counter">${likeCount}</span>
+            </button>`;
+        }
+
+        /**
+         * Create the comment button for a post.
+         * @param post object
+         * @param user object
+         * @returns the button element to create the comment button
+         */ 
+        function createCommentButton(post, user) {
+            const commentCount = post.comments?.length || 0;
+            
+            const commentIcon = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" width="20" height="20"
+            fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>`;
+
+            return `
+            <button class="footer-btn comment-btn" data-post-id="${post._id}" ${!user ? "disabled" : ""}>
+                ${commentIcon}
+                <span>${commentCount}</span>
+            </button>`;
+
+            //temp note: clicking button -> popup to see all comments and comment input
+            // guest can see comments in popup but input is hidden
         }
         loadPosts();
     </script>
