@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar - Soccer League Management</title>
+
+    <!-- Bootstrap + custom CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <!-- Leaflet CSS-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet GeoSearch CSS-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.7.0/dist/geosearch.css" />
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav id="main-navbar" class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="/index.html">
+            <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+            littleLIGA
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" href="/index.html">Home</a>
+                <a class="nav-item nav-link" href="#">League</a>
+                <a class="nav-item nav-link" href="/match.html">Matches</a>
+                <a class="nav-item nav-link" href="#">Team</a>
+                <a class="nav-item nav-link active" href="/calendar.html">Calendar</a>
+            </div>
+        </div>
+
+        <!-- Account Controls -->
+        <div id="signin-btn" class="ms-auto">
+            <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
+        </div>
+        <div id="account-dropdown" class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
+                    viewBox="0 0 16 16">
+                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 
+            1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 
+            10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                </svg> Account
+            </button>
+            <ul class="dropdown-menu">
+                <li id="admin"><a class="dropdown-item" href="/admin.html">Admin</a></li>
+                <li><a class="dropdown-item" href="/logout">Log out</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Calendar Layout -->
+    <div class="container mt-4 mb-5 d-flex flex-column flex-md-row">
+        <div class="flex-grow-1 mr-md-4">
+            <h1 class="text-center mb-4">Calendar</h1>
+
+            <!-- Month Navigation -->
+            <div class="calendar-nav mb-3">
+                <button id="prev-month" class="btn btn-outline-primary">&lt; Previous</button>
+                <h4 id="month-year" class="m-0 font-weight-bold"></h4>
+                <button id="next-month" class="btn btn-outline-primary">Next &gt;</button>
+            </div>
+
+            <!-- Add Event Button -->
+            <div class="text-center mb-3">
+                <button id="show-add-form" class="btn btn-success">+ Add Event</button>
+            </div>
+
+            <!-- Calendar Table -->
+            <div class="table-responsive">
+                <table id="calendar-table" class="table table-bordered text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendar-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Add Event Form -->
+            <form id="add-event-form" class="border p-3 bg-light rounded" style="display:none;">
+                <div class="form-group">
+                    <label for="eventTag">Tag:</label>
+                    <select id="eventTag" class="form-control" required>
+                        <option value="">Select Type</option>
+                        <option value="practice">Practice</option>
+                        <option value="match">Match</option>
+                        <option value="event">Event</option>
+                    </select>
+                </div>
+
+                <div id="dynamic-fields"></div>
+
+                <div class="form-group mt-3">
+                    <label for="eventDate">Date:</label>
+                    <input type="date" id="eventDate" class="form-control" required />
+                </div>
+
+                <div class="form-group mt-3">
+                    <label>Pick Location on Map:</label>
+                    <input type="text" id="eventLocation" class="form-control mb-2" placeholder="Use map to search for location"
+                        required />
+                    <div id="map" style="height: 300px; border-radius: 10px;"></div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" id="cancelBtn" class="btn btn-secondary ml-2">Cancel</button>
+                </div>
+            </form>
+
+            <p id="form-status" class="text-center mt-3"></p>
+        </div>
+
+        <!-- Sidebar (Event Details) -->
+        <aside id="event-details" class="calendar-sidebar border p-3 bg-light rounded mt-3 mt-md-0"
+            style="display:none;">
+            <h4>Event Details</h4>
+            <p><strong>Date:</strong> <span id="event-date"></span></p>
+            <div id="event-list-container">
+                <strong>Events:</strong>
+                <ul id="event-list" class="pl-3 mb-0"></ul>
+            </div>
+            <div id="event-location-container" class="mt-3">
+                <strong>Location:</strong>
+                <p id="event-location" class="mb-0 text-muted"></p>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+    <script type="module">
+        import { checkLoggedUser } from "../Calendar/CalendarAuth.js";
+        import { initCalendar } from "../Calendar/CalendarUI.js";
+
+        (async () => {
+            const user = await checkLoggedUser(); // returns user object or null
+            initCalendar(user); // pass user into CalendarUI
+
+            if (window.self !== window.top) {
+                const navbar = document.getElementById('main-navbar');
+                if (navbar) navbar.style.display = 'none';
+
+                document.body.style.paddingTop = '0';
+                const container = document.querySelector('.container');
+                if (container) container.style.marginTop = '0';
+            }
+
+        })();
+    </script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Geocoder JS -->
+    <script src="https://unpkg.com/leaflet-geosearch@3.7.0/dist/geosearch.umd.js"></script>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("add-event-form");
+            const locationInput = document.getElementById("eventLocation");
+            let map, marker;
+
+            function initMap() {
+                if (map) return;
+
+                // Create map centered on USA
+                map = L.map('map', { zoomControl: true }).setView([39.8283, -98.5795], 4);
+
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(map);
+
+                // GeoSearch provider
+                const provider = new window.GeoSearch.OpenStreetMapProvider();
+
+                // Create search control
+                searchControl = new window.GeoSearch.GeoSearchControl({
+                    provider: provider,
+                    style: 'bar',
+                    showMarker: false,
+                    autoComplete: true,
+                    autoCompleteDelay: 300,
+                    retainZoomLevel: false,
+                    searchLabel: 'Search for a location...',
+                    updateMap: true,
+                });
+
+                // Add search bar to map
+                map.addControl(searchControl);
+
+                // Handle result selection from GeoSearch
+                map.on('geosearch/showlocation', function (result) {
+                    const { x, y, label } = result.location;
+
+                    if (marker) marker.remove();
+                    marker = L.marker([y, x]).addTo(map)
+                        .bindPopup(label)
+                        .openPopup();
+
+                    map.setView([y, x], 14);
+                    locationInput.value = label;
+                });
+
+                // Click on map to manually select
+                map.on('click', async (e) => {
+                    const { lat, lng } = e.latlng;
+
+                    if (marker) marker.remove();
+                    marker = L.marker([lat, lng]).addTo(map);
+
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+                        const data = await res.json();
+                        const name = data.display_name || `Lat: ${lat}, Lng: ${lng}`;
+                        marker.bindPopup(name).openPopup();
+                        locationInput.value = name;
+                    } catch {
+                        locationInput.value = `Lat: ${lat}, Lng: ${lng}`;
+                    }
+                });
+            }
+
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 400);
+
+            document.getElementById("show-add-form").addEventListener("click", () => {
+                form.style.display = "block";
+                setTimeout(() => {
+                    initMap();
+                    map.invalidateSize();
+                }, 350);
+            });
+
+            document.getElementById("cancelBtn").addEventListener("click", () => {
+                form.style.display = "none";
+            });
+        });
+    </script>
+</body>
+
+</html>
