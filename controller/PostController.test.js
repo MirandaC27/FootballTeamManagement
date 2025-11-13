@@ -51,13 +51,13 @@ test('Get all posts without minors when not logged in', async function () {
     // Only show post without minor
     expect(dao.readAll).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith([{
-            _id: 'nominor',
-            owner_id: { _id: 'u2', name: 'Boby' },
-            type: 'video/mp4',
-            path: '/uploads/b.mp4',
-            caption: 'asd',
-            containsMinors: false
-        }
+        _id: 'nominor',
+        owner_id: { _id: 'u2', name: 'Boby' },
+        type: 'video/mp4',
+        path: '/uploads/b.mp4',
+        caption: 'asd',
+        containsMinors: false
+    }
     ]);
 
     expect(res.status).not.toHaveBeenCalled();
@@ -164,4 +164,39 @@ test('Update containsMinors fails', async function () {
 
     expect(res.status).toHaveBeenCalled();
     expect(res.send).toHaveBeenCalledWith('Error updating containsMinors');
+});
+
+/**
+ * Update like reaction successfully test.
+ */
+test('Update like reaction success', async function () {
+    let req = {
+        params: { id: "p" },
+        session: { user: { _id: "aa" } }
+    };
+    let res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    dao.updateLikeReaction.mockResolvedValue({ isLiked: true, count: 121 });
+    await controller.updateLikeReaction(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({ isLiked: true, count: 121 });
+    expect(dao.updateLikeReaction).toHaveBeenCalledWith("p", "aa");
+});
+
+/**
+ * Update like reaction fail test. 
+ */
+test('Update like reaction error', async function () {
+
+    const req = {
+        params: { id: "p" },
+        session: { user: { _id: "a" } }
+    };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+    dao.updateLikeReaction.mockRejectedValue(new Error("err"));
+    await controller.updateLikeReaction(req, res);
+
+    expect(res.status).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({ error: "Error updating like" });
 });

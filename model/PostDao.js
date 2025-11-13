@@ -27,7 +27,15 @@ const postSchema = new mongoose.Schema({
     containsMinors: {
         type: Boolean,
         default: false
-    }
+    },
+    likesCount: {
+        type: Number,
+        default: 0
+    },
+    likedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    }]
     /*
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -90,6 +98,27 @@ async function updateContainsMinors(id, containsMinors) {
     return await postModel.updateOne({ _id: id }, { $set: { containsMinors: containsMinors } });
 }
 
+/**
+ * Check and then return updated array for likedBy
+ * @param {*} id post id
+ * @param {*} user user id
+ */
+async function updateLikeReaction(id, user) {
+    const post = await postModel.findById(id);
+    const alreadyLiked = post.likedBy.includes(user);
+
+    // Check if post already been liked by user to toggle off the filled in 'like' reaction
+    if (alreadyLiked) {
+        post.likedBy.pull(user);
+        post.likesCount--;
+    } else {
+        post.likedBy.push(user);
+        post.likesCount++;
+    }
+    await post.save();
+    return { isLiked: !alreadyLiked, count: post.likesCount };
+}
+
 module.exports = {
     postModel,
     readAll,
@@ -97,5 +126,6 @@ module.exports = {
     create,
     del,
     deleteAll,
-    updateContainsMinors
+    updateContainsMinors,
+    updateLikeReaction
 };

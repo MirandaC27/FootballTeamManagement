@@ -517,8 +517,8 @@
         * @returns the button element to create the like button
         */
         function createLikeButton(post, user) {
-            const liked = user && post.likedBy?.includes(user._id);
-            const likeCount = post.likes || 0;
+            let liked = user && post.likedBy?.includes(user._id);
+            let likeCount = post.likes || 0;
 
             // Thumbs up outline
             const unclickedThumb = `

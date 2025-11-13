@@ -46,7 +46,7 @@ const getAllPosts = async (req, res) => {
         if (!req.session.user) {
             posts = posts.filter(post => !post.containsMinors);
         }
-        
+
         res.json(posts);
     } catch (err) {
         res.status(500).send('Error getting posts');
@@ -70,8 +70,26 @@ const updateContainsMinors = async (req, res) => {
     }
 };
 
+/**
+ * Toggle a 'like' reaction by a user on a post.
+ * @param {*} req request object
+ * @param {*} res response object
+ */
+const updateLikeReaction = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.session.user._id;
+        const result = await dao.updateLikeReaction(postId, userId);
+        res.json({ isLiked: result.isLiked, count: result.count });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error updating like" });
+    }
+};
+
 module.exports = {
     uploadPost,
     getAllPosts,
-    updateContainsMinors
+    updateContainsMinors,
+    updateLikeReaction
 };
