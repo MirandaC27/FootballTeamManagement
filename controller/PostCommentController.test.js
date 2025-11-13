@@ -3,6 +3,9 @@ const dao = require('../model/PostCommentDao');
 
 // Mock the entire dao module
 jest.mock("../model/PostCommentDao");
+jest.mock("../model/PostDao", () => ({
+    addCommentToPost: jest.fn().mockResolvedValue({})
+}));
 
 /**
  * Executed before each test.

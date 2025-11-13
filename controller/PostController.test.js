@@ -199,3 +199,37 @@ test('Update like reaction error', async function () {
     expect(res.status).toHaveBeenCalled();
     expect(res.send).toHaveBeenCalledWith("Error updating likes");
 });
+
+/**
+ * Get a single post test
+ */
+test('Get a single post', async function () {
+    let req = { params: { id: 'p' } };
+    let res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+
+    let post = {
+        _id: 'p',
+        caption: 'asdasd',
+    };
+
+    dao.read.mockResolvedValue(post);
+    await controller.getPost(req, res);
+
+    expect(dao.read).toHaveBeenCalledWith('p');
+    expect(res.json).toHaveBeenCalledWith(post);
+    expect(res.status).not.toHaveBeenCalled();
+});
+``
+/**
+ * Get a single post failure test
+ */
+test('Get a single post fail', async function () {
+    let req = { params: { id: 'p' } };
+    let res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+
+    dao.read.mockRejectedValue(new Error('err'));
+    await controller.getPost(req, res);
+
+    expect(res.status).toHaveBeenCalled();
+    expect(res.send).toHaveBeenCalledWith('Error getting a post');
+});
