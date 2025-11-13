@@ -11,9 +11,12 @@
 </head>
 
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    <!-- bootstrap stuff -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
 
     <!--nav bar-->
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
@@ -175,6 +178,39 @@
         <div class="calendar-col">
             <iframe src="/calendar.html" style="width:100%; height:2000px; border:none; overflow:hidden"
                 scrolling="no"></iframe>
+        </div>
+    </div>
+
+    <!-- COMMENT MODAL -->
+    <div class="modal" id="commentModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Post Comments</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Post -->
+                    <div id="modalPostContent"></div>
+                    <hr>
+
+                    <!-- Comments list -->
+                    <div id="modalComments"></div>
+
+                    <!-- Comment input -->
+                    <div id="modalCommentInputWrapper" class="input-group mt-3">
+                        <input type="text" id="modalCommentInput" class="form-control" placeholder="Write a comment...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" id="modalSubmitComment">Post</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -413,7 +449,6 @@
                 }
                 attachAdminMinorToggleHandler();
                 attachLikeButtonHandler();
-                console.log(posts);
 
             } catch (err) {
                 console.error(err);
@@ -564,7 +599,7 @@
             </svg>`;
 
             return `
-            <button class="footer-btn comment-btn" data-post-id="${post._id}" ${!user ? "disabled" : ""}>
+            <button class="footer-btn comment-btn" data-post-id="${post._id}">
                 ${commentIcon}
                 <span>${commentCount}</span>
             </button>`;
@@ -610,6 +645,16 @@
             }
         }
         loadPosts();
+
+
+        document.addEventListener("click", function (event) {
+            if (event.target.classList.contains("comment-btn")) {
+                $("#commentModal").modal("show");
+            }
+        });
+
+
+
     </script>
 </body>
 
