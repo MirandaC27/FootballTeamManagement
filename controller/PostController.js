@@ -1,11 +1,9 @@
 const dao = require('../model/PostDao');
-// const commentDao = require('../model/commentDao');
 
 /**
  * Upload a post with image or video or just text.
  * @param {*} req request object containing data
  * @param {*} res response object used to send back
- * @returns 
  */
 const uploadPost = async (req, res) => {
     try {

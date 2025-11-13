@@ -1,6 +1,7 @@
 const dbcon = require('./DbConnection');
 const dao = require('./PostDao');
 require("../model/UserDao");
+require("../model/PostCommentDao");
 
 /**
  * Executed once before all tests
@@ -35,7 +36,8 @@ test('Create new post', async function () {
         caption: "abc",
         containsMinors: true,
         likesCount: 0,
-        likedBy: []
+        likedBy: [],
+        comments: []
     };
     let created = await dao.create(newData);
     let found = await dao.read(created._id);
@@ -54,7 +56,8 @@ test('Delete post', async function () {
         caption: "abc",
         containsMinors: true,
         likesCount: 0,
-        likedBy: []
+        likedBy: [],
+        comments: []
     };
     let created = await dao.create(newData);
     let deleted = await dao.del(created._id);
@@ -74,7 +77,8 @@ test('Update containsMinors', async function () {
         caption: "..;da",
         containsMinors: false,
         likesCount: 0,
-        likedBy: []
+        likedBy: [],
+        comments: []
     };
     let created = await dao.create(newData);
     await dao.updateContainsMinors(created._id, true);
@@ -94,7 +98,8 @@ test('Update like by liking post', async function () {
         caption: "caption",
         containsMinors: false,
         likesCount: 0,
-        likedBy: []
+        likedBy: [],
+        comments: []
     };
 
     let created = await dao.create(newData);
@@ -121,7 +126,8 @@ test('Update like by removing liked post', async function () {
         caption: "caption",
         containsMinors: false,
         likesCount: 1,
-        likedBy: ["68f321cef24b117cb0cc4a22"]
+        likedBy: ["68f321cef24b117cb0cc4a22"],
+        comments: []
     };
 
     let created = await dao.create(newData);

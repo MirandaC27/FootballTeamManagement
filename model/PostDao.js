@@ -35,12 +35,11 @@ const postSchema = new mongoose.Schema({
     likedBy: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
-    }]
-    /*
+    }],
     comments: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'comment'
-    }]*/
+        ref: 'postComment'
+    }]
 });
 
 const postModel = mongoose.model('post', postSchema);
@@ -58,7 +57,10 @@ async function readAll() {
  * @returns post model object if found
  */
 async function read(id) {
-    return await postModel.findById(id).populate("owner_id", "name username");
+    return await postModel.findById(id).populate("owner_id", "name username").populate({
+        path: "comments",
+        populate: { path: "owner_id", select: "name username" }
+    });
 }
 
 /**
