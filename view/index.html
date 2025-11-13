@@ -219,9 +219,6 @@
                     <div id="modalLikeCounter" class="modal-like-summary"></div>
                     <hr>
 
-                    <!-- Comments list -->
-                    <div id="modalComments"></div>
-
                     <!-- Comment text input -->
                     <div id="modalCommentInputWrapper" class="input-group mt-3">
                         <input type="text" id="modalCommentInput" class="form-control" placeholder="Write a comment...">
@@ -229,6 +226,9 @@
                             <button class="btn btn-primary" id="modalSubmitComment">➤</button>
                         </div>
                     </div>
+
+                    <!-- Comments list -->
+                    <div id="modalComments"></div>
                 </div>
 
             </div>
@@ -675,6 +675,14 @@
         document.addEventListener("click", async function (event) {
             if (event.target.classList.contains("comment-btn")) {
                 const btn = event.target;
+
+                // Make sure that only clicked button is considered "opened"
+                const allButtons = document.querySelectorAll(".comment-btn");
+                for (let btn of allButtons) {
+                    btn.classList.remove("opened");
+                }
+                btn.classList.add("opened");
+
                 const postId = btn.getAttribute("data-post-id");
                 const ownerName = btn.getAttribute("data-posted-by");
 
@@ -718,9 +726,87 @@
 
                 document.getElementById("modalLikeCounter").innerHTML = `
                     <span class="like-post-emoji">👍</span> ${post.likesCount}`;
+
+                const commentsRes = await fetch(`/getAllComments/${postId}`);
+                const comments = await commentsRes.json();
+
+                let commentsHTML = "";
+                for (let comment of comments) {
+                    commentsHTML += createComment(comment);
+                }
+                document.getElementById("modalComments").innerHTML = commentsHTML;
                 $("#commentModal").modal("show");
             }
         });
+
+        /**
+         * Modal's send button handler for when it's clicked. 
+         */
+        document.getElementById("modalSubmitComment").addEventListener("click", async () => {
+            const input = document.getElementById("modalCommentInput");
+            const message = input.value;
+            const postId = document.querySelector(".comment-btn.opened")?.getAttribute("data-post-id");
+
+            await fetch(`/addComment/${postId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            });
+            input.value = "";
+
+            // Reload comments
+            const res = await fetch(`/getAllComments/${postId}`);
+            const comments = await res.json();
+
+            // HTML display for each comment
+            let commentsHTML = "";
+            for (let comment of comments) {
+                commentsHTML += createComment(comment);
+            }
+            document.getElementById("modalComments").innerHTML = commentsHTML;
+
+            // Update counter after adding a comment
+            const counter = document.querySelector(`.comment-btn[data-post-id="${postId}"] span`);
+            if (counter) {
+                counter.innerText = comments.length;
+            }
+        });
+
+        /**
+        * Create a comment's display in HTML and return it.
+        * @param comment object
+        * @returns comment's HTML code
+        */
+        function createComment(comment) {
+            return `
+            <div class="comment-item d-flex mb-3">
+            <!-- Profile Icon -->
+                <svg class="user-icon" viewBox="0 0 24 24" fill="none"
+                    style="width:38px; height:38px; min-width:38px;">
+                    <rect x="3" y="3" width="18" height="18" rx="4" fill="#556B8A"></rect>
+                    <circle cx="12" cy="10" r="3" fill="#FFFFFF"></circle>
+                    <path d="M7 17c0-2.5 2-4 5-4s5 1.5 5 4" fill="#FFFFFF"></path>
+                </svg>
+
+            <div class="ml-2">
+                <!-- Header -->
+                <div class="d-flex align-items-center mb-1">
+                    <strong>${comment.owner_id?.name}</strong>
+                    <span style="color:gray; font-size:0.85rem; margin-left:6px;">
+                        @${comment.owner_id?.username}
+                    </span>
+                    <span style="color:gray; font-size:0.75rem; margin-left:8px;">
+                        ${new Date(comment.uploadedAt).toLocaleString()}
+                    </span>
+                </div>
+
+                <!-- Message -->
+                <div class="comment-message" style="font-size:0.95rem;">
+                    ${comment.message}
+                </div>
+            </div>
+        </div>`;
+        }
     </script>
 </body>
 

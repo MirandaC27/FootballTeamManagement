@@ -161,6 +161,11 @@ app.post('/updateContainsMinors/:id', PostCont.updateContainsMinors);
 app.post('/updateLikeReaction/:id', PostCont.updateLikeReaction)
 app.get("/getPost/:id", PostCont.getPost);
 
+// post comment controller routes
+const PostCommentCont = require("./controller/PostCommentController");
+app.post('/addComment/:postId', PostCommentCont.addComment);
+app.get('/getAllComments/:postId', PostCommentCont.getAllComments);
+
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);
 console.log("TeamCont:", TeamCont);
@@ -169,6 +174,7 @@ app.use('/uploads', express.static('uploads'));
 
 console.log("ScheduleCont", ScheduleCont);
 console.log("PostCont", PostCont);
+console.log("PostCommentCont", PostCommentCont);
 
 // export for server.js
 module.exports = app; 

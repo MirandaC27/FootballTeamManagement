@@ -1,4 +1,5 @@
-const dao = require('../model/PostCommentDao');
+const commentDao = require('../model/PostCommentDao');
+const postDao = require('../model/PostDao');
 
 /**
  * Add a comment to a post.
@@ -7,12 +8,15 @@ const dao = require('../model/PostCommentDao');
  */
 const addComment = async (req, res) => {
     try {
-        const newComment = {
-            post_id: req.params.postId,
-            owner_id: req.session.user._id,
+        const postId = req.params.postId;
+        const userId = req.session.user._id;
+        const created = await commentDao.create({
+            post_id: postId,
+            owner_id: userId,
             message: req.body.message
-        };
-        const created = await dao.create(newComment);
+        });
+
+        await postDao.addCommentToPost(postId, created._id);
         res.json(created);
 
     } catch (err) {
@@ -29,7 +33,7 @@ const addComment = async (req, res) => {
 const getAllComments = async (req, res) => {
     try {
         const postId = req.params.postId;
-        const comments = await dao.readAll(postId);
+        const comments = await commentDao.readAll(postId);
         res.json(comments);
 
     } catch (err) {

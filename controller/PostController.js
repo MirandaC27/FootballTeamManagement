@@ -1,4 +1,5 @@
 const dao = require('../model/PostDao');
+const commentDao = require('../model/PostCommentDao');
 
 /**
  * Upload a post with image or video or just text.
@@ -44,8 +45,8 @@ const getAllPosts = async (req, res) => {
         if (!req.session.user) {
             posts = posts.filter(post => !post.containsMinors);
         }
-
         res.json(posts);
+        
     } catch (err) {
         res.status(500).send('Error getting posts');
     }

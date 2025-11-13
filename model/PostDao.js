@@ -36,10 +36,10 @@ const postSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user'
     }],
-    /*comments: [{
+    comments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'postComment'
-    }]*/
+    }]
 });
 
 const postModel = mongoose.model('post', postSchema);
@@ -48,7 +48,7 @@ const postModel = mongoose.model('post', postSchema);
  * Read and return all post documents from the database.
  */
 async function readAll() {
-    return await postModel.find().populate('owner_id', 'name username').sort({ uploadedAt: -1 });
+    return await postModel.find().populate('owner_id', 'name username').populate('comments').sort({ uploadedAt: -1 });
 }
 
 /**
@@ -58,11 +58,10 @@ async function readAll() {
  */
 async function read(id) {
     return await postModel.findById(id)
-        .populate("owner_id", "name username")
-        /*.populate({
+        .populate("owner_id", "name username").populate({
             path: "comments",
             populate: { path: "owner_id", select: "name username" }
-        })*/;
+        });
 }
 
 /**
@@ -123,6 +122,20 @@ async function updateLikeReaction(id, user) {
     return { isLiked: !alreadyLiked, count: post.likesCount };
 }
 
+/**
+ * Add a comment ID to a post's comments array.
+ * @param {*} postId post id
+ * @param {*} commentId comment id
+ * @returns updated array
+ */
+async function addCommentToPost(postId, commentId) {
+    return await postModel.findByIdAndUpdate(
+        postId,
+        { $push: { comments: commentId } },
+        { new: true }
+    );
+}
+
 module.exports = {
     postModel,
     readAll,
@@ -131,5 +144,6 @@ module.exports = {
     del,
     deleteAll,
     updateContainsMinors,
-    updateLikeReaction
+    updateLikeReaction,
+    addCommentToPost
 };
