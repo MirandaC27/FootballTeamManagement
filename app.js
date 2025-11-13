@@ -158,6 +158,7 @@ app.post('/upload', (req, res) => {
 });
 app.get('/getAllPosts', PostCont.getAllPosts);
 app.post('/updateContainsMinors/:id', PostCont.updateContainsMinors);
+app.post('/updateLikeReaction/:id', PostCont.updateLikeReaction)
 
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);

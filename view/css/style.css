@@ -699,3 +699,9 @@ main {
 .footer-btn:hover:not(:disabled) {
   background: #ececec;
 }
+
+.like-btn:focus,
+.like-btn:active {
+  outline: none;
+  box-shadow: none;
+}

@@ -412,6 +412,8 @@
                     feed.appendChild(postCard);
                 }
                 attachAdminMinorToggleHandler();
+                attachLikeButtonHandler();
+                console.log(posts);
 
             } catch (err) {
                 console.error(err);
@@ -433,7 +435,6 @@
                 media = `<video controls><source src="${post.path}"></video>`;
             }
             let adminMinorToggle = createAdminMinorToggle(post, user);
-            let likeButton = createLikeButton(post, user);
             let commentButton = createCommentButton(post, user);
 
             return `
@@ -517,8 +518,13 @@
         * @returns the button element to create the like button
         */
         function createLikeButton(post, user) {
-            let liked = user && post.likedBy?.includes(user._id);
-            let likeCount = post.likes || 0;
+            let liked = false;
+            if (user && Array.isArray(post.likedBy)) {
+                liked = post.likedBy.some(otherUserId =>
+                    String(otherUserId._id || otherUserId) === user._id
+                );
+            }
+            let likeCount = Number(post.likesCount);
 
             // Thumbs up outline
             const unclickedThumb = `
@@ -547,10 +553,10 @@
          * @param post object
          * @param user object
          * @returns the button element to create the comment button
-         */ 
+         */
         function createCommentButton(post, user) {
             const commentCount = post.comments?.length || 0;
-            
+
             const commentIcon = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" width="20" height="20"
             fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -565,6 +571,43 @@
 
             //temp note: clicking button -> popup to see all comments and comment input
             // guest can see comments in popup but input is hidden
+        }
+
+        /**
+        * Attach like reaction backend to the like button. 
+        */
+        function attachLikeButtonHandler() {
+            let likeButtons = document.getElementsByClassName("like-btn");
+
+            for (let btn of likeButtons) {
+                btn.addEventListener("click", async function () {
+                    let postId = btn.getAttribute("data-post-id");
+                    let response = await fetch(`/updateLikeReaction/${postId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    let result = await response.json();
+
+                    // Update counter
+                    let counter = btn.querySelector(".post-like-counter");
+                    counter.innerText = result.count;
+                    if (result.isLiked) {
+                        btn.classList.add("active");
+                        btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="like-icon filled" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path d="M7 10v11H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
+                        </svg>
+                        <span class="post-like-counter">${result.count}</span>`;
+                    } else {
+                        btn.classList.remove("active");
+                        btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="like-icon outline" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 10V21H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
+                        </svg>
+                        <span class="post-like-counter">${result.count}</span>`;
+                    }
+                });
+            }
         }
         loadPosts();
     </script>
