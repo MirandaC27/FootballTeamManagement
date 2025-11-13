@@ -51,7 +51,7 @@
 
         <!--account and log out dropdown-->
         <div id="account-dropdown" class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown"
                 aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person"
                     viewBox="0 0 16 16">
@@ -130,7 +130,8 @@
                 <!-- feed form (shown after clicking Create Post button) -->
                 <!-- caption input -->
                 <div id="postForm" class="post-form" style="display:none">
-                    <textarea id="postText" class="form-control mb-3" rows="3" placeholder="Enter a message"></textarea>
+                    <textarea id="postText" class="form-control mb-3" rows="3"
+                        placeholder="Write a message..."></textarea>
 
                     <!-- file (image, video) input -- only 1 file allowed -->
                     <div class="d-flex justify-content-between align-items-center">
@@ -181,31 +182,51 @@
         </div>
     </div>
 
-    <!-- COMMENT MODAL -->
+    <!-- COMMENT MODAL (social feed) -->
     <div class="modal" id="commentModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
+                <div class="modal-header d-flex w-100 justify-content-center position-relative">
+                    <h5 class="modal-title text-center m-0"></h5>
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Post Comments</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <!-- Close button stays right-aligned -->
+                    <button type="button" class="close position-absolute" style="right: 15px;" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
                 <div class="modal-body">
+                    <!-- Header (date, time) -->
+                    <div class="modal-owner-header d-flex align-items-center mb-3">
+                        <!-- Profile Icon -->
+                        <svg class="user-icon" viewBox="0 0 24 24" fill="none"
+                            style="width:45px; height:45px; min-width:45px;">
+                            <rect x="3" y="3" width="18" height="18" rx="4" fill="#556B8A" />
+                            <circle cx="12" cy="10" r="3" fill="#FFFFFF" />
+                            <path d="M7 17c0-2.5 2-4 5-4s5 1.5 5 4" fill="#FFFFFF" />
+                        </svg>
+
+                        <div class="modal-owner-line">
+                            <span id="modalTimeInfo" class="modal-time-info"></span>
+                        </div>
+                    </div>
+
                     <!-- Post -->
                     <div id="modalPostContent"></div>
+
+                    <!-- Counters -->
+                    <div id="modalLikeCounter" class="modal-like-summary"></div>
                     <hr>
 
                     <!-- Comments list -->
                     <div id="modalComments"></div>
 
-                    <!-- Comment input -->
+                    <!-- Comment text input -->
                     <div id="modalCommentInputWrapper" class="input-group mt-3">
                         <input type="text" id="modalCommentInput" class="form-control" placeholder="Write a comment...">
                         <div class="input-group-append">
-                            <button class="btn btn-primary" id="modalSubmitComment">Post</button>
+                            <button class="btn btn-primary" id="modalSubmitComment">➤</button>
                         </div>
                     </div>
                 </div>
@@ -599,7 +620,7 @@
             </svg>`;
 
             return `
-            <button class="footer-btn comment-btn" data-post-id="${post._id}">
+            <button class="footer-btn comment-btn" data-post-id="${post._id}" data-posted-by="${post.owner_id.name}">
                 ${commentIcon}
                 <span>${commentCount}</span>
             </button>`;
@@ -645,16 +666,61 @@
             }
         }
         loadPosts();
+    </script>
 
-
-        document.addEventListener("click", function (event) {
+    <script>
+        /**
+        * Modal popup and its content when the comment button is clicked. 
+        */
+        document.addEventListener("click", async function (event) {
             if (event.target.classList.contains("comment-btn")) {
+                const btn = event.target;
+                const postId = btn.getAttribute("data-post-id");
+                const ownerName = btn.getAttribute("data-posted-by");
+
+                // Title ([Owner]'s Post)
+                document.querySelector("#commentModal .modal-title").innerText =
+                    `${ownerName}'s Post`;
+
+                // Check user login to hide text input for guest users
+                // temp note: this should be in a separate function ---------
+                let userRes = await fetch('/loggedUser');
+                let user = await userRes.json();
+                if (!user) {
+                    document.getElementById("modalCommentInputWrapper")
+                        .classList.add("guest-hide");
+                } else {
+                    document.getElementById("modalCommentInputWrapper")
+                        .classList.remove("guest-hide");
+                }
+                //--------------------------------------------
+
+                // Post content
+                // temp note: this should be in a separate function ----------
+                const res = await fetch(`/getPost/${postId}`);
+                const post = await res.json();
+
+                document.getElementById("modalTimeInfo").innerText =
+                    `@${post.owner_id.username} · ${new Date(post.uploadedAt).toLocaleString()}`;
+
+                document.getElementById("modalPostContent").innerHTML = `
+                    ${post.type && post.type.startsWith("image")
+                        ? `<img src="${post.path}" style="max-width:100%">`
+                        : ""
+                    }
+                    ${post.type && post.type.startsWith("video")
+                        ? `<video controls style="width:100%"><source src="${post.path}"></video>`
+                        : ""
+                    }
+                    <p>${post.caption}</p>
+                `;
+                //---------------------------------
+
+                document.getElementById("modalLikeCounter").innerHTML = `
+                    <span class="like-post-emoji">👍</span> ${post.likesCount}`;
                 $("#commentModal").modal("show");
             }
         });
-
-
-
     </script>
 </body>
 

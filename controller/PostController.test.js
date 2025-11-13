@@ -174,7 +174,7 @@ test('Update like reaction success', async function () {
         params: { id: "p" },
         session: { user: { _id: "aa" } }
     };
-    let res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+    let res = { json: jest.fn(), send: jest.fn(), status: jest.fn().mockReturnThis() };
 
     dao.updateLikeReaction.mockResolvedValue({ isLiked: true, count: 121 });
     await controller.updateLikeReaction(req, res);
@@ -187,16 +187,15 @@ test('Update like reaction success', async function () {
  * Update like reaction fail test. 
  */
 test('Update like reaction error', async function () {
-
-    const req = {
+    let req = {
         params: { id: "p" },
         session: { user: { _id: "a" } }
     };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+    let res = { json: jest.fn(), send: jest.fn(), status: jest.fn().mockReturnThis() };
 
     dao.updateLikeReaction.mockRejectedValue(new Error("err"));
     await controller.updateLikeReaction(req, res);
 
     expect(res.status).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith({ error: "Error updating like" });
+    expect(res.send).toHaveBeenCalledWith("Error updating likes");
 });

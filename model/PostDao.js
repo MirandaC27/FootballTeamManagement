@@ -58,7 +58,7 @@ async function readAll() {
  * @returns post model object if found
  */
 async function read(id) {
-    return await postModel.findById(id);
+    return await postModel.findById(id).populate("owner_id", "name username");
 }
 
 /**

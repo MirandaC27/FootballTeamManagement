@@ -83,7 +83,24 @@ const updateLikeReaction = async (req, res) => {
         res.json({ isLiked: result.isLiked, count: result.count });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Error updating like" });
+        res.status(500).send('Error updating likes');
+    }
+};
+
+/**
+ * Get a single post and its content.
+ * @param {*} req request object
+ * @param {*} res response object
+ */
+const getPost = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const post = await dao.read(postId);
+        res.json(post);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error getting a post');
     }
 };
 
@@ -91,5 +108,6 @@ module.exports = {
     uploadPost,
     getAllPosts,
     updateContainsMinors,
-    updateLikeReaction
+    updateLikeReaction,
+    getPost
 };

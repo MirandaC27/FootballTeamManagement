@@ -1,5 +1,6 @@
 const dbcon = require('./DbConnection');
 const dao = require('./PostDao');
+require("../model/UserDao");
 
 /**
  * Executed once before all tests
