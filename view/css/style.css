@@ -809,7 +809,8 @@ main {
   margin: 20px auto;
   border: 1px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(6px);
-  margin-top: 80px; /* this is TEMPORARY */
+  margin-top: 80px;
+  /* this is TEMPORARY */
 }
 
 .reaction-card {
@@ -874,6 +875,29 @@ main {
 
 .guest-disabled .reaction-card:active,
 .guest-disabled .reaction-card:active .emoji {
+  transform: none !important;
+}
+
+.match-disabled {
+  pointer-events: none;
+  cursor: default !important;
+}
+
+.match-disabled .reaction-card {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.match-disabled .reaction-card:hover {
+  background: none !important;
+}
+
+.match-disabled .reaction-card:hover .emoji {
+  transform: none !important;
+}
+
+.match-disabled .reaction-card:active,
+.match-disabled .reaction-card:active .emoji {
   transform: none !important;
 }
 /* --------------------- */

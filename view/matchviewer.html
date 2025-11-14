@@ -218,6 +218,14 @@
             document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
+
+            // Make reaction bar clickable only when match is "In Progress"
+            const reactionBar = document.getElementById("reactionBar");
+            if (match.matchStatus !== "In Progress") {
+                reactionBar.classList.add("match-disabled");
+            } else {
+                reactionBar.classList.remove("match-disabled");
+            }
         }
 
 
