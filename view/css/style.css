@@ -786,3 +786,12 @@ main {
 #modalLikeCounter.right {
   justify-content: flex-end;
 }
+
+#modalCommentCounter {
+    font-size: 15px;
+    color: #888;
+    margin: 6px 0 10px 41em;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
