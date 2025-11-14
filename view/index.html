@@ -709,8 +709,7 @@
 
                 // Comment counter (same row as like counter but right align)
                 document.getElementById("modalCommentCounter").innerHTML =
-                    `${post.comments.length} comments`;
-
+                    `${post.comments.length} ${post.comments.length == 1 ? "comment" : "comments"}`;
 
                 const commentsRes = await fetch(`/getAllComments/${postId}`);
                 const comments = await commentsRes.json();
