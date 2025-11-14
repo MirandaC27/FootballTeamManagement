@@ -7,31 +7,31 @@ const matchDao = require('../model/MatchDao');
  * @param {*} res response object used to send back
  */
 const createNewMatch = async (req, res) => {
-    try {
-        const { homeTeam, awayTeam, homeScore, awayScore, matchDate, matchLocation, matchStatus } = req.body;
+  try {
+    const { homeTeam, awayTeam, homeScore, awayScore, matchDate, matchLocation, matchStatus } = req.body;
 
-        // Validate required attributes
-        if (!homeTeam || !awayTeam || homeScore == null || awayScore == null || !matchDate || !matchLocation || !matchStatus) {
-            return res.status(400).send('All match attributes are required');
-        }
-
-        const newMatch = new matchDao.matchModel({
-            homeTeam,
-            awayTeam,
-            homeScore,
-            awayScore,
-            matchDate,
-            matchLocation,
-            matchStatus,
-        });
-
-        await newMatch.save();
-        res.status(200).json({ message: 'Match added successfully' });
-        
-    } catch (err) {
-        console.error('Could not create match:', err);
-        res.status(500).send('Could not create match');
+    // Validate required attributes
+    if (!homeTeam || !awayTeam || homeScore == null || awayScore == null || !matchDate || !matchLocation || !matchStatus) {
+      return res.status(400).send('All match attributes are required');
     }
+
+    const newMatch = new matchDao.matchModel({
+      homeTeam,
+      awayTeam,
+      homeScore,
+      awayScore,
+      matchDate,
+      matchLocation,
+      matchStatus,
+    });
+
+    await newMatch.save();
+    res.status(200).json({ message: 'Match added successfully' });
+
+  } catch (err) {
+    console.error('Could not create match:', err);
+    res.status(500).send('Could not create match');
+  }
 };
 
 /**
@@ -40,19 +40,19 @@ const createNewMatch = async (req, res) => {
  * @param {*} res response object used to send back
  */
 const deleteMatch = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deleted = await matchDao.matchModel.findByIdAndDelete(id);
+  try {
+    const { id } = req.params;
+    const deleted = await matchDao.matchModel.findByIdAndDelete(id);
 
-        if (!deleted) {
-            return res.status(404).json({ message: 'Match not found' });
-        }
-
-        res.json({ message: 'Match deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting match:', err);
-        res.status(500).json({ message: 'Server error while deleting match' });
+    if (!deleted) {
+      return res.status(404).json({ message: 'Match not found' });
     }
+
+    res.json({ message: 'Match deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting match:', err);
+    res.status(500).json({ message: 'Server error while deleting match' });
+  }
 };
 
 
@@ -85,13 +85,13 @@ const updateMatch = async (req, res) => {
  * @param {*} res response object used to send back
  */
 const getAllMatches = async (req, res) => {
-    try{
-        const matches = await matchDao.matchModel.find();
-        res.json(matches);
-    } catch (err) {
-        console.error('Could not get matches:', err);
-        res.status(500).send('Could not get matches');
-    }
+  try {
+    const matches = await matchDao.matchModel.find();
+    res.json(matches);
+  } catch (err) {
+    console.error('Could not get matches:', err);
+    res.status(500).send('Could not get matches');
+  }
 };
 
 /**
@@ -100,7 +100,7 @@ const getAllMatches = async (req, res) => {
  * @param {*} res response object used to send back
  */
 const getMatchDetails = async (req, res) => {
-    try{
+  try {
     const matchId = req.params.id;
     const match = await matchDao.matchModel.findById(matchId).lean();
 
@@ -115,11 +115,38 @@ const getMatchDetails = async (req, res) => {
   }
 };
 
+/**
+ * Toggle a reaction on a match.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
+async function updateMatchReaction(req, res) {
+  try {
+    const matchId = req.params.id;
+    const userId = req.session.user._id;
+    const reactionType = req.body.reaction; 
+
+    const result = await matchDao.updateMatchReaction(matchId, userId, reactionType);
+
+    if (!result) {
+      return res.status(404).send("Match not found");
+    }
+    res.json({
+      isReacted: result.isReacted,
+      count: result.count
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating match reaction");
+  }
+}
 
 module.exports = {
-    createNewMatch,
-    deleteMatch,
-    updateMatch,
-    getAllMatches,
-    getMatchDetails,
+  createNewMatch,
+  deleteMatch,
+  updateMatch,
+  getAllMatches,
+  getMatchDetails,
+  updateMatchReaction,
 };

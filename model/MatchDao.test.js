@@ -152,3 +152,30 @@ test('Update non-existent match returns null', async () => {
   const updated = await dao.updateById(badId, { matchStatus: 'Cancelled' });
   expect(updated).toBeNull();
 });
+
+/**
+ * Reaction tests
+ */
+test('toggle reaction, adding reaction', async () => {
+  const created = await dao.create(validMatchData);
+  const userId = "691693886b8759198c4f2a22";
+  const reactionType = 'happy';
+  const result = await dao.updateMatchReaction(created._id, userId, reactionType);
+  expect(result.isReacted).toBe(true);
+  expect(result.count).toBe(1);
+  const updatedMatch = await dao.readById(created._id);
+  expect(updatedMatch.reactions[reactionType].map(String)).toContain(userId);
+});
+
+test('toggle reaction, removing reaction', async () => {
+  const created = await dao.create(validMatchData);
+  const userId = "691693886b8759198c4f2a22";
+  const reactionType = 'happy';
+  created.reactions[reactionType].push(userId);
+  await created.save();
+  const result = await dao.updateMatchReaction(created._id, userId, reactionType);
+  expect(result.isReacted).toBe(false);
+  expect(result.count).toBe(0);
+  const updatedMatch = await dao.readById(created._id);
+  expect(updatedMatch.reactions[reactionType].map(String)).not.toContain(userId);
+});

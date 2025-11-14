@@ -234,3 +234,68 @@ test('Get match details DAO error', async () => {
   expect(res.status).toHaveBeenCalledWith(500);
   expect(res.send).toHaveBeenCalledWith('Error loading match');
 });
+
+/**
+ * Match Reaction tests
+ */
+test("Toggle match reaction successfully", async () => {
+  const req = {
+    params: { id: "123" },
+    session: { user: { _id: "abc" } },
+    body: { reaction: "happy" }
+  };
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn()
+  };
+
+  const daoResult = { isReacted: true, count: 1 };
+  matchDao.updateMatchReaction.mockResolvedValue(daoResult);
+  await controller.updateMatchReaction(req, res);
+
+  expect(matchDao.updateMatchReaction).toHaveBeenCalledWith("123", "abc", "happy");
+  expect(res.json).toHaveBeenCalledWith({
+    isReacted: true,
+    count: 1
+  });
+  expect(res.status).not.toHaveBeenCalled();
+});
+
+test("Toggle reaction returns 404 if match not found", async () => {
+  const req = {
+    params: { id: "123" },
+    session: { user: { _id: "abc" } },
+    body: { reaction: "happy" }
+  };
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn()
+  };
+
+  matchDao.updateMatchReaction.mockResolvedValue(null);
+  await controller.updateMatchReaction(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(404);
+  expect(res.send).toHaveBeenCalledWith("Match not found");
+});
+
+test("Toggle reaction handles server error", async () => {
+  const req = {
+    params: { id: "123" },
+    session: { user: { _id: "abc" } },
+    body: { reaction: "sad" }
+  };
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn()
+  };
+
+  matchDao.updateMatchReaction.mockRejectedValue(new Error("DB error"));
+  await controller.updateMatchReaction(req, res);
+
+  expect(res.status).toHaveBeenCalled();
+  expect(res.send).toHaveBeenCalledWith("Error updating match reaction");
+});

@@ -9,39 +9,47 @@ const MATCH_STATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancell
 
 //match view schema
 const matchSchema = new mongoose.Schema({
-    homeTeam: {
-        //type: mongoose.Schema.Types.ObjectId,
-        //ref: 'team',
-        type: String,
-        required: true
-    },
-    awayTeam:{
-        //type: mongoose.Schema.Types.ObjectId,
-        //ref: 'team',
-        type: String,
-        required: true
-    },
-    homeScore:{
-        type: Number,
-        default: -1
-    },
-    awayScore:{
-        type: Number,
-        default: -1
-    },
-    matchDate:{
-        type: Date,
-        required: true
-    },
-    matchLocation:{
-        type: String,
-        required: true
-    },
-    matchStatus:{
-        type: String,
-        required: true,
-        default: 'Scheduled'
-    }
+  homeTeam: {
+    //type: mongoose.Schema.Types.ObjectId,
+    //ref: 'team',
+    type: String,
+    required: true
+  },
+  awayTeam: {
+    //type: mongoose.Schema.Types.ObjectId,
+    //ref: 'team',
+    type: String,
+    required: true
+  },
+  homeScore: {
+    type: Number,
+    default: -1
+  },
+  awayScore: {
+    type: Number,
+    default: -1
+  },
+  matchDate: {
+    type: Date,
+    required: true
+  },
+  matchLocation: {
+    type: String,
+    required: true
+  },
+  matchStatus: {
+    type: String,
+    required: true,
+    default: 'Scheduled'
+  },
+  reactions: {
+    happy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    neutral: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    sad: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    angry: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    like: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    dislike: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }]
+  }
 });
 
 
@@ -49,7 +57,7 @@ const matchModel = mongoose.model('match', matchSchema);
 
 //Test functions
 
-async function readAll(){
+async function readAll() {
   return await matchModel.find();
 }
 
@@ -57,7 +65,7 @@ async function readAll(){
  * create a new match and save it in database.
  * @param {*} newMatch data for new match
  */
-async function create(newMatch){
+async function create(newMatch) {
   const match = new matchModel(newMatch);
   await match.save();
   return match;
@@ -67,7 +75,7 @@ async function create(newMatch){
  * find an existing match in the database.
  * @param {*} id data for new match
  */
-async function readById(id){
+async function readById(id) {
   return await matchModel.findById(id);
 }
 
@@ -75,15 +83,15 @@ async function readById(id){
  * update an existing match in the database.
  * @param {*} id data for new match
  */
-async function updateById(id, newData){
-  return await matchModel.findByIdAndUpdate(id, newData, {new:true});
+async function updateById(id, newData) {
+  return await matchModel.findByIdAndUpdate(id, newData, { new: true });
 }
 
 /**
  * delete an existing match in the database.
  * @param {*} id data for new match
  */
-async function remove(id){
+async function remove(id) {
   return await matchModel.findByIdAndDelete(id);
 }
 
@@ -91,10 +99,31 @@ async function remove(id){
  * delete all existing matches in the database.
  * @param {*} id data for new match
  */
-async function removeAll(){
+async function removeAll() {
   await matchModel.deleteMany();
 }
 
+/**
+ * Toggle a match reaction.
+ * @param {*} matchId match id
+ * @param {*} userId user id
+ * @param {*} reactionType reaction type
+ * @returns 
+ */
+async function updateMatchReaction(matchId, userId, reactionType) {
+  const match = await matchModel.findById(matchId);
+  const reactionArr = match.reactions[reactionType];
+  const alreadyReacted = reactionArr.includes(userId);
+
+  // Remove reaction if already been reacted/clicked on 
+  if (alreadyReacted) {
+    match.reactions[reactionType].pull(userId);
+  } else {
+    match.reactions[reactionType].push(userId);
+  }
+  await match.save();
+  return { isReacted: !alreadyReacted, count: match.reactions[reactionType].length };
+}
 
 module.exports = {
   matchModel,
@@ -103,5 +132,6 @@ module.exports = {
   updateById,
   readById,
   remove,
-  removeAll
+  removeAll,
+  updateMatchReaction
 };
