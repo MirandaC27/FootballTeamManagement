@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
 </head>
+
 <body>
   <!-- Navbar -->
   <!--<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -97,6 +99,23 @@
       <tbody id="upcoming-list"></tbody>
     </table>
 
+    <!-- LIVE MATCH (in progress) -->
+    <h3 class="mt-4 text-center">Live Matches</h3>
+    <table class="table table-striped" id="inprogress-matches-table">
+      <thead>
+        <tr>
+          <th>Home Team</th>
+          <th>Away Team</th>
+          <th>Score</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="inprogress-list"></tbody>
+    </table>
+
     <h3 class="mt-4 text-center">Past Matches</h3>
     <table class="table table-striped" id="past-matches-table">
       <thead>
@@ -114,30 +133,34 @@
     </table>
   </div>
 
- <script>
-  document.addEventListener('DOMContentLoaded', loadMatches);
+  <script>
+    document.addEventListener('DOMContentLoaded', loadMatches);
 
-  let editMode = false;
-  let editMatchId = null;
+    let editMode = false;
+    let editMatchId = null;
 
-  async function loadMatches() {
-    const res = await fetch('/getAllMatches');
-    const matches = await res.json();
-    const upcominglist = document.getElementById('upcoming-list');
-    const pastList = document.getElementById('past-list');
-    upcominglist.innerHTML = '';
-    pastList.innerHTML = '';
+    async function loadMatches() {
+      const res = await fetch('/getAllMatches');
+      const matches = await res.json();
+      const upcominglist = document.getElementById('upcoming-list');
+      const pastList = document.getElementById('past-list');
+      const inprogressList = document.getElementById('inprogress-list'); // added
+      upcominglist.innerHTML = '';
+      pastList.innerHTML = '';
+      inprogressList.innerHTML = ''; // added
 
-    const upcomingMatches = matches.filter(m => m.matchStatus === 'Scheduled');
-    const pastMatches = matches.filter(m => m.matchStatus === 'Final');
 
-    upcomingMatches.forEach(m => {
-      const matchviewerURL = `matchviewer.html?id=${m._id}`;
-      
-      const row = document.createElement('tr');
-      row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
-      row.className = 'clickable-row';
-      row.innerHTML = `
+      const upcomingMatches = matches.filter(m => m.matchStatus === 'Scheduled');
+      const pastMatches = matches.filter(m => m.matchStatus === 'Final');
+      const inProgressMatches = matches.filter(m => m.matchStatus === 'In Progress'); // added
+
+      upcomingMatches.forEach(m => {
+        const matchviewerURL = `matchviewer.html?id=${m._id}`;
+
+        const row = document.createElement('tr');
+        row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
+        row.className = 'clickable-row';
+        row.innerHTML = `
         <td>${m.homeTeam}</td>
         <td>${m.awayTeam}</td>
         <td>${m.homeScore >= 0 && m.awayScore >= 0 ? `${m.homeScore} - ${m.awayScore}` : 'N/A'}</td>
@@ -149,16 +172,39 @@
           <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); confirmDelete('${m._id}')">Delete</button>
         </td>
       `;
-      upcominglist.appendChild(row);
-    });
+        upcominglist.appendChild(row);
+      });
 
-    pastMatches.forEach(m => {
-      const matchviewerURL = `matchviewer.html?id=${m._id}`;
-      
-      const row = document.createElement('tr');
-      row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
-      row.className = 'clickable-row';
-      row.innerHTML = `
+      // added
+      inProgressMatches.forEach(m => { 
+        const matchviewerURL = `matchviewer.html?id=${m._id}`;
+
+        const row = document.createElement('tr');
+        row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
+        row.className = 'clickable-row';
+        row.innerHTML = `
+        <td>${m.homeTeam}</td>
+        <td>${m.awayTeam}</td>
+        <td>${m.homeScore >= 0 && m.awayScore >= 0 ? `${m.homeScore} - ${m.awayScore}` : 'N/A'}</td>
+        <td>${new Date(m.matchDate).toLocaleDateString()}</td>
+        <td>${m.matchLocation}</td>
+        <td>${m.matchStatus}</td>
+        <td>
+          <button class="btn btn-info btn-sm mr-1" onclick="event.stopPropagation(); showEditForm('${m._id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); confirmDelete('${m._id}')">Delete</button>
+        </td>
+      `;
+        inprogressList.appendChild(row);
+      });
+
+
+      pastMatches.forEach(m => {
+        const matchviewerURL = `matchviewer.html?id=${m._id}`;
+
+        const row = document.createElement('tr');
+        row.setAttribute('onclick', `window.location.href='${matchviewerURL}'`);
+        row.className = 'clickable-row';
+        row.innerHTML = `
         <td>${m.homeTeam}</td>
         <td>${m.awayTeam}</td>
         <td>${m.homeScore >= 0 && m.awayScore >= 0 ? `${m.homeScore} - ${m.awayScore}` : 'N/A'}</td>
@@ -170,124 +216,125 @@
           <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteMatch('${m._id}')">Delete</button>
         </td>
       `;
-      pastList.appendChild(row);
-    });
-  }
-
-  function confirmDelete(id) {
-    if (confirm('Are you sure you want to delete this match? This action cannot be undone.')) {
-      deleteMatch(id);
-    }
-  }
-
-
-  async function deleteMatch(id) {
-    const res = await fetch('/deleteMatch/' + id, { method: 'DELETE' });
-    if (res.ok) {
-      showStatus('Match deleted successfully!', 'success');
-      loadMatches();
-    } else {
-      showStatus('Failed to delete match.', 'danger');
-    }
-  }
-
-  const addForm = document.getElementById('add-match-form');
-  const showAddForm = document.getElementById('show-add-form');
-  const formStatus = document.getElementById('form-status');
-
-  showAddForm.addEventListener('click', () => {
-    addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
-    resetFormMode();
-  });
-
-  addForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const match = {
-      homeTeam: document.getElementById('homeTeam').value,
-      awayTeam: document.getElementById('awayTeam').value,
-      homeScore: parseInt(document.getElementById('homeScore').value),
-      awayScore: parseInt(document.getElementById('awayScore').value),
-      matchDate: document.getElementById('matchDate').value,
-      matchLocation: document.getElementById('matchLocation').value,
-      matchStatus: document.getElementById('matchStatus').value
-    };
-
-    let res;
-    if (editMode && editMatchId) {
-      // Update existing match
-      res = await fetch('/updateMatch/' + editMatchId, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(match)
-      });
-    } else {
-      // Create new match
-      res = await fetch('/createMatch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(match)
+        pastList.appendChild(row);
       });
     }
 
-    if (res.ok) {
-      const message = editMode ? 'Match updated successfully!' : 'Match added successfully!';
-      showStatus(message, 'success');
-      addForm.reset();
-      addForm.style.display = 'none';
+    function confirmDelete(id) {
+      if (confirm('Are you sure you want to delete this match? This action cannot be undone.')) {
+        deleteMatch(id);
+      }
+    }
+
+
+    async function deleteMatch(id) {
+      const res = await fetch('/deleteMatch/' + id, { method: 'DELETE' });
+      if (res.ok) {
+        showStatus('Match deleted successfully!', 'success');
+        loadMatches();
+      } else {
+        showStatus('Failed to delete match.', 'danger');
+      }
+    }
+
+    const addForm = document.getElementById('add-match-form');
+    const showAddForm = document.getElementById('show-add-form');
+    const formStatus = document.getElementById('form-status');
+
+    showAddForm.addEventListener('click', () => {
+      addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
       resetFormMode();
-      loadMatches();
-    } else {
-      const message = editMode ? 'Failed to update match.' : 'Failed to add match.';
-      showStatus(message, 'danger');
+    });
+
+    addForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const match = {
+        homeTeam: document.getElementById('homeTeam').value,
+        awayTeam: document.getElementById('awayTeam').value,
+        homeScore: parseInt(document.getElementById('homeScore').value),
+        awayScore: parseInt(document.getElementById('awayScore').value),
+        matchDate: document.getElementById('matchDate').value,
+        matchLocation: document.getElementById('matchLocation').value,
+        matchStatus: document.getElementById('matchStatus').value
+      };
+
+      let res;
+      if (editMode && editMatchId) {
+        // Update existing match
+        res = await fetch('/updateMatch/' + editMatchId, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(match)
+        });
+      } else {
+        // Create new match
+        res = await fetch('/createMatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(match)
+        });
+      }
+
+      if (res.ok) {
+        const message = editMode ? 'Match updated successfully!' : 'Match added successfully!';
+        showStatus(message, 'success');
+        addForm.reset();
+        addForm.style.display = 'none';
+        resetFormMode();
+        loadMatches();
+      } else {
+        const message = editMode ? 'Failed to update match.' : 'Failed to add match.';
+        showStatus(message, 'danger');
+      }
+    });
+
+    async function showEditForm(id) {
+      const res = await fetch(`/getMatchDetails/${id}`);
+      if (!res.ok) {
+        alert('Failed to load match details');
+        return;
+      }
+
+      const match = await res.json();
+
+      // Fill form fields with match data
+      document.getElementById('homeTeam').value = match.homeTeam;
+      document.getElementById('awayTeam').value = match.awayTeam;
+      document.getElementById('homeScore').value = match.homeScore;
+      document.getElementById('awayScore').value = match.awayScore;
+      document.getElementById('matchDate').value = match.matchDate.split('T')[0];
+      document.getElementById('matchLocation').value = match.matchLocation;
+      document.getElementById('matchStatus').value = match.matchStatus;
+
+      // Show the form in edit mode
+      addForm.style.display = 'block';
+      const submitButton = addForm.querySelector('button[type="submit"]');
+      submitButton.textContent = 'Update Match';
+      submitButton.classList.remove('btn-primary');
+      submitButton.classList.add('btn-warning');
+
+      editMode = true;
+      editMatchId = id;
     }
-  });
 
-  async function showEditForm(id) {
-    const res = await fetch(`/getMatchDetails/${id}`);
-    if (!res.ok) {
-      alert('Failed to load match details');
-      return;
+    function resetFormMode() {
+      const submitButton = addForm.querySelector('button[type="submit"]');
+      submitButton.textContent = 'Add Match';
+      submitButton.classList.remove('btn-warning');
+      submitButton.classList.add('btn-primary');
+      editMode = false;
+      editMatchId = null;
     }
 
-    const match = await res.json();
-
-    // Fill form fields with match data
-    document.getElementById('homeTeam').value = match.homeTeam;
-    document.getElementById('awayTeam').value = match.awayTeam;
-    document.getElementById('homeScore').value = match.homeScore;
-    document.getElementById('awayScore').value = match.awayScore;
-    document.getElementById('matchDate').value = match.matchDate.split('T')[0];
-    document.getElementById('matchLocation').value = match.matchLocation;
-    document.getElementById('matchStatus').value = match.matchStatus;
-
-    // Show the form in edit mode
-    addForm.style.display = 'block';
-    const submitButton = addForm.querySelector('button[type="submit"]');
-    submitButton.textContent = 'Update Match';
-    submitButton.classList.remove('btn-primary');
-    submitButton.classList.add('btn-warning');
-
-    editMode = true;
-    editMatchId = id;
-  }
-
-  function resetFormMode() {
-    const submitButton = addForm.querySelector('button[type="submit"]');
-    submitButton.textContent = 'Add Match';
-    submitButton.classList.remove('btn-warning');
-    submitButton.classList.add('btn-primary');
-    editMode = false;
-    editMatchId = null;
-  }
-
-  function showStatus(message, type) {
-    formStatus.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
-    setTimeout(() => {
-    formStatus.innerHTML = '';
-    }, 3000);
-  }
-</script>
+    function showStatus(message, type) {
+      formStatus.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+      setTimeout(() => {
+        formStatus.innerHTML = '';
+      }, 3000);
+    }
+  </script>
 
 </body>
+
 </html>
