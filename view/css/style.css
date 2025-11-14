@@ -601,14 +601,14 @@ main {
   position: absolute;
   bottom: 0;
   width: 50%;
-  height: 100px;
+  height: 80px;
   z-index: 1;
 }
 
 /* left triangle bottom overlay (gray) */
 .large-banner::before {
   left: 0;
-  background-color: rgba(227, 178, 60, 0.9);
+  background-color: rgba(126, 128, 135, 0.9);
   clip-path: polygon(0 0, 100% 100%, 0% 100%);
 }
 
