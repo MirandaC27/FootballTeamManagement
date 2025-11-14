@@ -115,7 +115,7 @@
     </main>
 
 
-    <!-- Reaction Bar -->
+    <!-- REACTION BAR -->
     <section id="reactionBar" class="reaction-bar guest-disabled">
         <button class="reaction-card" data-reaction="happy">
             <span class="emoji">😄</span>
@@ -219,6 +219,29 @@
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
+            loadReactions(match);
+        }
+
+    </script>
+
+
+    <!-- REACTION BAR SCRIPT -->
+    <script>
+        /**
+         * Load all reactions for a match.
+         * @param match object
+         */
+        async function loadReactions(match) {
+            const userRes = await fetch('/loggedUser');
+            const user = await userRes.json();
+
+            let reactionTypes = ["happy", "neutral", "sad", "angry", "like", "dislike"];
+            for (let i = 0; i < reactionTypes.length; i++) {
+                const type = reactionTypes[i];
+                updateReactionCounter(match, type);
+                showActiveReaction(match, type, user);
+            }
+
             // Make reaction bar clickable only when match is "In Progress"
             const reactionBar = document.getElementById("reactionBar");
             if (match.matchStatus !== "In Progress") {
@@ -228,13 +251,39 @@
             }
         }
 
-
-    </script>
-
-    <!-- REACTION BAR SCRIPT -->
-    <script>
         /**
-         * Update the reaction bar visibility by hiding it if guest or showing it if logged in.
+         * Update each match reaction's counter.
+         * @param match object
+         * @param type what reaction (noted from the html)
+         */
+        async function updateReactionCounter(match, type) {
+            const counter = document.querySelector(`[data-count-${type}]`);
+            if (counter && match.reactions && match.reactions[type]) {
+                counter.innerText = match.reactions[type].length;
+            }
+        }
+
+        /**
+         * Show user's active/clicked reactions as bold/highlighted.
+         * @param match object
+         * @param type what reaction
+         * @param user currently logged in
+         */
+        async function showActiveReaction(match, type, user) {
+            if (user && match.reactions && match.reactions[type]) {
+                const hasReacted = match.reactions[type].includes(user._id);
+                if (hasReacted) {
+                    const btn = document.querySelector(`.reaction-card[data-reaction="${type}"]`);
+                    // Apply the highlight CSS to the button
+                    if (btn) {
+                        btn.classList.add("active");
+                    }
+                }
+            }
+        }
+
+        /**
+         * Update the reaction bar visibility by hiding it if guest or show it if logged in.
          */
         async function updateReactionVisibility() {
             let res = await fetch('/loggedUser');
@@ -248,8 +297,47 @@
             }
         }
 
+        /**
+        * Attach match reaction handler backend to each reaction button. 
+        */
+        function attachReactionHandler() {
+            let reactionBtns = document.getElementsByClassName("reaction-card");
+
+            for (let btn of reactionBtns) {
+                btn.addEventListener("click", async function () {
+                    const reaction = btn.getAttribute("data-reaction");
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const matchId = urlParams.get('id');
+                    const response = await fetch(`/updateMatchReaction/${matchId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ reaction })
+                    });
+                    const result = await response.json();
+                    updateReactionButtonDisplay(btn, result);
+                });
+            }
+        }
+
+        /**
+         * Update the UI for a reaction button.
+         * @param btn reaction button element
+         * @param result response data
+         */
+        function updateReactionButtonDisplay(btn, result) {
+            let counter = btn.querySelector(".reaction-count");
+            counter.innerText = result.count;
+            if (result.isReacted) {
+                // Counter increments
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        }
         updateReactionVisibility();
+        attachReactionHandler();
     </script>
+
 
 </body>
 

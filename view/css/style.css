@@ -799,15 +799,13 @@ main {
 /* LIVE MATCH REACTION BAR */
 .reaction-bar {
   display: flex;
-  background: linear-gradient(135deg,
-      rgba(192, 255, 249, 0.55),
-      rgba(235, 220, 255, 0.55));
+  background: white;
   padding: 6px 0;
   border-radius: 16px;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
   max-width: 500px;
   margin: 20px auto;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(6px);
   margin-top: 80px; /* this is TEMPORARY */
 }
@@ -828,7 +826,7 @@ main {
 }
 
 .reaction-card:not(:last-child) {
-  border-right: 1px solid rgba(255, 255, 255, 0.543);
+  border-right: 1px solid rgba(125, 141, 151, 0.543);
 }
 
 .reaction-card .emoji {
@@ -839,7 +837,7 @@ main {
 }
 
 .reaction-card:hover {
-  background: rgba(210, 205, 255, 0.35);
+  background: rgba(181, 182, 240, 0.35);
 }
 
 .reaction-card:hover .emoji {
@@ -899,4 +897,13 @@ main {
 .match-disabled .reaction-card:active .emoji {
   transform: none !important;
 }
-/* --------------------- */
+
+.reaction-card.active .emoji {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 8px rgba(255, 234, 1, 0.575));
+}
+
+.reaction-card.active .reaction-count {
+  font-weight: 700;
+  color: #000000;
+}
