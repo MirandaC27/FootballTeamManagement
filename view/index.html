@@ -750,8 +750,9 @@
             const post = await res.json();
 
             // Header (username, date, time)
-            document.getElementById("modalTimeInfo").innerText =
-                `@${post.owner_id.username} · ${new Date(post.uploadedAt).toLocaleString()}`;
+            document.getElementById("modalTimeInfo").innerHTML = `
+            <span class="username">@${post.owner_id.username}</span>
+            <span class="datetime">${new Date(post.uploadedAt).toLocaleString()}</span>`;
 
             let mediaHTML = "";
             if (post.type?.startsWith("image")) {
@@ -808,34 +809,31 @@
         */
         function createComment(comment) {
             return `
-            <div class="comment-item d-flex mb-3">
-            <!-- Profile Icon -->
-                <svg class="user-icon" viewBox="0 0 24 24" fill="none"
-                    style="width:38px; height:38px; min-width:38px;">
-                    <rect x="3" y="3" width="18" height="18" rx="4" fill="#556B8A"></rect>
-                    <circle cx="12" cy="10" r="3" fill="#FFFFFF"></circle>
-                    <path d="M7 17c0-2.5 2-4 5-4s5 1.5 5 4" fill="#FFFFFF"></path>
-                </svg>
+            <div class="comment-item mb-3">
+                <div class="comment-header">
+                    <!-- Profile Icon -->
+                        <svg class="user-icon" viewBox="0 0 24 24" fill="none"
+                            style="width:38px; height:38px; min-width:38px;">
+                            <rect x="3" y="3" width="18" height="18" rx="4" fill="#556B8A"></rect>
+                            <circle cx="12" cy="10" r="3" fill="#FFFFFF"></circle>
+                            <path d="M7 17c0-2.5 2-4 5-4s5 1.5 5 4" fill="#FFFFFF"></path>
+                        </svg>
 
-            <div class="ml-2">
-                <!-- Header -->
-                <div class="d-flex align-items-center mb-1">
-                    <strong>${comment.owner_id?.name}</strong>
-                    <span style="color:gray; font-size:0.85rem; margin-left:6px;">
-                        @${comment.owner_id?.username}
-                    </span>
-                    <span style="color:gray; font-size:0.75rem; margin-left:8px;">
-                        ${new Date(comment.uploadedAt).toLocaleString()}
-                    </span>
-                </div>
+                        <!-- name, username (left) -->
+                        <span class="comment-name">${comment.owner_id?.name}</span>
+                        <span class="comment-username">@${comment.owner_id?.username}</span>
 
-                <!-- Message -->
-                <div class="comment-message" style="font-size:0.95rem;">
-                    ${comment.message}
-                </div>
-            </div>
-        </div>`;
-        }
+                        <!-- date, time (right) -->
+                        <span class="comment-datetime">${new Date(comment.uploadedAt).toLocaleString()}</span>
+                    </div>
+
+                    <!-- MESSAGE -->
+                    <div class="comment-message" style="font-size:0.95rem; margin-left:48px;">
+                        ${comment.message}
+                    </div>
+                    <hr>
+                </div>`;
+            }
     </script>
 </body>
 

@@ -575,7 +575,6 @@ main {
 .large-banner-text {
   position: absolute;
   bottom: 90px;
-  /* adjust placement */
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -740,9 +739,22 @@ main {
 /* modal header */
 .modal-owner-line {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  margin-top: 5px;
+  width: 100%;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.modal-time-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.modal-time-info .datetime {
+  white-space: nowrap;
+  margin-left: auto;
 }
 
 .modal-owner-line .user-icon {
@@ -790,10 +802,40 @@ main {
 #modalCommentCounter {
   font-size: 15px;
   color: #888;
-  margin: 6px 0 10px 41em;
+  margin: 6px 0 10px 41.7em;
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.comment-name {
+  font-weight: 600;
+}
+
+.comment-username {
+  color: gray;
+  font-size: 0.85rem;
+}
+
+.comment-datetime {
+  color: gray;
+  font-size: 0.80rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.comment-item hr {
+  border: 0;
+  border-bottom: 1.5px solid #e2e2e2;
+  margin-top: 10px;
 }
 
 /* LIVE MATCH REACTION BAR */
@@ -807,7 +849,7 @@ main {
   margin: 20px auto;
   border: 3px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(6px);
-  margin-top: 80px; /* this is TEMPORARY */
+  margin-top: 80px; /*<-- this is TEMPORARY */
 }
 
 .reaction-card {
