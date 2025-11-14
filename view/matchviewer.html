@@ -114,6 +114,41 @@
         </section>
     </main>
 
+
+    <!-- Reaction Bar -->
+    <section id="reactionBar" class="reaction-bar guest-disabled">
+        <button class="reaction-card" data-reaction="happy">
+            <span class="emoji">😄</span>
+            <span class="reaction-count" data-count-happy>0</span>
+        </button>
+
+        <button class="reaction-card" data-reaction="neutral">
+            <span class="emoji">😐</span>
+            <span class="reaction-count" data-count-neutral>0</span>
+        </button>
+
+        <button class="reaction-card" data-reaction="sad">
+            <span class="emoji">😢</span>
+            <span class="reaction-count" data-count-sad>0</span>
+        </button>
+
+        <button class="reaction-card" data-reaction="angry">
+            <span class="emoji">😡</span>
+            <span class="reaction-count" data-count-angry>0</span>
+        </button>
+
+        <button class="reaction-card" data-reaction="like">
+            <span class="emoji">👍</span>
+            <span class="reaction-count" data-count-like>0</span>
+        </button>
+
+        <button class="reaction-card" data-reaction="dislike">
+            <span class="emoji">👎</span>
+            <span class="reaction-count" data-count-dislike>0</span>
+        </button>
+    </section>
+
+
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -124,7 +159,7 @@
             if (backButton) {
                 backButton.addEventListener('click', () => {
                     // Tells the browser to go back one step in its history
-                    window.history.back(); 
+                    window.history.back();
                 });
             }
         });
@@ -159,23 +194,23 @@
             const urlParams = new URLSearchParams(window.location.search);
             const matchId = urlParams.get('id');
 
-            if (matchId){
+            if (matchId) {
                 loadMatch(matchId);
             }
-            else{
+            else {
                 console.error("Error: No Match ID found in the URL.");
             }
         });
 
-        async function loadMatch(id){
+        async function loadMatch(id) {
             const res = await fetch(`/getMatchDetails/${id}`);
 
             if (!res.ok) {
                 alert('Failed to load match details');
-            return;
+                return;
             }
             const match = await res.json();
-            
+
             document.getElementById('homeTeam').textContent = match.homeTeam;
             document.getElementById('awayTeam').textContent = match.awayTeam;
             document.getElementById('homeScore').textContent = match.homeScore;
@@ -186,6 +221,26 @@
         }
 
 
+    </script>
+
+    <!-- REACTION BAR SCRIPT -->
+    <script>
+        /**
+         * Update the reaction bar visibility by hiding it if guest or showing it if logged in.
+         */
+        async function updateReactionVisibility() {
+            let res = await fetch('/loggedUser');
+            let user = await res.json();
+            const bar = document.getElementById('reactionBar');
+
+            if (!user) {
+                bar.classList.add('guest-disabled');
+            } else {
+                bar.classList.remove('guest-disabled');
+            }
+        }
+
+        updateReactionVisibility();
     </script>
 
 </body>

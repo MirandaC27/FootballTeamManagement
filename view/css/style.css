@@ -767,16 +767,16 @@ main {
 }
 
 #modalLikeCounter {
-    font-size: 15px;
-    color: #888;
-    margin: 6px 0 10px 0;
-    display: flex;
-    align-items: center;
-    gap: -2px;
+  font-size: 15px;
+  color: #888;
+  margin: 6px 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: -2px;
 }
 
 #modalLikeCounter span {
-    font-size: 18px;
+  font-size: 18px;
 }
 
 #modalLikeCounter .emoji {
@@ -788,10 +788,92 @@ main {
 }
 
 #modalCommentCounter {
-    font-size: 15px;
-    color: #888;
-    margin: 6px 0 10px 41em;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+  font-size: 15px;
+  color: #888;
+  margin: 6px 0 10px 41em;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
+
+/* LIVE MATCH REACTION BAR */
+.reaction-bar {
+  display: flex;
+  background: linear-gradient(135deg,
+      rgba(192, 255, 249, 0.55),
+      rgba(235, 220, 255, 0.55));
+  padding: 6px 0;
+  border-radius: 16px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  max-width: 500px;
+  margin: 20px auto;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px);
+  margin-top: 80px; /* this is TEMPORARY */
+}
+
+.reaction-card {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  outline: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.reaction-card:focus {
+  outline: none !important;
+}
+
+.reaction-card:not(:last-child) {
+  border-right: 1px solid rgba(255, 255, 255, 0.543);
+}
+
+.reaction-card .emoji {
+  display: block;
+  font-size: 22px;
+  margin-bottom: 6px;
+  transition: transform 0.15s ease;
+}
+
+.reaction-card:hover {
+  background: rgba(210, 205, 255, 0.35);
+}
+
+.reaction-card:hover .emoji {
+  transform: scale(1.25);
+}
+
+.reaction-card:active {
+  transform: scale(0.92);
+}
+
+.reaction-card:active .emoji {
+  transform: scale(0.80);
+}
+
+.reaction-count {
+  font-size: 13px;
+  color: #171619;
+}
+
+.guest-disabled .reaction-card {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.guest-disabled .reaction-card:hover {
+  background: none !important;
+}
+
+.guest-disabled .reaction-card:hover .emoji {
+  transform: none !important;
+}
+
+.guest-disabled .reaction-card:active,
+.guest-disabled .reaction-card:active .emoji {
+  transform: none !important;
+}
+/* --------------------- */
