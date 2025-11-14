@@ -219,7 +219,7 @@ test('Get a single post', async function () {
     expect(res.json).toHaveBeenCalledWith(post);
     expect(res.status).not.toHaveBeenCalled();
 });
-``
+
 /**
  * Get a single post failure test
  */

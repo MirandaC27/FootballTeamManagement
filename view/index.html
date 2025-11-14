@@ -624,9 +624,6 @@
                 ${commentIcon}
                 <span>${commentCount}</span>
             </button>`;
-
-            //temp note: clicking button -> popup to see all comments and comment input
-            // guest can see comments in popup but input is hidden
         }
 
         /**
@@ -643,26 +640,35 @@
                         headers: { "Content-Type": "application/json" }
                     });
                     let result = await response.json();
-
-                    // Update counter
-                    let counter = btn.querySelector(".post-like-counter");
-                    counter.innerText = result.count;
-                    if (result.isLiked) {
-                        btn.classList.add("active");
-                        btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="like-icon filled" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                            <path d="M7 10v11H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
-                        </svg>
-                        <span class="post-like-counter">${result.count}</span>`;
-                    } else {
-                        btn.classList.remove("active");
-                        btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="like-icon outline" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M7 10V21H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
-                        </svg>
-                        <span class="post-like-counter">${result.count}</span>`;
-                    }
+                    updateLikeButtonDisplay(btn, result);
                 });
+            }
+        }
+
+        /**
+         * Update the UI for the like button.
+         * @param btn like button element
+         * @param result response data
+         */
+        function updateLikeButtonDisplay(btn, result) {
+            // Update counter
+            let counter = btn.querySelector(".post-like-counter");
+            counter.innerText = result.count;
+            if (result.isLiked) {
+                btn.classList.add("active");
+                btn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="like-icon filled" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                    <path d="M7 10v11H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
+                </svg>
+                <span class="post-like-counter">${result.count}</span>`;
+
+            } else {
+                btn.classList.remove("active");
+                btn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="like-icon outline" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 10V21H4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h3zm3 0V5a3 3 0 0 1 3-3h0a1 1 0 0 1 1 1v4h5.3a2 2 0 0 1 1.9 2.5l-1.5 7a2 2 0 0 1-1.9 1.5H10a2 2 0 0 1-2-2V10z"/>
+                </svg>
+            <span class="post-like-counter">${result.count}</span>`;
             }
         }
         loadPosts();
@@ -691,45 +697,17 @@
                     `${ownerName}'s Post`;
 
                 // Check user login to hide text input for guest users
-                // temp note: this should be in a separate function ---------
-                let userRes = await fetch('/loggedUser');
-                let user = await userRes.json();
-                if (!user) {
-                    document.getElementById("modalCommentInputWrapper")
-                        .classList.add("guest-hide");
-                } else {
-                    document.getElementById("modalCommentInputWrapper")
-                        .classList.remove("guest-hide");
-                }
-                //--------------------------------------------
+                updateCommentInputVisibility();
+                let post = await loadModalPostContent(postId);
 
-                // Post content
-                // temp note: this should be in a separate function ----------
-                const res = await fetch(`/getPost/${postId}`);
-                const post = await res.json();
-
-                document.getElementById("modalTimeInfo").innerText =
-                    `@${post.owner_id.username} · ${new Date(post.uploadedAt).toLocaleString()}`;
-
-                document.getElementById("modalPostContent").innerHTML = `
-                    ${post.type && post.type.startsWith("image")
-                        ? `<img src="${post.path}" style="max-width:100%">`
-                        : ""
-                    }
-                    ${post.type && post.type.startsWith("video")
-                        ? `<video controls style="width:100%"><source src="${post.path}"></video>`
-                        : ""
-                    }
-                    <p>${post.caption}</p>
-                `;
-                //---------------------------------
-
+                // Like counter (below content)
                 document.getElementById("modalLikeCounter").innerHTML = `
                     <span class="like-post-emoji">👍</span> ${post.likesCount}`;
 
                 const commentsRes = await fetch(`/getAllComments/${postId}`);
                 const comments = await commentsRes.json();
 
+                // Create each comment's html
                 let commentsHTML = "";
                 for (let comment of comments) {
                     commentsHTML += createComment(comment);
@@ -738,6 +716,47 @@
                 $("#commentModal").modal("show");
             }
         });
+
+        /**
+         * Update the comment input visibility by hiding it if guest or showing it if logged in.
+         */
+        async function updateCommentInputVisibility() {
+            const wrapper = document.getElementById("modalCommentInputWrapper");
+            let res = await fetch('/loggedUser');
+            let user = await res.json();
+
+            if (!user) {
+                wrapper.classList.add("guest-hide");
+            } else {
+                wrapper.classList.remove("guest-hide");
+            }
+        }
+
+        /**
+         * Output the post's content into the modal.
+         * @param postId post id
+         * @returns post object
+         */ 
+        async function loadModalPostContent(postId) {
+            const res = await fetch(`/getPost/${postId}`);
+            const post = await res.json();
+
+            // Header (username, date, time)
+            document.getElementById("modalTimeInfo").innerText =
+                `@${post.owner_id.username} · ${new Date(post.uploadedAt).toLocaleString()}`;
+
+            let mediaHTML = "";
+            if (post.type?.startsWith("image")) {
+                mediaHTML = `<img src="${post.path}" style="max-width:100%">`;
+            } else if (post.type?.startsWith("video")) {
+                mediaHTML = `<video controls style="width:100%"><source src="${post.path}"></video>`;
+            }
+            document.getElementById("modalPostContent").innerHTML = `
+            ${mediaHTML}
+            <p>${post.caption}</p>`;
+
+            return post;
+        }
 
         /**
          * Modal's send button handler for when it's clicked. 
