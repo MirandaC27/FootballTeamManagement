@@ -145,7 +145,12 @@
 
     <!-- LIVE MATCH CHAT -->
     <section id="chatContainer">
-        <h5>Live Chat</h5>
+        <h5 id="chatHeader" class="chat-header">
+            Match Chat
+            <span id="liveBadge" class="live-badge">
+                <span class="live-dot"></span> LIVE
+            </span>
+        </h5>
         <div id="chatMessages"></div>
         <div id="chatInput">
             <input id="chatInputText" placeholder="Enter a message...">
@@ -207,6 +212,45 @@
             }
         });
 
+        /**
+         * Show LIVE badge if match is in progress or END badge if match is final
+         * @param match match id
+         */
+        function updateLiveBadgeDisplay(match) {
+            const badge = document.getElementById("liveBadge");
+
+            if (match.matchStatus === "In Progress") {
+                badge.classList.remove("ended");
+                badge.classList.add("live");
+                badge.style.display = "inline-flex";
+                badge.innerHTML = `<span class="live-dot"></span> LIVE`;
+            }
+            else if (match.matchStatus === "Final") {
+                badge.classList.remove("live");
+                badge.classList.add("ended");
+                badge.style.display = "inline-block";
+                badge.textContent = "ENDED";
+            }
+            else {
+                badge.style.display = "none";
+            }
+        }
+
+        /**
+         * Only show the chat input if match is in progress, otherwise hide it.
+         * @param match match id
+         */
+        function changeChatInputVisibility(match) {
+            const chatInput = document.getElementById("chatInput");
+
+            if (match.matchStatus === "In Progress") {
+                chatInput.classList.remove("chat-hidden");
+            } else {
+                chatInput.classList.add("chat-hidden");
+            }
+        }
+
+
         async function loadMatch(id) {
             const res = await fetch(`/getMatchDetails/${id}`);
 
@@ -225,11 +269,13 @@
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
             loadReactions(match);
+            changeChatInputVisibility(match);
+            updateLiveBadgeDisplay(match);
         }
 
     </script>
 
-    <!-- REACTION SCRIPT -->
+    <!-- Reaction Bar -->
     <script>
         /**
          * Load all reactions for a match.
@@ -342,7 +388,7 @@
         attachReactionHandler();
     </script>
 
-    <!-- LIVE MATCH CHAT SCRIPT -->
+    <!-- Live Match Chat-->
     <script src="/socket.io/socket.io.js"></script>
     <script type="module">
         const urlParams = new URLSearchParams(window.location.search);
@@ -359,7 +405,19 @@
         // Get user's name or a random Guest name for guest users
         let response = await fetch('/loggedUser');
         let user = await response.json();
-        let name = user ? user.name : 'Guest' + (Math.floor(Math.random() * 100) + 1);
+        let name = user ? user.name : 'Guest' + (Math.floor(Math.random() * 150) + 1);
+
+        /**
+         * Format the date string so that it shows time only.
+         */
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
 
         /**
          * Load all saved messages for a live match and create HTML element for it to display.
@@ -373,12 +431,12 @@
                 const msg = data[i];
                 const div = document.createElement('div');
                 div.classList.add('chat-message');
-                div.textContent = `${msg.name}: ${msg.text}`;
+                const time = formatTime(msg.uploadedAt);
+                div.innerHTML = `<span class="chat-time">${time}</span> <strong>${msg.name}</strong>: ${msg.text}`;
                 messages.appendChild(div);
             }
             messages.scrollTop = messages.scrollHeight;
         }
-        loadMessages();
 
         /**
          * Add a new message to the current HTML div for live chat.
@@ -387,8 +445,9 @@
             console.log('Received message:', data);
 
             const div = document.createElement('div');
+            const time = formatTime(new Date());
             div.classList.add('chat-message');
-            div.textContent = `${data.user}: ${data.text}`;
+            div.innerHTML = `<span class="chat-time">${time}</span> <strong>${data.user}</strong>: ${data.text}`;
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
         });
@@ -421,6 +480,17 @@
             });
             input.value = '';
         });
+
+        /**
+        * Allow the Enter key to be used for sending message also
+        */
+        input.addEventListener("keypress", async (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendBtn.click();
+            }
+        });
+        loadMessages();
     </script>
 
 
