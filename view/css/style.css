@@ -1102,6 +1102,12 @@ main {
   display: inline-block;
 }
 
+.live-badge.offline {
+  background: #404040;
+  color: white;
+  display: inline-block;
+}
+
 @keyframes pulse {
   0% {
     opacity: 0.3;
