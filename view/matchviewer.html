@@ -229,8 +229,7 @@
 
     </script>
 
-
-    <!-- REACTION BAR SCRIPT -->
+    <!-- REACTION SCRIPT -->
     <script>
         /**
          * Load all reactions for a match.
@@ -343,9 +342,11 @@
         attachReactionHandler();
     </script>
 
-    <!-- socket.io (Live Match Chat) -->
+    <!-- LIVE MATCH CHAT -->
     <script src="/socket.io/socket.io.js"></script>
-    <script>
+    <script type="module">
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('id');
         const socket = io();
         const messages = document.getElementById('chatMessages');
         const input = document.getElementById('chatInputText');
@@ -355,13 +356,23 @@
             console.log('Connected to Socket.IO server!');
         });
 
-        socket.on('message', (msg) => {
-            console.log('Received message:', msg);
+        async function getName() {
+            let response = await fetch('/loggedUser');
+            let user = await response.json();
+            return user ? user.name : 'Guest' + Math.floor(Math.random() * 100) + 1;
+        }
+        let name = await getName();
+
+        console.log(name);
+
+
+        socket.on('message', (data) => {
+            console.log('Received message:', data);
 
 
             const div = document.createElement('div');
             div.classList.add('chat-message');
-            div.textContent = msg;
+            div.textContent = `${data.user}: ${data.text}`;
 
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
@@ -370,7 +381,11 @@
 
         sendBtn.addEventListener('click', () => {
             if (input.value) {
-                socket.emit('message', input.value);
+                socket.emit('message', {
+                    user: name,
+                    text: input.value,
+                    matchId: matchId
+                });
                 input.value = '';
             }
         });
