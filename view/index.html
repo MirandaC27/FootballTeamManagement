@@ -778,6 +778,11 @@
             const message = input.value;
             const postId = document.querySelector(".comment-btn.opened")?.getAttribute("data-post-id");
 
+            // Ignore empty input
+            if (!message.trim()) {
+                return;
+            }
+
             await fetch(`/addComment/${postId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

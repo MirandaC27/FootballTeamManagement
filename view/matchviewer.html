@@ -342,7 +342,7 @@
         attachReactionHandler();
     </script>
 
-    <!-- LIVE MATCH CHAT -->
+    <!-- LIVE MATCH CHAT SCRIPT -->
     <script src="/socket.io/socket.io.js"></script>
     <script type="module">
         const urlParams = new URLSearchParams(window.location.search);
@@ -356,41 +356,72 @@
             console.log('Connected to Socket.IO server!');
         });
 
-        async function getName() {
-            let response = await fetch('/loggedUser');
-            let user = await response.json();
-            return user ? user.name : 'Guest' + Math.floor(Math.random() * 100) + 1;
+        // Get user's name or a random Guest name for guest users
+        let response = await fetch('/loggedUser');
+        let user = await response.json();
+        let name = user ? user.name : 'Guest' + (Math.floor(Math.random() * 100) + 1);
+
+        /**
+         * Load all saved messages for a live match and create HTML element for it to display.
+         */
+        async function loadMessages() {
+            let response = await fetch(`/getMessagesByMatch/${matchId}`);
+            let data = await response.json();
+            messages.innerHTML = "";
+
+            for (let i = 0; i < data.length; i++) {
+                const msg = data[i];
+                const div = document.createElement('div');
+                div.classList.add('chat-message');
+                div.textContent = `${msg.name}: ${msg.text}`;
+                messages.appendChild(div);
+            }
+            messages.scrollTop = messages.scrollHeight;
         }
-        let name = await getName();
+        loadMessages();
 
-        console.log(name);
-
-
+        /**
+         * Add a new message to the current HTML div for live chat.
+         */
         socket.on('message', (data) => {
             console.log('Received message:', data);
-
 
             const div = document.createElement('div');
             div.classList.add('chat-message');
             div.textContent = `${data.user}: ${data.text}`;
-
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
         });
 
-
-        sendBtn.addEventListener('click', () => {
-            if (input.value) {
-                socket.emit('message', {
-                    user: name,
-                    text: input.value,
-                    matchId: matchId
-                });
-                input.value = '';
+        /**
+         * Send and save the new message to database.
+         */
+        sendBtn.addEventListener('click', async () => {
+            // Ignore empty input
+            if (!input.value.trim()) {
+                return;
             }
+            let text = input.value;
+
+            await fetch('/createMessage', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    match_id: matchId,
+                    name: name,
+                    text: text
+                })
+            });
+
+            // Send message to the server also
+            socket.emit('message', {
+                user: name,
+                text: text,
+                matchId: matchId
+            });
+            input.value = '';
         });
     </script>
-
 
 
 </body>

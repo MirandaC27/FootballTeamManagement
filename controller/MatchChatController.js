@@ -27,7 +27,6 @@ const createMessage = async (req, res) => {
         // null for guest user
         const newChat = {
             match_id,
-            user_id: user_id || null,
             name,
             text
         };

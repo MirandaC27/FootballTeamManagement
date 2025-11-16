@@ -5,11 +5,6 @@ const matchChatSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    user_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
-        required: false
-    },
     name: {
         type: String,
         required: true
@@ -30,7 +25,7 @@ const matchChatModel = mongoose.model('matchChat', matchChatSchema);
  * Read and return all chat messages (oldest to most recent).
  */
 async function readAll() {
-    return await matchChatModel.find().populate('user_id', 'name').sort({ uploadedAt: 1 });
+    return await matchChatModel.find().sort({ uploadedAt: 1 });
 }
 
 /**
@@ -38,7 +33,7 @@ async function readAll() {
  * @param {*} id match id
  */
 async function read(id) {
-    return await matchChatModel.find({ match_id: id }).populate('user_id', 'name').sort({ uploadedAt: 1 }); 
+    return await matchChatModel.find({ match_id: id }).sort({ uploadedAt: 1 }); 
 }
 
 /**

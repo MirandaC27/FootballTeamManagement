@@ -1,6 +1,5 @@
 const dbcon = require('./DbConnection');
 const dao = require('./MatchChatDao');
-require('./UserDao');
 
 /**
  * Executed once before all tests
@@ -30,7 +29,6 @@ beforeEach(async function () {
 test('Create new match chat', async function () {
     let newData = {
         match_id: '68f321cef24b117cb0cc4a11',
-        user_id: '68f321cef200117cb0cc4a11',
         name: 'adsad',
         text: 'aaa'
     };
@@ -45,7 +43,6 @@ test('Create new match chat', async function () {
 test('Delete chat test', async function () {
     let newData = {
         match_id: '68f321cef24b117cb0cc4a11',
-        user_id: '68f321cef200117cb0cc4a11',
         name: 'adsad',
         text: 'aaa'
     };
@@ -62,19 +59,16 @@ test('Delete chat test', async function () {
 test('Read All', async function () {
     let newData1 = {
         match_id: '68f321cef24b117cb0cc4a11',
-        user_id: '68f321cef200117cb0cc4a11',
         name: 'adsad',
         text: 'aaa'
     };
     let newData2 = {
         match_id: '68f321cef24b117cb0cc4a11',
-        user_id: null,
         name: 'Guest21',
         text: 'bbb'
     };
     let newData3 = {
         match_id: '68f321cef24b117cb0cc4a11',
-        user_id: '68f321cef200117cb0cc4a22',
         name: 'Apple',
         text: 'ccc'
     };

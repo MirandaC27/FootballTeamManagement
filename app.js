@@ -168,6 +168,11 @@ const PostCommentCont = require("./controller/PostCommentController");
 app.post('/addComment/:postId', PostCommentCont.addComment);
 app.get('/getAllComments/:postId', PostCommentCont.getAllComments);
 
+// match chat controller routes
+const MatchChatCont = require("./controller/MatchChatController");
+app.post('/createMessage', MatchChatCont.createMessage);
+app.get('/getMessagesByMatch/:id', MatchChatCont.getMessagesByMatch);
+
 console.log("UserCont:", UserCont);
 console.log("MinorCont:", MinorCont);
 console.log("TeamCont:", TeamCont);
