@@ -882,6 +882,7 @@ main {
   margin: 0 auto;
   border: 3px solid rgba(255, 255, 255, 0.3);
   backdrop-filter: blur(6px);
+  margin-bottom: -7px;
 }
 
 .reaction-card {
@@ -993,7 +994,7 @@ main {
 }
 
 #chatMessages {
-  height: 250px;
+  height: 300px;
   overflow-y: auto;
   background: #f8f9ff;
   border-radius: 12px;
@@ -1005,8 +1006,10 @@ main {
   margin-bottom: 6px;
   background: #eef0ff;
   border-radius: 10px;
-  padding: 6px 12px;
+  padding: 8px 12px;
   overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .chat-message strong {
@@ -1050,8 +1053,8 @@ main {
 }
 
 .chat-time {
-  color: #8a8a8a;
-  font-size: 0.7rem;
+  font-size: 0.55rem;
+  color: #a1a1a1;
   margin-right: 6px;
 }
 
@@ -1127,11 +1130,6 @@ main {
   box-shadow: none !important;
 }
 
-.reaction-bar {
-  border-radius: 12px 12px 0 0;
-  margin-bottom: 0;
-}
-
 #chatContainer {
   border-radius: 0 0 12px 12px;
   margin-top: 0;
@@ -1139,12 +1137,13 @@ main {
 
 .chat-name {
   font-weight: 700;
+  color: #333;
 }
 
 .role-tag {
   font-size: 0.70rem;
   font-weight: 700;
-  padding: 2px 5px;
+  padding: 1px 4px;
   margin-right: 5px;
   border-radius: 4px;
 }
@@ -1162,4 +1161,86 @@ main {
 .role-guest,
 .role-adult {
   display: none;
+}
+
+/* matchviewer layout (2 columns) */
+.match-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.left-match-col {
+  flex: 3.5;
+}
+
+.right-match-col {
+  flex: 1.3;
+  position: sticky;
+  top: 80px;
+}
+
+.viewer-container {
+  max-width: 100%;
+  width: 100%;
+}
+
+.match-layout {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 1rem;
+}
+
+.reaction-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  height: 60px;
+}
+
+.reaction-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.reaction-card .emoji {
+  font-size: 22px;
+  line-height: 22px;
+  margin-bottom: 2px;
+}
+
+.reaction-count {
+  font-size: 12px;
+  margin-top: -2px;
+}
+
+.reaction-bar button:not(:last-child) {
+  border-right: 1px solid #e2e2e2;
+  height: 60%;
+}
+
+#chatInputText {
+  border: 2px solid #d0d7e2;
+  border-radius: 10px;
+  padding: 10px;
+  transition: all 0.15s ease;
+}
+
+#chatInputText:focus {
+  outline: none !important;
+  border-color: #6aa7ff;
+  box-shadow: 0 0 0 3px rgba(118, 169, 255, 0.45);
 }

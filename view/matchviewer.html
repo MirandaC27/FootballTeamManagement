@@ -68,95 +68,100 @@
             &larr; Back to Schedule
         </button>
     </header>
+    
+    <div class="match-layout">
+        <div class="left-match-col">
+            <!--container for the match-->
+            <main>
+                <!--<div class="section-header"><h5>Match Viewer</h5></div>-->
+                <section class="viewer-container">
+                    <div class="viewer-header">
+                        <span id="matchStatus" class="match-status"></span>
+                        <span class="seperator">•</span>
+                        <span id="matchLocation"></span>
+                    </div>
 
-    <!--container for the match-->
-    <main>
-        <!--<div class="section-header"><h5>Match Viewer</h5></div>-->
-        <section class="viewer-container">
-            <div class="viewer-header">
-                <span id="matchStatus" class="match-status"></span>
-                <span class="seperator">•</span>
-                <span id="matchLocation"></span>
-            </div>
+                    <div class="viewer-content">
+                        <div class="team-content Home">
+                            <h2 id="homeTeam" class="team-name"></h2>
+                        </div>
 
-            <div class="viewer-content">
-                <div class="team-content Home">
-                    <h2 id="homeTeam" class="team-name"></h2>
-                </div>
+                        <div class="score-content">
+                            <span id="homeScore" class="score-number"></span>
+                            <span class="score-seperator">:</span>
+                            <span id="awayScore" class="score-number"></span>
+                        </div>
 
-                <div class="score-content">
-                    <span id="homeScore" class="score-number"></span>
-                    <span class="score-seperator">:</span>
-                    <span id="awayScore" class="score-number"></span>
-                </div>
+                        <div class="team-content Away">
+                            <h2 id="awayTeam" class="team-name"></h2>
+                        </div>
+                    </div>
 
-                <div class="team-content Away">
-                    <h2 id="awayTeam" class="team-name"></h2>
-                </div>
-            </div>
-
-            <div class="viewer-footer">
-                <div class="date-time">
-                    <span id="matchDate"></span>
-                    <!--<span class="seperator">•</span>-->
-                    <!--<span id="match"></span>-->
-                </div>
-            </div>
-        </section>
-        <section class="details-container">
-            <nav class="nav-header">Timeline</nav>
-            <div class="timeline-container">
-                <div class="timeline-item">
-                    <span class="event-minute">15'</span>
-                    <div>⚽️ **Goal** (H) - A. Johnson (Assist: B. Smith)</div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-
-    <!-- REACTION BAR -->
-    <section id="reactionBar" class="reaction-bar guest-disabled">
-        <button class="reaction-card" data-reaction="happy">
-            <span class="emoji">😄</span>
-            <span class="reaction-count" data-count-happy>0</span>
-        </button>
-        <button class="reaction-card" data-reaction="neutral">
-            <span class="emoji">😐</span>
-            <span class="reaction-count" data-count-neutral>0</span>
-        </button>
-        <button class="reaction-card" data-reaction="sad">
-            <span class="emoji">😢</span>
-            <span class="reaction-count" data-count-sad>0</span>
-        </button>
-        <button class="reaction-card" data-reaction="angry">
-            <span class="emoji">😡</span>
-            <span class="reaction-count" data-count-angry>0</span>
-        </button>
-        <button class="reaction-card" data-reaction="like">
-            <span class="emoji">👍</span>
-            <span class="reaction-count" data-count-like>0</span>
-        </button>
-        <button class="reaction-card" data-reaction="dislike">
-            <span class="emoji">👎</span>
-            <span class="reaction-count" data-count-dislike>0</span>
-        </button>
-    </section>
-
-    <!-- LIVE MATCH CHAT -->
-    <section id="chatContainer">
-        <h5 id="chatHeader" class="chat-header">
-            Match Chat
-            <span id="liveBadge" class="live-badge">
-                <span class="live-dot"></span> LIVE
-            </span>
-        </h5>
-        <div id="chatMessages"></div>
-        <div id="chatInput">
-            <input id="chatInputText" placeholder="Enter a message...">
-            <button id="sendBtn">Send</button>
+                    <div class="viewer-footer">
+                        <div class="date-time">
+                            <span id="matchDate"></span>
+                            <!--<span class="seperator">•</span>-->
+                            <!--<span id="match"></span>-->
+                        </div>
+                    </div>
+                </section>
+                <section class="details-container">
+                    <nav class="nav-header">Timeline</nav>
+                    <div class="timeline-container">
+                        <div class="timeline-item">
+                            <span class="event-minute">15'</span>
+                            <div>⚽️ **Goal** (H) - A. Johnson (Assist: B. Smith)</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
         </div>
-    </section>
+
+        <div class="right-match-col">
+            <!-- REACTION BAR -->
+            <section id="reactionBar" class="reaction-bar guest-disabled">
+                <button class="reaction-card" data-reaction="happy">
+                    <span class="emoji">😄</span>
+                    <span class="reaction-count" data-count-happy>0</span>
+                </button>
+                <button class="reaction-card" data-reaction="neutral">
+                    <span class="emoji">😐</span>
+                    <span class="reaction-count" data-count-neutral>0</span>
+                </button>
+                <button class="reaction-card" data-reaction="sad">
+                    <span class="emoji">😢</span>
+                    <span class="reaction-count" data-count-sad>0</span>
+                </button>
+                <button class="reaction-card" data-reaction="angry">
+                    <span class="emoji">😡</span>
+                    <span class="reaction-count" data-count-angry>0</span>
+                </button>
+                <button class="reaction-card" data-reaction="like">
+                    <span class="emoji">👍</span>
+                    <span class="reaction-count" data-count-like>0</span>
+                </button>
+                <button class="reaction-card" data-reaction="dislike">
+                    <span class="emoji">👎</span>
+                    <span class="reaction-count" data-count-dislike>0</span>
+                </button>
+            </section>
+
+            <!-- LIVE MATCH CHAT -->
+            <section id="chatContainer">
+                <h5 id="chatHeader" class="chat-header">
+                    Match Chat
+                    <span id="liveBadge" class="live-badge">
+                        <span class="live-dot"></span> LIVE
+                    </span>
+                </h5>
+                <div id="chatMessages"></div>
+                <div id="chatInput">
+                    <input id="chatInputText" placeholder="Enter a message...">
+                    <button id="sendBtn">Send</button>
+                </div>
+            </section>
+        </div>
+    </div>
 
 
     <script>
