@@ -811,6 +811,16 @@
         });
 
         /**
+         *  Allow the Enter key to be used for sending post comment.
+         */ 
+        document.getElementById("modalCommentInput").addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("modalSubmitComment").click();
+            }
+        });
+
+        /**
         * Create a comment's display in HTML and return it.
         * @param comment object
         * @returns comment's HTML code
