@@ -121,31 +121,36 @@
             <span class="emoji">😄</span>
             <span class="reaction-count" data-count-happy>0</span>
         </button>
-
         <button class="reaction-card" data-reaction="neutral">
             <span class="emoji">😐</span>
             <span class="reaction-count" data-count-neutral>0</span>
         </button>
-
         <button class="reaction-card" data-reaction="sad">
             <span class="emoji">😢</span>
             <span class="reaction-count" data-count-sad>0</span>
         </button>
-
         <button class="reaction-card" data-reaction="angry">
             <span class="emoji">😡</span>
             <span class="reaction-count" data-count-angry>0</span>
         </button>
-
         <button class="reaction-card" data-reaction="like">
             <span class="emoji">👍</span>
             <span class="reaction-count" data-count-like>0</span>
         </button>
-
         <button class="reaction-card" data-reaction="dislike">
             <span class="emoji">👎</span>
             <span class="reaction-count" data-count-dislike>0</span>
         </button>
+    </section>
+
+    <!-- LIVE MATCH CHAT -->
+    <section id="chatContainer">
+        <h5>Live Chat</h5>
+        <div id="chatMessages"></div>
+        <div id="chatInput">
+            <input id="chatInputText" placeholder="Enter a message...">
+            <button id="sendBtn">Send</button>
+        </div>
     </section>
 
 
@@ -337,6 +342,40 @@
         updateReactionVisibility();
         attachReactionHandler();
     </script>
+
+    <!-- socket.io (Live Match Chat) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const messages = document.getElementById('chatMessages');
+        const input = document.getElementById('chatInputText');
+        const sendBtn = document.getElementById('sendBtn');
+
+        socket.on('connect', () => {
+            console.log('Connected to Socket.IO server!');
+        });
+
+        socket.on('message', (msg) => {
+            console.log('Received message:', msg);
+
+
+            const div = document.createElement('div');
+            div.classList.add('chat-message');
+            div.textContent = msg;
+
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        });
+
+
+        sendBtn.addEventListener('click', () => {
+            if (input.value) {
+                socket.emit('message', input.value);
+                input.value = '';
+            }
+        });
+    </script>
+
 
 
 </body>
