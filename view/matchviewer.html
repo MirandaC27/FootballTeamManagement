@@ -432,7 +432,16 @@
                 const div = document.createElement('div');
                 div.classList.add('chat-message');
                 const time = formatTime(msg.uploadedAt);
-                div.innerHTML = `<span class="chat-time">${time}</span> <strong>${msg.name}</strong>: ${msg.text}`;
+
+                const roleClass = msg.role ? `role-${msg.role}` : "";
+                const roleTag = msg.role && msg.role !== "guest" && msg.role !== "adult"
+                    ? `<span class="role-tag ${roleClass}">${msg.role.toUpperCase()}</span>`
+                    : "";
+
+                div.innerHTML = `
+                <span class="chat-time">${time}</span> 
+                <strong class="chat-name">${roleTag} ${msg.name}</strong>: ${msg.text}`;
+
                 messages.appendChild(div);
             }
             messages.scrollTop = messages.scrollHeight;
@@ -446,8 +455,16 @@
 
             const div = document.createElement('div');
             const time = formatTime(new Date());
+            const roleClass = data.role ? `role-${data.role}` : "";
+            const roleTag = data.role && data.role !== "guest"
+                ? `<span class="role-tag ${roleClass}">${data.role.toUpperCase()}</span>`
+                : "";
+
             div.classList.add('chat-message');
-            div.innerHTML = `<span class="chat-time">${time}</span> <strong>${data.user}</strong>: ${data.text}`;
+            div.innerHTML = `
+            <span class="chat-time">${time}</span> 
+            <strong class="chat-name">${roleTag} ${data.user}</strong>: ${data.text}
+            `;
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
         });
@@ -468,7 +485,8 @@
                 body: JSON.stringify({
                     match_id: matchId,
                     name: name,
-                    text: text
+                    text: text,
+                    role: user ? user.role : "guest"
                 })
             });
 
@@ -476,7 +494,8 @@
             socket.emit('message', {
                 user: name,
                 text: text,
-                matchId: matchId
+                matchId: matchId,
+                role: user ? user.role : "guest"
             });
             input.value = '';
         });

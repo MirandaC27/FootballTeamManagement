@@ -1136,3 +1136,30 @@ main {
   border-radius: 0 0 12px 12px;
   margin-top: 0;
 }
+
+.chat-name {
+  font-weight: 700;
+}
+
+.role-tag {
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  margin-right: 5px;
+  border-radius: 4px;
+}
+
+.role-admin {
+  background: #ffd700;
+  color: black;
+}
+
+.role-manager {
+  background: #1e40af;
+  color: white;
+}
+
+.role-guest,
+.role-adult {
+  display: none;
+}

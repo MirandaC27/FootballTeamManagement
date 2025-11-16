@@ -22,13 +22,14 @@ const getMessagesByMatch = async (req, res) => {
  */
 const createMessage = async (req, res) => {
     try {
-        const { match_id, user_id, name, text } = req.body;
+        const { match_id, name, text, role } = req.body;
 
         // null for guest user
         const newChat = {
             match_id,
             name,
-            text
+            text,
+            role: role || "guest"
         };
         const savedMessage = await dao.create(newChat);
         res.json(savedMessage);

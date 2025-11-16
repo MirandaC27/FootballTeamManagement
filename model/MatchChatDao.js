@@ -16,6 +16,10 @@ const matchChatSchema = new mongoose.Schema({
     uploadedAt: {
         type: Date,
         default: Date.now
+    },
+    role: {
+        type: String,
+        default: "guest"
     }
 });
 
@@ -33,7 +37,7 @@ async function readAll() {
  * @param {*} id match id
  */
 async function read(id) {
-    return await matchChatModel.find({ match_id: id }).sort({ uploadedAt: 1 }); 
+    return await matchChatModel.find({ match_id: id }).sort({ uploadedAt: 1 });
 }
 
 /**
