@@ -29,7 +29,7 @@ beforeEach(async function () {
 test('Create new match chat', async function () {
     let newData = {
         match_id: '68f321cef24b117cb0cc4a11',
-        name: 'adsad',
+        user_id: '22f321cef24b117cb0cc4a11',
         text: 'aaa',
         role: 'Admin'
     };
@@ -44,7 +44,7 @@ test('Create new match chat', async function () {
 test('Delete chat test', async function () {
     let newData = {
         match_id: '68f321cef24b117cb0cc4a11',
-        name: 'adsad',
+        user_id: '22f321cef24b117cb0cc4a11',
         text: 'aaa',
         role: 'Admin'
     };
@@ -61,19 +61,19 @@ test('Delete chat test', async function () {
 test('Read All', async function () {
     let newData1 = {
         match_id: '68f321cef24b117cb0cc4a11',
-        name: 'adsad',
+        user_id: '22f321cef24b117cb0cc4a11',
         text: 'aaa',
         role: 'Admin'
     };
     let newData2 = {
         match_id: '68f321cef24b117cb0cc4a11',
-        name: 'Guest21',
+        user_id: '33f321cef24b117cb0cc4a11',
         text: 'bbb',
         role: 'Guest'
     };
     let newData3 = {
         match_id: '68f321cef24b117cb0cc4a11',
-        name: 'Apple',
+        user_id: '33f321cef24b117cb0cc4a11',
         text: 'ccc',
         role: 'Manager'
     };

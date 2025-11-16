@@ -1202,6 +1202,7 @@ main {
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   height: 60px;
+  margin-top: 1rem;
 }
 
 .reaction-card {
@@ -1224,12 +1225,12 @@ main {
 
 .reaction-count {
   font-size: 12px;
-  margin-top: -2px;
+  margin-top: 1.5px;
 }
 
 .reaction-bar button:not(:last-child) {
   border-right: 1px solid #e2e2e2;
-  height: 60%;
+  height: 65%;
 }
 
 #chatInputText {

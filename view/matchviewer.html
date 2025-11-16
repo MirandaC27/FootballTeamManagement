@@ -68,7 +68,7 @@
             &larr; Back to Schedule
         </button>
     </header>
-    
+
     <div class="match-layout">
         <div class="left-match-col">
             <!--container for the match-->
@@ -412,7 +412,8 @@
         // Get user's name or a random Guest name for guest users
         let response = await fetch('/loggedUser');
         let user = await response.json();
-        let name = user ? user.name : 'Guest' + (Math.floor(Math.random() * 150) + 1);
+        let guestName = 'Guest' + (Math.floor(Math.random() * 1000) + 1);
+        let name = user ? user.username : guestName;
 
         /**
          * Format the date string so that it shows relative timestamps.
@@ -421,22 +422,22 @@
             const now = new Date();
             const then = new Date(dateString);
 
-            const seconds = Math.floor((now - then) / 1000);
+            let seconds = Math.floor((now - then) / 1000);
             if (seconds < 60) {
                 return `${seconds} seconds ago`;
             }
 
-            const minutes = Math.floor(seconds / 60);
+            let minutes = Math.floor(seconds / 60);
             if (minutes < 60) {
                 return `${minutes} minutes ago`;
             }
 
-            const hours = Math.floor(minutes / 60);
+            let hours = Math.floor(minutes / 60);
             if (hours < 24) {
                 return `${hours} hours ago`;
             }
 
-            const days = Math.floor(hours / 24);
+            let days = Math.floor(hours / 24);
             return `${days} days ago`;
         }
 
@@ -457,9 +458,14 @@
                 const time = formatTime(msg.uploadedAt);
                 const roleTag = createRoleTag(msg);
 
+                const displayName =
+                    (msg.user_id && msg.user_id.username) ||
+                    msg.username;
+
                 div.innerHTML = `
                 <span class="chat-time">${time}</span> 
-                <strong class="chat-name">${roleTag} ${msg.name}</strong>: ${msg.text}`;
+                <strong class="chat-name">${roleTag} ${displayName}</strong>: ${msg.text}`;
+
                 messages.appendChild(div);
             }
             messages.scrollTop = messages.scrollHeight;
@@ -490,7 +496,7 @@
             div.classList.add('chat-message');
             div.innerHTML = `
             <span class="chat-time">${time}</span> 
-            <strong class="chat-name">${roleTag} ${data.user}</strong>: ${data.text}
+            <strong class="chat-name">${roleTag} ${data.username}</strong>: ${data.text}
             `;
 
             messages.appendChild(div);
@@ -512,7 +518,8 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     match_id: matchId,
-                    name: name,
+                    user_id: user ? user._id : null,
+                    username: name,
                     text: text,
                     role: user ? user.role : "guest"
                 })
@@ -520,7 +527,7 @@
 
             // Send message to the server also
             socket.emit('message', {
-                user: name,
+                username: name,
                 text: text,
                 matchId: matchId,
                 role: user ? user.role : "guest"

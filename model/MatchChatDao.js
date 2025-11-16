@@ -5,9 +5,13 @@ const matchChatSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    name: {
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        default: null
+    },
+    username: { 
         type: String,
-        required: true
     },
     text: {
         type: String,
@@ -37,7 +41,9 @@ async function readAll() {
  * @param {*} id match id
  */
 async function read(id) {
-    return await matchChatModel.find({ match_id: id }).sort({ uploadedAt: 1 });
+    return await matchChatModel
+        .find({ match_id: id })
+        .sort({ uploadedAt: 1 });
 }
 
 /**

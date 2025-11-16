@@ -22,12 +22,13 @@ const getMessagesByMatch = async (req, res) => {
  */
 const createMessage = async (req, res) => {
     try {
-        const { match_id, name, text, role } = req.body;
+        const { match_id, user_id, username, text, role } = req.body;
 
         // null for guest user
         const newChat = {
             match_id,
-            name,
+            user_id: user_id || null,
+            username: username,
             text,
             role: role || "guest"
         };
