@@ -224,20 +224,18 @@
                 badge.classList.add("live");
                 badge.style.display = "inline-flex";
                 badge.innerHTML = `<span class="live-dot"></span> LIVE`;
-            }
-            else if (match.matchStatus === "Final") {
+            } else if (match.matchStatus === "Final") {
                 badge.classList.remove("live");
                 badge.classList.add("ended");
                 badge.style.display = "inline-block";
                 badge.textContent = "ENDED";
-            }
-            else {
+            } else {
                 badge.style.display = "none";
             }
         }
 
         /**
-         * Only show the chat input if match is in progress, otherwise hide it.
+         * Only show the chat text input if match is in progress, otherwise hide it.
          * @param match match id
          */
         function changeChatInputVisibility(match) {
@@ -249,7 +247,6 @@
                 chatInput.classList.add("chat-hidden");
             }
         }
-
 
         async function loadMatch(id) {
             const res = await fetch(`/getMatchDetails/${id}`);
@@ -322,6 +319,7 @@
         async function showActiveReaction(match, type, user) {
             if (user && match.reactions && match.reactions[type]) {
                 const hasReacted = match.reactions[type].includes(user._id);
+
                 if (hasReacted) {
                     const btn = document.querySelector(`.reaction-card[data-reaction="${type}"]`);
                     // Apply the highlight CSS to the button
@@ -358,6 +356,7 @@
                     const reaction = btn.getAttribute("data-reaction");
                     const urlParams = new URLSearchParams(window.location.search);
                     const matchId = urlParams.get('id');
+
                     const response = await fetch(`/updateMatchReaction/${matchId}`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -398,6 +397,9 @@
         const input = document.getElementById('chatInputText');
         const sendBtn = document.getElementById('sendBtn');
 
+        /**
+         * socket.io connection message
+         */
         socket.on('connect', () => {
             console.log('Connected to Socket.IO server!');
         });
@@ -408,15 +410,29 @@
         let name = user ? user.name : 'Guest' + (Math.floor(Math.random() * 150) + 1);
 
         /**
-         * Format the date string so that it shows time only.
+         * Format the date string so that it shows relative timestamps.
          */
         function formatTime(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            const now = new Date();
+            const then = new Date(dateString);
+
+            const seconds = Math.floor((now - then) / 1000);
+            if (seconds < 60) {
+                return `${seconds} seconds ago`;
+            }
+
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) {
+                return `${minutes} minutes ago`;
+            }
+
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) {
+                return `${hours} hours ago`;
+            }
+
+            const days = Math.floor(hours / 24);
+            return `${days} days ago`;
         }
 
         /**
@@ -431,20 +447,30 @@
                 const msg = data[i];
                 const div = document.createElement('div');
                 div.classList.add('chat-message');
-                const time = formatTime(msg.uploadedAt);
 
-                const roleClass = msg.role ? `role-${msg.role}` : "";
-                const roleTag = msg.role && msg.role !== "guest" && msg.role !== "adult"
-                    ? `<span class="role-tag ${roleClass}">${msg.role.toUpperCase()}</span>`
-                    : "";
+                // Timestamp and role (admin, manager) tag
+                const time = formatTime(msg.uploadedAt);
+                const roleTag = createRoleTag(msg);
 
                 div.innerHTML = `
                 <span class="chat-time">${time}</span> 
                 <strong class="chat-name">${roleTag} ${msg.name}</strong>: ${msg.text}`;
-
                 messages.appendChild(div);
             }
             messages.scrollTop = messages.scrollHeight;
+        }
+
+        /**
+         * Create a HTML code for the role tag (admin and manager only).
+         * @param msg message id
+         * @returns role tag HTML 
+         */
+        function createRoleTag(msg) {
+            const roleClass = msg.role ? `role-${msg.role}` : "";
+            const roleTag = msg.role && msg.role !== "guest" && msg.role !== "adult"
+                ? `<span class="role-tag ${roleClass}">${msg.role.toUpperCase()}</span>`
+                : "";
+            return roleTag;
         }
 
         /**
@@ -452,19 +478,16 @@
          */
         socket.on('message', (data) => {
             console.log('Received message:', data);
-
             const div = document.createElement('div');
             const time = formatTime(new Date());
-            const roleClass = data.role ? `role-${data.role}` : "";
-            const roleTag = data.role && data.role !== "guest"
-                ? `<span class="role-tag ${roleClass}">${data.role.toUpperCase()}</span>`
-                : "";
+            const roleTag = createRoleTag(data);
 
             div.classList.add('chat-message');
             div.innerHTML = `
             <span class="chat-time">${time}</span> 
             <strong class="chat-name">${roleTag} ${data.user}</strong>: ${data.text}
             `;
+
             messages.appendChild(div);
             messages.scrollTop = messages.scrollHeight;
         });
