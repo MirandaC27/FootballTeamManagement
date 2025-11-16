@@ -19,8 +19,8 @@ test('Get all messages by match', async function () {
     let res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
     let messages = [
-        { name: 'Apple', text: 'hi', match_id: 'asdasd' },
-        { name: 'Banana', text: 'hi2', match_id: 'asdasd' }
+        { name: 'Apple', text: 'hi', match_id: 'asdasd', role: 'manager' },
+        { name: 'Banana', text: 'hi2', match_id: 'asdasd', role: 'manager' }
     ];
 
     dao.read.mockResolvedValue(messages);
@@ -52,9 +52,9 @@ test('Create new chat message as logged in user', async function () {
     let req = {
         body: {
             match_id: 'asdasd',
-            user_id: 'asdsadsad',
             name: 'Apple',
-            text: 'hasdknsakjd'
+            text: 'hasdknsakjd',
+            role: 'manager'
         }
     };
 
@@ -63,13 +63,12 @@ test('Create new chat message as logged in user', async function () {
     let saved = {
         _id: '123',
         match_id: 'asdasd',
-        user_id: 'asdsadsad',
         name: 'Apple',
-        text: 'hasdknsakjd'
+        text: 'hasdknsakjd',
+        role: 'manager'
     }
 
     dao.create.mockResolvedValue(saved);
-
     await controller.createMessage(req, res);
 
     expect(dao.create).toHaveBeenCalled();
@@ -84,9 +83,9 @@ test('Create chat message as guest', async function () {
     let req = {
         body: {
             match_id: 'asdada',
-            user_id: null,
             name: 'Guest1',
-            text: 'hi'
+            text: 'hi',
+            role: 'Guest'
         }
     };
 
@@ -95,9 +94,9 @@ test('Create chat message as guest', async function () {
     let saved = {
         _id: 'asdasdsada',
         match_id: 'asdada',
-        user_id: null,
         name: 'Guest1',
-        text: 'hi'
+        text: 'hi',
+        role: 'Guest'
     };
 
     dao.create.mockResolvedValue(saved);
@@ -114,9 +113,9 @@ test('Create message failed', async function () {
     let req = {
         body: {
             match_id: 'asdada',
-            user_id: null,
             name: 'Guest1',
-            text: 'hi'
+            text: 'hi',
+            role: 'Guest'
         }
     };
 

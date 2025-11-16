@@ -14,6 +14,7 @@ const server = ExpressApp.listen(process.env.PORT, process.env.HOSTNAME, functio
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+// Initialize socket.io connection and handle real-time chat updates
 io.on('connection', (socket) => {
     console.log('connected to server');
 

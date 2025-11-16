@@ -30,7 +30,8 @@ test('Create new match chat', async function () {
     let newData = {
         match_id: '68f321cef24b117cb0cc4a11',
         name: 'adsad',
-        text: 'aaa'
+        text: 'aaa',
+        role: 'Admin'
     };
     let created = await dao.create(newData);
     let found = await dao.read(newData.match_id);
@@ -44,7 +45,8 @@ test('Delete chat test', async function () {
     let newData = {
         match_id: '68f321cef24b117cb0cc4a11',
         name: 'adsad',
-        text: 'aaa'
+        text: 'aaa',
+        role: 'Admin'
     };
     let created = await dao.create(newData);
     let deleted = await dao.del(created._id);
@@ -60,17 +62,20 @@ test('Read All', async function () {
     let newData1 = {
         match_id: '68f321cef24b117cb0cc4a11',
         name: 'adsad',
-        text: 'aaa'
+        text: 'aaa',
+        role: 'Admin'
     };
     let newData2 = {
         match_id: '68f321cef24b117cb0cc4a11',
         name: 'Guest21',
-        text: 'bbb'
+        text: 'bbb',
+        role: 'Guest'
     };
     let newData3 = {
         match_id: '68f321cef24b117cb0cc4a11',
         name: 'Apple',
-        text: 'ccc'
+        text: 'ccc',
+        role: 'Manager'
     };
     await dao.create(newData1);
     await dao.create(newData2);
