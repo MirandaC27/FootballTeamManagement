@@ -235,7 +235,11 @@
                 badge.style.display = "inline-block";
                 badge.textContent = "ENDED";
             } else {
-                badge.style.display = "none";
+                badge.classList.remove("live");
+                badge.classList.remove("ended");
+                badge.classList.add("offline");
+                badge.style.display = "inline-block";
+                badge.textContent = "OFFLINE";
             }
         }
 
