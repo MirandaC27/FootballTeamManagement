@@ -84,6 +84,13 @@ const MinorCont = require('./controller/MinorController');
 app.put('/reassignMinor/:minorId/:newTeamId', MinorCont.reassignMinor);
 app.get('/getAllMinors', MinorCont.getAllMinors);
 
+// invite + respond controller routes
+const InviteCont = require('./controller/InviteMinor');
+const RespondInviteCont = require('./controller/RespondToInvite');
+
+app.get('/inviteMinor', InviteCont.inviteMinor);
+app.get('/respondToInvite', RespondInviteCont.respondToInvite);
+
 // team controller routes
 const TeamCont = require('./controller/TeamController');
 app.get('/getAllTeams', TeamCont.getAllTeams);
