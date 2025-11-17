@@ -21,56 +21,62 @@ function formatTime(h, m, s) {
     return `${hh}:${mm}:${ss}`;
 }
 
-function stopWatch(){
-    //always increment seconds
-    seconds++;
+function loadUserInput() {
+    const hourInput = parseInt(document.getElementById("inputHours").value) || 0;
+    const minuteInput = parseInt(document.getElementById("inputMinutes").value) || 0;
+    const secondInput = parseInt(document.getElementById("inputSeconds").value) || 0;
 
-    //minutes
-    if(seconds / 60 === 1){
-        seconds = 0;
-        minutes++;
+    hours = Math.max(0, hourInput);
+    minutes = Math.max(0, minuteInput);
+    seconds = Math.max(0, secondInput);
 
-        if(minutes / 60 === 1){
-            minutes = 0;
-            hours++;
-        }
-
-    }
-
-    //display strings for time
-    if(seconds < 10){
-        displaySeconds = "0" + seconds.toString();
-    }
-    else{
-        displaySeconds = seconds;
-    }
-
-    if(minutes < 10){
-        displayMinutes = "0" + minutes.toString();
-    }
-    else{
-        displayMinutes = minutes;
-    }
-
-    if(hours < 10){
-        displayHours = "0" + hours.toString();
-    }
-    else{
-        displayHours = hours;
-    }
-
-    //Display updated time values to user
-    document.getElementById("display").innerHTML =  `${displayHours}:${displayMinutes}:${displaySeconds}`;
+    updateDisplay();
 }
 
+
+
+function updateDisplay() {
+    displayHours = hours < 10 ? "0" + hours : hours;
+    displayMinutes = minutes < 10 ? "0" + minutes : minutes;
+    displaySeconds = seconds < 10 ? "0" + seconds : seconds;
+
+    document.getElementById("display").innerHTML =
+        `${displayHours}:${displayMinutes}:${displaySeconds}`;
+}
+
+function timerTick() {
+
+    if (hours === 0 && minutes === 0 && seconds === 0) {
+        clearInterval(interval);
+        status = "stopped";
+        document.getElementById("startStop").innerHTML = "Start";
+        return;
+    }
+
+    if (seconds === 0) {
+        if (minutes === 0) {
+            hours--;
+            minutes = 59;
+            seconds = 59;
+        } else {
+            minutes--;
+            seconds = 59;
+        }
+    } else {
+        seconds--;
+    }
+
+    updateDisplay();
+}
 
 
 function startStop(){
 
     if(status === "stopped"){
 
+        loadUserInput(); 
        
-        interval = window.setInterval(stopWatch, 1000);
+        interval = window.setInterval(timerTick, 1000);
         document.getElementById("startStop").innerHTML = "Stop";
         status = "started";
 
@@ -86,22 +92,22 @@ function startStop(){
 }
 
 
-function reset(){
-
+function reset() {
     window.clearInterval(interval);
 
+    // Reset internal timer to 0
     hours = 0;
     minutes = 0;
     seconds = 0;
 
-    document.getElementById("display").innerHTML = "00:00:00";
-    document.getElementById("startStop").innerHTML = "Start";
+    updateDisplay();
 
+    document.getElementById("startStop").innerHTML = "Start";
+    status = "stopped";
 
     // clear laps
     lapTimes = [];
     document.getElementById("laps").innerHTML = "";
-
 }
 
 function lap() {
@@ -115,3 +121,5 @@ function lap() {
     item.textContent = `Lap ${lapTimes.length}: ${lapTime}`;
     list.appendChild(item);
 }
+
+updateDisplay();

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Stopwatch</title>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <div id="display">
+            00:00:00
+        </div>
+
+        <div class="inputs">
+            <input type="number" id="inputHours" placeholder="Hours" min="0">
+            <input type="number" id="inputMinutes" placeholder="Minutes" min="0">
+            <input type="number" id="inputSeconds" placeholder="Seconds" min="0">
+        </div>
+
+        <div class="buttons">
+            <button id="startStop" onclick="startStop()">Start</button> 
+            <button id="reset" onclick="reset()">Reset</button>
+            <button id="lap" onclick="lap()">Lap</button>
+        </div>
+
+        <ul id="laps"></ul>
+
+    </div>
+
+    <!-- Move script to bottom so DOM exists before JS runs -->
+    <script src="script.js"></script>
+
+</body>
+</html>
