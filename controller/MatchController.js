@@ -144,13 +144,8 @@ async function updateMatchReaction(req, res) {
   }
 }
 
-const Match = require('../model/Match'); // or MatchDao if using DAO
 
-/**
- * Admin sets match duration
- * @route POST /setMatchDuration/:id
- * @access Admin only
- */
+
 const setMatchDuration = async (req, res) => {
     const user = req.session.user;
     if (!user || user.role !== "admin") {
@@ -165,7 +160,7 @@ const setMatchDuration = async (req, res) => {
     }
 
     try {
-        const match = await Match.findByIdAndUpdate(
+        const match = await matchDAO.findByIdAndUpdate(
             id,
             { durationMinutes },
             { new: true }

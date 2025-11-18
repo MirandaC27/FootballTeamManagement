@@ -1251,3 +1251,17 @@ main {
   border-color: #6aa7ff;
   box-shadow: 0 0 0 3px rgba(118, 169, 255, 0.45);
 }
+
+.display-clock {
+    font-size: 3rem; /* bigger size */
+    font-weight: bold; /* bold */
+    display: block;
+    margin-bottom: 0.5rem; /* space between clock and date */
+}
+
+.match-date {
+    font-size: 1.2rem;
+    color: #555;
+    display: block;
+    margin-top: 0.2rem;
+}
