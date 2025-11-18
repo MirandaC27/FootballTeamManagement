@@ -566,6 +566,9 @@
     <script type="module">
         import { startStopClock, resetClock, initClock } from "/Clock/Clock.js";
 
+        const urlParams2 = new URLSearchParams(window.location.search);
+        const matchId2 = urlParams2.get('id');
+
         async function setupTimerUI() {
             const userRes = await fetch('/loggedUser');
             const user = await userRes.json();
@@ -585,8 +588,9 @@
             }
         }
 
-        initClock();
+        initClock(matchId2);
         setupTimerUI();
+
     </script>
 
 

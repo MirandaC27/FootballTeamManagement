@@ -106,7 +106,9 @@ app.delete('/deleteMatch/:id', MatchCont.deleteMatch);
 app.put('/updateMatch/:id', MatchCont.updateMatch);
 
 app.post('/updateMatchReaction/:id', MatchCont.updateMatchReaction);
-app.post('/setMatchDuration/:id', MatchCont.setMatchDuration);
+
+app.post("/match/start/:id", MatchCont.startMatchTimer);
+app.post("/match/end/:id", MatchCont.endMatchTimer);
 
 //calendar routes
 const EventCont = require('./controller/EventController');

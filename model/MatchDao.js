@@ -35,11 +35,11 @@ const matchSchema = new mongoose.Schema({
   },
   matchStart: {
     type: Date,
-    required: true
+    default:null
   },
   matchEnd: {
     type: Date,
-    required: true
+    default:null
   },
   matchLocation: {
     type: String,

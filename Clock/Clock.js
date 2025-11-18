@@ -3,22 +3,23 @@ let minutes = 0;
 let seconds = 0;
 let timerInterval = null;
 let status = "stopped";
+let currentMatchId = null;
 
-const display = document.getElementById("matchClock");
+let display;
 
-/** Format time MM:SS */
+//Format time MM:SS
 function formatTime(mins, secs) {
     const mm = mins < 10 ? "0" + mins : mins;
     const ss = secs < 10 ? "0" + secs : secs;
     return `${mm}:${ss}`;
 }
 
-/** Update the clock display */
+//Update the clock display
 function updateDisplay() {
     display.textContent = formatTime(minutes, seconds);
 }
 
-/** Tick every second */
+//Tick every second 
 function timerTick() {
     seconds++;
     if (seconds >= 60) {
@@ -28,19 +29,32 @@ function timerTick() {
     updateDisplay();
 }
 
-/** Start or stop the timer */
-export function startStopClock() {
+/** Start or stop timer + notify backend */
+export async function startStopClock() {
     if (status === "stopped") {
+
+        // BACKEND: mark matchStart ===
+        await fetch(`/match/start/${currentMatchId}`, {
+            method: "POST"
+        });
+
         timerInterval = setInterval(timerTick, 1000);
         status = "started";
+
     } else {
+
+        //BACKEND: mark matchEnd
+        await fetch(`/match/end/${currentMatchId}`, {
+            method: "POST"
+        });
+
         clearInterval(timerInterval);
         timerInterval = null;
         status = "stopped";
     }
 }
 
-/** Reset the timer */
+
 export function resetClock() {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -50,7 +64,9 @@ export function resetClock() {
     updateDisplay();
 }
 
-/** Initialize clock display */
-export function initClock() {
+
+export function initClock(matchId) {
+    currentMatchId = matchId;
+    display = document.getElementById("matchClock");
     updateDisplay();
 }

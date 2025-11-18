@@ -176,13 +176,69 @@ const setMatchDuration = async (req, res) => {
 };
 
 
+const startMatchTimer = async (req, res) => {
+    const user = req.session.user;
+    if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admins only" });
+    }
+
+    const { id } = req.params;
+
+    try {
+        const updated = await matchDao.matchModel.findByIdAndUpdate(
+            id,
+            {
+                matchStart: new Date(),
+                matchStatus: "In Progress"
+            },
+            { new: true }
+        );
+
+        if (!updated) return res.status(404).json({ message: "Match not found" });
+
+        res.json({ message: "Match started", match: updated });
+    } catch (err) {
+        console.error("Error starting match:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+const endMatchTimer = async (req, res) => {
+    const user = req.session.user;
+    if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Admins only" });
+    }
+
+    const { id } = req.params;
+
+    try {
+        const updated = await matchDao.matchModel.findByIdAndUpdate(
+            id,
+            {
+                matchEnd: new Date(),
+                matchStatus: "Final"
+            },
+            { new: true }
+        );
+
+        if (!updated) return res.status(404).json({ message: "Match not found" });
+
+        res.json({ message: "Match ended", match: updated });
+    } catch (err) {
+        console.error("Error ending match:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
 
 module.exports = {
-  createNewMatch,
-  deleteMatch,
-  updateMatch,
-  getAllMatches,
-  getMatchDetails,
-  updateMatchReaction,
-  setMatchDuration
+    createNewMatch,
+    deleteMatch,
+    updateMatch,
+    getAllMatches,
+    getMatchDetails,
+    updateMatchReaction,
+    startMatchTimer,
+    endMatchTimer
 };
+
