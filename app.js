@@ -10,6 +10,9 @@ app.use(express.static(path.join(__dirname, 'view')));
 //route for calendar front end
 app.use('/Calendar', express.static(path.join(__dirname, 'Calendar')));
 
+//route for clock front end
+app.use('/Clock', express.static(path.join(__dirname, 'Clock')));
+
 // middleware
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
@@ -103,6 +106,7 @@ app.delete('/deleteMatch/:id', MatchCont.deleteMatch);
 app.put('/updateMatch/:id', MatchCont.updateMatch);
 
 app.post('/updateMatchReaction/:id', MatchCont.updateMatchReaction);
+app.post('/setMatchDuration/:id', MatchCont.setMatchDuration);
 
 //calendar routes
 const EventCont = require('./controller/EventController');

@@ -33,6 +33,14 @@ const matchSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  matchStart: {
+    type: Date,
+    required: true
+  },
+  matchEnd: {
+    type: Date,
+    required: true
+  },
   matchLocation: {
     type: String,
     required: true
@@ -49,7 +57,8 @@ const matchSchema = new mongoose.Schema({
     angry: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     like: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     dislike: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }]
-  }
+  },
+  durationMinutes: { type: Number, default: null } 
 });
 
 

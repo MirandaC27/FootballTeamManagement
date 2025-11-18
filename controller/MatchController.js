@@ -21,6 +21,8 @@ const createNewMatch = async (req, res) => {
       homeScore,
       awayScore,
       matchDate,
+      matchStart,
+      matchEnd,
       matchLocation,
       matchStatus,
     });
@@ -142,6 +144,44 @@ async function updateMatchReaction(req, res) {
   }
 }
 
+const Match = require('../model/Match'); // or MatchDao if using DAO
+
+/**
+ * Admin sets match duration
+ * @route POST /setMatchDuration/:id
+ * @access Admin only
+ */
+const setMatchDuration = async (req, res) => {
+    const user = req.session.user;
+    if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Access denied: Admins only" });
+    }
+
+    const { id } = req.params;
+    const { durationMinutes } = req.body;
+
+    if (!durationMinutes || durationMinutes <= 0) {
+        return res.status(400).json({ message: "Invalid duration" });
+    }
+
+    try {
+        const match = await Match.findByIdAndUpdate(
+            id,
+            { durationMinutes },
+            { new: true }
+        );
+
+        if (!match) return res.status(404).json({ message: "Match not found" });
+
+        return res.json({ message: "Duration saved", durationMinutes: match.durationMinutes });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+
+
 module.exports = {
   createNewMatch,
   deleteMatch,
@@ -149,4 +189,5 @@ module.exports = {
   getAllMatches,
   getMatchDetails,
   updateMatchReaction,
+  setMatchDuration
 };
