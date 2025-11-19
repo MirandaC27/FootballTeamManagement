@@ -9,46 +9,84 @@
     <link rel="stylesheet" href="/css/style.css">
     <title>Admin - Manage Playoff Brackets</title>
     <style>
-        body {
-            background-color: #f8fafc;
-            font-family: Arial, sans-serif;
+        .bracket-container {
+        display: flex;
+        overflow-x: auto;
+        padding: 20px 10px;
+        gap: 40px;
         }
 
-        .card {
-            border-radius: 1rem;
+        .bracket-round {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            min-width: 200px;
         }
 
-        table {
-            background: white;
-            border-collapse: collapse;
-            width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        th,
-        td {
-            padding: 12px 15px;
+        .bracket-title {
             text-align: center;
-            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
         }
 
-        thead {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
+        .matchup {
+            position: relative;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #007bff;
+            width: 180px;
         }
 
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .team {
+            padding: 5px 8px;
         }
 
-        tbody tr:hover {
-            background-color: #f1f7ff;
+        .team + .team {
+            border-top: 1px solid #ccc;
         }
 
-        .btn-primary,
-        .btn-danger {
-            border-radius: 12px;
+        /* Lines connecting matchups */
+        .matchup::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: -40px;
+            width: 40px;
+            height: 2px;
+            background: #0004;
+        }
+
+        .bracket-round:last-child .matchup::after {
+            display: none; /* no lines after final round */
+        }
+
+        .matchup {
+            position: relative;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .matchup-header {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+        }
+
+        .delete-matchup {
+            cursor: pointer;
+            font-size: 18px;
+            color: #b30000;
+            transition: 0.2s ease;
+        }
+
+        .delete-matchup:hover {
+            color: #ff0000;
+            transform: scale(1.2);
         }
     </style>
 </head>
@@ -124,14 +162,28 @@
             </div>
 
             <!-- Add Matchup -->
-            <div class="col-md-5 mb-3">
-                <div class="card shadow text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Add Matchup</h5>
-                        <p class="card-text text-muted">Add a matchup to a specific round in the bracket.</p>
-                        <div class="d-flex justify-content-center gap-2">
-                            <select id="roundSelect" class="form-select w-50"></select>
-                            <button class="btn btn-primary" onclick="goToAddMatchup()">Go</button>
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Add Match to Round</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Select Round</label>
+                            <select id="roundSelect" class="form-select"></select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Home Team</label>
+                            <select id="homeTeamSelect" class="form-select"></select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Away Team</label>
+                            <select id="awayTeamSelect" class="form-select"></select>
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-primary w-100" onclick="addMatchToRound()">Add Match</button>
                         </div>
                     </div>
                 </div>
@@ -141,21 +193,9 @@
         <!-- Bracket Table -->
         <div class="card shadow">
             <div class="card-body">
-                <h5 class="card-title">📋 Current Bracket Overview</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover text-center" id="bracketTable">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Round</th>
-                                <th>Home Team</th>
-                                <th>Away Team</th>
-                                <th>Result</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td colspan="4" class="text-muted">Loading bracket...</td></tr>
-                        </tbody>
-                    </table>
+                <h5 class="card-title">🏆 Current Bracket</h5>
+                <div id="bracketContainer" class="bracket-container">
+                    <p class="text-muted">Loading bracket...</p>
                 </div>
             </div>
         </div>
@@ -165,6 +205,7 @@
     <script>
         // Load the bracket on page load
         document.addEventListener('DOMContentLoaded', async () => {
+            await populateTeamDropdowns();
             const params = new URLSearchParams(window.location.search);
             const size = parseInt(params.get('size'));
 
@@ -197,7 +238,6 @@
             }
         });
 
-        // Example: fetch top N teams (replace with your API call)
         async function fetchQualifyingTeams(size) {
             const res = await fetch('/getAllTeams');
             const teams = await res.json();
@@ -227,19 +267,36 @@
         }
 
         // Display bracket in table
-        function displayBracket(bracket, roundFilter = null) {
-            const tbody = document.querySelector("#bracketTable tbody");
-            tbody.innerHTML = '';
+        function displayBracket(bracket) {
+            const container = document.getElementById("bracketContainer");
+            container.innerHTML = ""; // clear old bracket
+
             bracket.rounds.forEach(round => {
-                if (roundFilter && round.roundNumber !== roundFilter) return;
+                const roundCol = document.createElement("div");
+                roundCol.className = "bracket-round";
+
+                const title = document.createElement("div");
+                title.className = "bracket-title";
+                title.textContent = `Round ${round.roundNumber}`;
+                roundCol.appendChild(title);
+
                 round.roundMatchups.forEach(match => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>Round ${round.roundNumber}</td>
-                            <td>${match.homeTeam}</td>
-                            <td>${match.awayTeam}</td>
-                            <td>${match.result || '-'}</td>`;
-                    tbody.appendChild(tr);
+                    const box = document.createElement("div");
+                    box.className = "matchup";
+
+                    box.innerHTML = `
+                        <div class="matchup-header">
+                            <span class="delete-matchup" data-round="${round.roundNumber}" data-home="${match.homeTeam}" data-away="${match.awayTeam}">🗑️</span>
+                        </div>
+                        <div class="team">${match.homeTeam}</div>
+                        <div class="team">${match.awayTeam}</div>
+                    `;
+
+                    roundCol.appendChild(box);
                 });
+
+                container.appendChild(roundCol);
+                deleteMatchup();
             });
         }
 
@@ -247,13 +304,108 @@
         function populateRoundsDropdown(bracket) {
             const select = document.getElementById('roundSelect');
             select.innerHTML = '';
+
             bracket.rounds.forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r.roundNumber;
                 opt.textContent = `Round ${r.roundNumber}`;
                 select.appendChild(opt);
             });
-            select.addEventListener('change', e => displayBracket(bracket, parseInt(e.target.value)));
+        }
+
+        // Populate teams dropdown
+        async function populateTeamDropdowns() {
+            const res = await fetch('/getAllTeams');
+            const teams = await res.json();
+
+            const homeSel = document.getElementById('homeTeamSelect');
+            const awaySel = document.getElementById('awayTeamSelect');
+
+            homeSel.innerHTML = "";
+            awaySel.innerHTML = "";
+
+            teams.forEach(t => {
+                const opt1 = document.createElement("option");
+                opt1.textContent = t.name;
+                opt1.value = t.name;
+
+                const opt2 = opt1.cloneNode(true);
+
+                homeSel.appendChild(opt1);
+                awaySel.appendChild(opt2);
+            });
+        }
+        
+        // Add a match to a round
+        async function addMatchToRound() {
+            if (!window.currentBracket) {
+                return alert("No bracket loaded.");
+            }
+
+            const roundNumber = parseInt(document.getElementById("roundSelect").value);
+            const homeTeam = document.getElementById("homeTeamSelect").value;
+            const awayTeam = document.getElementById("awayTeamSelect").value;
+
+            if (homeTeam === awayTeam) {
+                return alert("A team cannot play against itself.");
+            }
+
+            if (!homeTeam || !awayTeam) {
+                return alert("You must select both teams.");
+            }
+
+            const round = window.currentBracket.rounds.find(r => r.roundNumber === roundNumber);
+            if (!round) return alert("Invalid round selected.");
+
+            // Prevent team from having more than one game in a round
+            const hasDuplicate = round.roundMatchups.some(m =>
+                m.homeTeam === homeTeam ||
+                m.awayTeam === homeTeam ||
+                m.homeTeam === awayTeam ||
+                m.awayTeam === awayTeam
+            )
+            if (hasDuplicate) {
+                return alert("One or more of these teams already play in this round.")
+            }
+
+            // Prevent matchups in round from exceeding maximum
+            const expectedNumTeams = window.currentBracket.numTeams / Math.pow(2, roundNumber - 1);
+            const maxNumMatchups = expectedNumTeams / 2;
+            const realMatchCount = round.roundMatchups.filter(m =>
+                m.homeTeam !== "TBD" && m.awayTeam !== "TBD"
+            ).length;
+
+            if (realMatchCount >= maxNumMatchups) {
+                return alert("This round is already full — cannot add more matchups.");
+            }
+
+
+
+            const match = {
+                homeTeam,
+                awayTeam,
+                result: null
+            };
+
+            try {
+                const res = await fetch(`/addMatchup/${window.currentBracket.name}/${roundNumber}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(match)
+                });
+
+                if (!res.ok) throw new Error("Server error adding match");
+
+                const updatedBracket = await res.json();
+                window.currentBracket = updatedBracket;
+
+                displayBracket(updatedBracket);
+
+                alert("Match added successfully.");
+            } catch (err) {
+                console.error(err);
+                alert("Failed to add match.");
+            }
         }
 
         // Load existing brackets
@@ -269,6 +421,35 @@
             } catch (err) {
                 console.error(err);
             }
+        }
+
+        // Delete a matchup
+        async function deleteMatchup() {
+            document.querySelectorAll(".delete-matchup").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const round = btn.dataset.round;
+                    const homeTeam = btn.dataset.home;
+                    const awayTeam = btn.dataset.away;
+
+                    if (!confirm("Are you sure you want to delete this matchup?")) return;
+
+                    try {
+                        const res = await fetch(`/deleteMatchup/${encodeURIComponent(window.currentBracket.name)}/${round}/${encodeURIComponent(homeTeam)}/${encodeURIComponent(awayTeam)}`, {
+                            method: "DELETE"
+                        });
+
+                        if (!res.ok) throw new Error("Failed to delete matchup.");
+
+                        const updatedBracket = await res.json();
+                        window.currentBracket = updatedBracket;
+                        displayBracket(updatedBracket);
+
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error deleting matchup.");
+                    }
+                });
+            });
         }
 
         // Delete current bracket

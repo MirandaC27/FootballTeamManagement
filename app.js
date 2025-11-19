@@ -149,6 +149,7 @@ app.post('/addMatchup/:name/:roundNumber', PlayoffCont.addMatchup);
 app.put('/updateResult/:name/:roundNumber', PlayoffCont.updatePlayoffMatchupResult);
 app.delete('/deleteBracket/:name', PlayoffCont.deleteBracket);
 app.delete('/deleteAllBrackets', PlayoffCont.deleteAllBrackets);
+app.delete('/deleteMatchup/:name/:round/:homeTeam/:awayTeam', PlayoffCont.deleteMatchup);
 
 // post controller routes
 const PostCont = require("./controller/PostController");

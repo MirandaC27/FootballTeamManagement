@@ -113,6 +113,17 @@ const deleteAllBrackets = async(req, res) => {
     }
 }
 
+const deleteMatchup = async(req, res) => {
+    try {
+        const { name, round, homeTeam, awayTeam } = req.params;
+        const matchIndex = await dao.getMatchupIndex(name, parseInt(round), homeTeam, awayTeam);
+        const bracket = await dao.deleteSingleMatchup(name, parseInt(round), matchIndex);
+        res.json(bracket);
+    } catch (err) {
+        res.status(500).send('Error deleting matchup');
+    }
+}
+
 
 module.exports = {
     getAllBrackets,
@@ -121,5 +132,6 @@ module.exports = {
     addMatchup,
     updatePlayoffMatchupResult,
     deleteBracket,
-    deleteAllBrackets
+    deleteAllBrackets,
+    deleteMatchup
 };
