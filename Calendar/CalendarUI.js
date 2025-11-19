@@ -110,7 +110,13 @@ export function initCalendar(user) {
 
     try {
       const title = buildTitle(tag);
-      const ok = await addEvent({ eventDate: date, title, tag, location });
+      const ok = await addEvent({ eventDate: date, 
+                                  title, 
+                                  tag, 
+                                  location, 
+                                  startTime: document.getElementById("startTime").value,
+                                  endTime: document.getElementById("endTime").value
+                                });
       formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
       if (ok) {
         addForm.reset();
@@ -226,7 +232,10 @@ export function showEventDetails(eventsForDay, result, day, month, year) {
     grouped[tag].forEach(ev => {
       const li = document.createElement('li');
       li.classList.add('mb-2');
-      li.innerHTML = `<strong>${ev.title}</strong> <span class="badge badge-secondary tag-badge">${ev.tag}</span>`;
+      li.innerHTML = `<strong>${ev.title}</strong> 
+                      <span class="badge badge-secondary tag-badge">${ev.tag}</span>
+                      <br>
+                      <small>${ev.startTime} – ${ev.endTime}</small>`;
 
       if (currentUser && currentUser.role === 'admin') {
         const editBtn = document.createElement('button');
@@ -284,10 +293,12 @@ export function openEditForm(eventObj, defaultDate) {
         <label for="editTitle">Event Title:</label>
         <input type="text" id="editTitle" class="form-control" value="${eventObj.title}" required>
       </div>
+      
       <div class="form-group">
         <label for="editDate">Event Date:</label>
         <input type="date" id="editDate" class="form-control" value="${defaultDate}" required>
       </div>
+
       <div class="form-group">
         <label for="editTag">Tag:</label>
         <select id="editTag" class="form-control" required>
@@ -296,10 +307,22 @@ export function openEditForm(eventObj, defaultDate) {
           <option value="event" ${eventObj.tag === 'event' ? 'selected' : ''}>Event</option>
         </select>
       </div>
+
       <div class="form-group">
         <label for="editLocation">Location:</label>
         <input type="text" id="editLocation" class="form-control" value="${eventObj.location || ''}" placeholder="Enter event location" required>
       </div>
+
+      <div class="form-group">
+        <label for="editStartTime">Start Time:</label>
+        <input type="time" id="editStartTime" class="form-control" value="${eventObj.startTime}" required>
+      </div>
+
+      <div class="form-group">
+        <label for="editEndTime">End Time:</label>
+        <input type="time" id="editEndTime" class="form-control" value="${eventObj.endTime}" required>
+      </div>
+
       <div class="text-center">
         <button type="submit" class="btn btn-primary">Save</button>
         <button type="button" id="cancelEdit" class="btn btn-secondary ml-2">Cancel</button>
@@ -322,7 +345,13 @@ export function openEditForm(eventObj, defaultDate) {
       return;
     }
 
-    const ok = await updateEvent(eventObj.id, { title: newTitle, eventDate: newDate, tag: newTag, location: newLocation });
+    const ok = await updateEvent(eventObj.id, { title: newTitle, 
+                                                eventDate: newDate, 
+                                                tag: newTag, 
+                                                location: newLocation,
+                                                startTime: document.getElementById("editStartTime").value,
+                                                endTime: document.getElementById("editEndTime").value 
+                                              });
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);

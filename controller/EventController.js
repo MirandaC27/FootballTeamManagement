@@ -8,27 +8,27 @@ const TAGS = ["practice", "match", "event"];
  * @param {*} res response object used to send back
  */
 const createNewEvent = async (req, res) => {
-    try{
-        const{ eventDate, title, tag, location } = req.body;
-        
-        if(!eventDate || !title || !tag || !location){
-          return res.status(400).send('date, title, tag, and location are required');
-        }
+  try {
+    const { eventDate, title, tag, location, startTime, endTime } = req.body;
 
-        if (!TAGS.includes(tag)) {
-          return res.status(400).send("Invalid tag. Must be practice, match, or event.");
-        }
-
-        const localDate = new Date(`${eventDate}T00:00:00`);
-        await dao.create({ eventDate: localDate, title, tag, location });
-        res.status(200).json({ message: "Event added successfully" });
+    if (!eventDate || !title || !tag || !location || !startTime || !endTime) {
+      return res.status(400).send('date, title, tag, location, startTime, and endTime are required');
     }
 
-    catch(err){
-        console.error('Could not create event:', err);
-        res.status(500).send('Could not create event');
+    if (!TAGS.includes(tag)) {
+      return res.status(400).send("Invalid tag.");
     }
+
+    const localDate = new Date(`${eventDate}T00:00:00`);
+    await dao.create({ eventDate: localDate, title, tag, location, startTime, endTime });
+
+    res.status(200).json({ message: "Event added successfully" });
+  } catch (err) {
+      console.error('Could not create event:', err);
+      res.status(500).send('Could not create event');
+  }
 };
+
 
 /**
  * delete an existing event and register it in the database.
@@ -61,9 +61,13 @@ const deleteEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { eventDate, title, tag, location } = req.body;
+    const { eventDate, title, tag, location, startTime, endTime } = req.body;
 
     const updatedFields = {};
+
+    if (startTime) updatedFields.startTime = startTime;
+    if (endTime) updatedFields.endTime = endTime;
+
     if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
     if (title) updatedFields.title = title;
     if (tag) {
@@ -124,12 +128,15 @@ function eventByMonth(events, year, monthIndex){
             
     //map each day to the month
     .map(m => ({
-        day: new Date(m.eventDate).getDate(),
-        id:m._id,
-        title: m.title,
-        tag: m.tag,
-        location: m.location
+      day: new Date(m.eventDate).getDate(),
+      id: m._id,
+      title: m.title,
+      tag: m.tag,
+      location: m.location,
+      startTime: m.startTime,   
+      endTime: m.endTime   
     }));
+
 
 }
 
