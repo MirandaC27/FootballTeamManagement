@@ -8,26 +8,27 @@ const TAGS = ["practice", "match", "event"];
  * @param {*} res response object used to send back
  */
 const createNewEvent = async (req, res) => {
-    try{
-        const{ eventDate, title, tag, location } = req.body;
-        
-        if(!eventDate || !title || !tag || !location){
-          return res.status(400).send('date, title, tag, and location are required');
-        }
+  console.log("BODY RECEIVED:", req.body);
+  try{
+    const{ eventDate, title, tag, location, locationCoords } = req.body;
+      
+    if(!eventDate || !title || !tag || !location || !locationCoords){
+        return res.status(400).send('date, title, tag, location, and location coordinates are required');
+      }
 
-        if (!TAGS.includes(tag)) {
-          return res.status(400).send("Invalid tag. Must be practice, match, or event.");
-        }
+      if (!TAGS.includes(tag)) {
+        return res.status(400).send("Invalid tag. Must be practice, match, or event.");
+      }
 
-        const localDate = new Date(`${eventDate}T00:00:00`);
-        await dao.create({ eventDate: localDate, title, tag, location });
-        res.status(200).json({ message: "Event added successfully" });
-    }
+      const localDate = new Date(`${eventDate}T00:00:00`);
+      await dao.create({ eventDate: localDate, title, tag, location, locationCoords });
+      res.status(200).json({ message: "Event added successfully" });
+  }
 
-    catch(err){
-        console.error('Could not create event:', err);
-        res.status(500).send('Could not create event');
-    }
+  catch(err){
+      console.error('Could not create event:', err);
+      res.status(500).send('Could not create event');
+  }
 };
 
 /**
@@ -61,7 +62,7 @@ const deleteEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { eventDate, title, tag, location } = req.body;
+    const { eventDate, title, tag, location, locationCoords } = req.body;
 
     const updatedFields = {};
     if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
@@ -73,6 +74,7 @@ const updateEvent = async (req, res) => {
       updatedFields.tag = tag;
     }
     if (location) updatedFields.location = location;
+    if (locationCoords) updatedFields.locationCoords = locationCoords;
 
 
     const updated = await dao.update(id, updatedFields);
@@ -106,6 +108,23 @@ const getAllEvents = async (req, res) => {
         res.status(500).send('Could not get events');
     }
 };
+
+/**
+ * get event location coordinates from the database.
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
+const getEventLocationCoords = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const coordinates = await dao.eventModel.findById(id);
+    res.json(coordinates);
+  }
+  catch(err) {
+    console.error('Could not get coordinates', err);
+    res.status(500).send('Could not get coordinates');
+  }
+}
 
 /**
  * create mapping of events in a month
@@ -170,5 +189,6 @@ module.exports = {
     updateEvent,
     deleteEvent,
     getAllEvents,
+    getEventLocationCoords,
     getCalendarData
 };
