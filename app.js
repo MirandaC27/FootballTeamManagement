@@ -102,6 +102,10 @@ app.get('/matches', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'matches.html'));
 });
 
+app.get('/teams', (req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'teams.html'));
+});
+
 app.get('/getAllMatches', MatchCont.getAllMatches);
 app.get('/getMatchDetails/:id', MatchCont.getMatchDetails);
 
