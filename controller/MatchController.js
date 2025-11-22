@@ -97,6 +97,8 @@ const updateMatch = async (req, res) => {
     }
 
     res.json({ message: 'Match updated successfully', updated });
+    io.emit("matchUpdated", updatedMatch);
+    
   } catch (err) {
     console.error('Error updating match:', err);
     res.status(500).json({ message: 'Server error while updating match' });
