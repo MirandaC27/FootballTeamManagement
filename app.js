@@ -110,6 +110,9 @@ app.post('/updateMatchReaction/:id', MatchCont.updateMatchReaction);
 app.post("/match/start/:id", MatchCont.startMatchTimer);
 app.post("/match/end/:id", MatchCont.endMatchTimer);
 
+const NotificationCont = require("./controller/NotificationController");
+app.get("/notifications", NotificationCont.getNotifications);
+
 //calendar routes
 const EventCont = require('./controller/EventController');
 console.log("EventCont loaded:", EventCont);

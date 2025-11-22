@@ -1265,3 +1265,43 @@ main {
     display: block;
     margin-top: 0.2rem;
 }
+
+/*notif hub container*/
+#notificationHub {
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 20px;
+    background: #f8f8f8;
+}
+
+/*notif hub title*/
+#notificationHub h5 {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+/* single notif box*/
+.single-notification {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 5px solid #4a68f0;
+}
+
+/* notif text */
+.single-notification .notification-message {
+    color: #666;
+}
+
+/* timestamp styling */
+.single-notification .notification-timestamp {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+

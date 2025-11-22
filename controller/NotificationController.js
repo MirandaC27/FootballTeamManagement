@@ -11,6 +11,7 @@ async function getNotifications(req, res) {
     }
 }
 
+/*
 async function markNotificationRead(req, res) {
     try {
         const { id } = req.params;
@@ -26,8 +27,9 @@ async function markNotificationRead(req, res) {
         res.status(500).send("Error marking read");
     }
 }
+    */
 
 module.exports = {
-    getNotifications,
-    markNotificationRead
+    getNotifications
+    //markNotificationRead
 };
