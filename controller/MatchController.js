@@ -1,4 +1,6 @@
 const matchDao = require('../model/MatchDao');
+const NotificationDao = require("../model/NotificationDao");
+
 //const teamDao = require('../model/TeamDao');
 
 /**
@@ -72,6 +74,26 @@ const updateMatch = async (req, res) => {
 
     if (!updated) {
       return res.status(404).json({ message: 'Match not found' });
+    }
+
+    // In progress notification
+    if (newData.matchStatus === "In Progress") {
+      const io = req.app.get("io");
+
+      const notifTitle = "Match started!";
+      const notifMessage = `Match ${updated.homeTeam} vs ${updated.awayTeam} is now In Progress`;
+      const notifTimestamp = new Date(); // Correct timestamp
+
+      // Create the notification
+      const notif = await NotificationDao.createNotification(
+        updated._id,      
+        notifMessage,     
+        notifTitle,       
+        notifTimestamp    
+      );
+
+      // Emit through socket.io
+      io.emit("matchNotification", notif);
     }
 
     res.json({ message: 'Match updated successfully', updated });

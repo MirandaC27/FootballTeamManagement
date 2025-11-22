@@ -1304,4 +1304,26 @@ main {
     color: #999;
 }
 
+#toastBox {
+   position: fixed;
+   bottom: 20px;
+   right: 20px;
+   z-index: 9999;
+}
+.toast-msg {
+    background: #333;
+    color: white;
+    padding: 10px 14px;
+    margin-top: 8px;
+    border-radius: 6px;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s ease;
+}
+.toast-msg.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
 
