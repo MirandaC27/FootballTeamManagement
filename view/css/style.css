@@ -559,11 +559,11 @@ main {
   margin: 0 5px;
 }
 
-/* --- Input Form Styling --- */
-#eventform-container {
+/* --- Input Form Styling (Based on your provided CSS) --- */
+.eventform-container {
     margin-bottom: 30px;
 }
-#eventform-content {
+.eventform-content {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -573,30 +573,30 @@ main {
     align-items: center;
     gap: 10px 20px;
 }
-#eventform-content label, #eventform-content input, #eventform-content select, #eventform-content button {
+.eventform-content label, .eventform-content input, .eventform-content select, .eventform-content button {
     padding: 8px;
     border-radius: 4px;
     border: 1px solid #ccc;
     box-sizing: border-box;
     font-size: 14px;
 }
-#eventform-content input[type="text"] { 
+.eventform-content input[type="text"] { 
     flex-grow: 1;
     min-width: 200px;
 }
-#eventform-content input[type="number"] {
+.eventform-content input[type="number"] {
     width: 70px;
     text-align: center;
 }
-#eventform-content button {
+.eventform-content button {
     cursor: pointer;
     border: none;
     transition: background-color 0.3s;
-    background-color: #007bff;
+    background-color: #007bff; /* Blue to match your CSS */
     color: white;
 }
 
-/* --- Simplified Timeline Layout Styling --- */
+/* --- Simplified Timeline Layout Styling (Based on your provided CSS) --- */
 #timeline-container {
     width: 95%;
     max-width: 1200px;
