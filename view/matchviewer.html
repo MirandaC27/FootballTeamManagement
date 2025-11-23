@@ -18,7 +18,6 @@
     <!--nav bar-->
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
         <nav class="navbar navbar-dark bg-primary">
-
             <!--logo-->
             <a class="navbar-brand" href="/index.html">
                 <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
@@ -29,7 +28,6 @@
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <!--options-->
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
@@ -45,7 +43,6 @@
         <div id="signin-btn" class="ms-auto">
             <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
         </div>
-
         <!--account and log out dropdown-->
         <div id="account-dropdown" class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -123,17 +120,16 @@
 
                         <label for="event-minute">Min:</label>
                         <input type="number" id="event-minute" min="1" max="90" value="1" placeholder="Min">
-                        <button id="toggleTime-btn" onclick="toggleTimeInputMode()">Use Current Time</button>
                         <label for="event-desc">Description:</label>
-                        <input type="text" id="event-desc" placeholder="player number goes here">
-                        <button onclick="logEvent()">Submit</button>
+                        <input type="text" id="event-desc" placeholder="e.g, #10; Own Goal">
+                        <button id="logEventButton">Submit</button>
                     </div>
                 </section>
 
                 <section class="details-container">
                     <nav class="nav-header">Timeline</nav>
                     <div class="timeline-container">
-                        
+
                     </div>
                 </section>
             </main>
@@ -187,11 +183,14 @@
 
 
     <script>
+        let matchEvents = [];
+        let currScore = {
+            teamHome: match.homeScore,
+            teamAway: match.awayScore
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... existing loadMatch(SAMPLE_MATCH_DATA); and setupTabListeners(); ...
-
-            // New logic for the back button
+            // logic for the back button
             const backButton = document.getElementById('backButton');
             if (backButton) {
                 backButton.addEventListener('click', () => {
@@ -199,6 +198,14 @@
                     window.history.back();
                 });
             }
+
+            //logic for event form
+            docuemnt.getElementById('logEventButton').addEventListener('click', (e)=>{
+                e.preventDefault();
+                logEvent();
+            });
+
+
         });
 
         /**
@@ -301,7 +308,86 @@
             updateLiveBadgeDisplay(match);
         }
 
+        /*Event form and Timeline*/
+        function updateScoreboard(){
+            document.getElementById('homeScore').textContent = currScore.teamHome;
+            document.getElementById('awayScore').textContent = currScore.teamAway;
+        }
+
+        function recalcScore(){
+            matchEvents.forEach(event=> {
+                if(event.type == 'goal'){
+                    currScore[event.teamSelected]++;
+                }
+            });
+
+            updateScoreboard();
+            updateScore(matchId, {homeScore: currScore.teamHome, awayScore: currScore.teamAway});
+        }
+
+        async function logEvent(){
+            const selectType = document.getElementById('event-type');
+            const typeSelected = selectType.options[selectType.selectedIndex].text;
+            const selectTeam = document.getElementById('event-team');
+            const teamSelected = selectTeam.value;
+            const inputMin = document.getElementById('event-min');
+            const inputDesc = document.getElementById('event-desc');
+
+            const eventMinute = parseInt(inputMin.value, 10);
+
+            const eventDesc = inputDesc.value.trim();
+
+            const newEvent = {
+                minute: eventMinute,
+                type: typeSelected,
+                description: eventDesc,
+                team: teamSelected,
+                timestamp: new Date().toISOString()
+            };
+
+            try{
+                const res = await fetch(`/api/matches/${matchId}/events`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(newEvent)
+                });
+            }
+            catch (err){
+                console.error("error logging event:", err.message);
+            }
+
+            console.log("event saved, reloading page");
+            await loadMatch(matchId);
+            /*matchEvents.push(newEvent);*/
+
+
+            inputDesc.value = '';
+            inputDesc.focus();
+        }
+
+        function loadTimeline(){
+            /*recalcScore();*/
+
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineContainer.innerHTML = '';
+
+            matchEvents.sort((home, away) => home.minute - away.minute);
+            matchEvents.forEach(event => {
+                const teamName = event.team = 'teamHome' ? match.homeTeam : match.awayTeam;
+                const eventItem = document.createElement('div');
+                eventItem.className = 'timeline-item';
+
+                eventItem.innerHTML =
+                 `<strong>${event.eventMinute} | ${event.typeSelected}:<strong>${event.eventDesc} <em>(${teamName})</em>`;
+
+                timelineContainer.appendChild(eventItem);
+
+            });
+        
+        }
+
     </script>
+
 
     <!-- Reaction Bar -->
     <script>
