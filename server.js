@@ -29,3 +29,9 @@ io.on('connection', (socket) => {
         console.log('disconnected from server');
     });
 });
+
+//sync up clock for everyone
+const setupClockSocket = require("./Clock/ClockSocket.js");   
+const matchDao = require("./model/MatchDao.js");
+
+setupClockSocket(io, matchDao);   

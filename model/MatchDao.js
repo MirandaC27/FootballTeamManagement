@@ -58,7 +58,14 @@ const matchSchema = new mongoose.Schema({
     like: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
     dislike: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }]
   },
-  durationMinutes: { type: Number, default: null } 
+  durationMinutes: { type: Number, default: null },
+
+  clock: {
+    startTimestamp: { type: Number, default: null },      
+    elapsedBeforeStart: { type: Number, default: 0 },      
+    status: { type: String, default: "stopped" } 
+  }
+
 });
 
 
@@ -134,6 +141,38 @@ async function updateMatchReaction(matchId, userId, reactionType) {
   return { isReacted: !alreadyReacted, count: match.reactions[reactionType].length };
 }
 
+
+//ClockDAO things.
+async function setClockState(id, newClockObj) {
+  return await matchModel.findByIdAndUpdate(
+    id,
+    { $set: { clock: newClockObj } },
+    { new: true }
+  ).lean();
+}
+
+async function updateElapsed(id, elapsedBeforeStart) {
+  return await matchModel.findByIdAndUpdate(
+    id,
+    { $set: { "clock.elapsedBeforeStart": elapsedBeforeStart } },
+    { new: true }
+  ).lean();
+}
+
+async function resetClock(id) {
+  return await matchModel.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        "clock.status": "stopped",
+        "clock.startTimestamp": null,
+        "clock.elapsedBeforeStart": 0
+      }
+    },
+    { new: true }
+  ).lean();
+}
+
 module.exports = {
   matchModel,
   create,
@@ -142,5 +181,8 @@ module.exports = {
   readById,
   remove,
   removeAll,
-  updateMatchReaction
+  updateMatchReaction,
+  setClockState,
+  updateElapsed,
+  resetClock
 };

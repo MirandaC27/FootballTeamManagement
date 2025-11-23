@@ -109,6 +109,8 @@ app.post('/updateMatchReaction/:id', MatchCont.updateMatchReaction);
 
 app.post("/match/start/:id", MatchCont.startMatchTimer);
 app.post("/match/end/:id", MatchCont.endMatchTimer);
+app.post("/match/reset/:id", MatchCont.resetMatchTimer);
+
 
 const NotificationCont = require("./controller/NotificationController");
 app.get("/notifications", NotificationCont.getNotifications);

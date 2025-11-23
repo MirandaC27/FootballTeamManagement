@@ -23,8 +23,6 @@ const createNewMatch = async (req, res) => {
       homeScore,
       awayScore,
       matchDate,
-      matchStart,
-      matchEnd,
       matchLocation,
       matchStatus,
     });
@@ -98,7 +96,7 @@ const updateMatch = async (req, res) => {
 
     res.json({ message: 'Match updated successfully', updated });
     io.emit("matchUpdated", updatedMatch);
-    
+
   } catch (err) {
     console.error('Error updating match:', err);
     res.status(500).json({ message: 'Server error while updating match' });
@@ -169,91 +167,100 @@ async function updateMatchReaction(req, res) {
 }
 
 
+async function startMatchTimer(req, res) {
+  try {
+    const matchId = req.params.id;
 
-const setMatchDuration = async (req, res) => {
-    const user = req.session.user;
-    if (!user || user.role !== "admin") {
-        return res.status(403).json({ message: "Access denied: Admins only" });
+    const match = await matchDao.readById(matchId);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+
+    if (match.clock.status === "started") {
+      return res.json({ message: "Clock already running", match });
     }
 
-    const { id } = req.params;
-    const { durationMinutes } = req.body;
+    const newClock = {
+      status: "started",
+      startTimestamp: Date.now(),
+      elapsedBeforeStart: match.clock.elapsedBeforeStart
+    };
 
-    if (!durationMinutes || durationMinutes <= 0) {
-        return res.status(400).json({ message: "Invalid duration" });
+    const updated = await matchDao.setClockState(matchId, newClock);
+
+    const io = req.app.get("io");
+    io.emit("clock:start", {
+      matchId,
+      ...newClock
+    });
+
+    return res.json({ message: "Clock started", match: updated });
+  } catch (err) {
+    console.error("Start clock error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function endMatchTimer(req, res) {
+  try {
+    const matchId = req.params.id;
+
+    const match = await matchDao.matchModel.findById(matchId);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+
+    if (match.clock.status !== "started") {
+      return res.json({ message: "Clock already stopped", match });
     }
 
-    try {
-        const match = await matchDAO.findByIdAndUpdate(
-            id,
-            { durationMinutes },
-            { new: true }
-        );
+    const now = Date.now();
+    const elapsed = match.clock.elapsedBeforeStart + (now - match.clock.startTimestamp);
 
-        if (!match) return res.status(404).json({ message: "Match not found" });
+    const newClock = {
+      status: "stopped",
+      startTimestamp: null,
+      elapsedBeforeStart: elapsed
+    };
 
-        return res.json({ message: "Duration saved", durationMinutes: match.durationMinutes });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Server error" });
-    }
-};
+    const updated = await matchDao.setClockState(matchId, newClock);
+
+    const io = req.app.get("io");
+    io.emit("clock:stop", {
+      matchId,
+      elapsedBeforeStart: elapsed
+    });
+
+    return res.json({ message: "Clock stopped", match: updated });
+  } catch (err) {
+    console.error("Stop clock error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function resetMatchTimer(req, res) {
+  try {
+    const matchId = req.params.id;
+
+    const match = await matchDao.readById(matchId);
+    if (!match) return res.status(404).json({ message: "Match not found" });
+
+    // Always reset the clock to the initial state
+    const newClock = {
+      status: "stopped",
+      startTimestamp: null,
+      elapsedBeforeStart: 0
+    };
+
+    const updated = await matchDao.setClockState(matchId, newClock);
+
+    const io = req.app.get("io");
+    io.emit("clock:reset", { matchId });
+
+    return res.json({ message: "Clock reset", match: updated });
+  } catch (err) {
+    console.error("Reset clock error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
 
 
-const startMatchTimer = async (req, res) => {
-    const user = req.session.user;
-    if (!user || user.role !== "admin") {
-        return res.status(403).json({ message: "Admins only" });
-    }
-
-    const { id } = req.params;
-
-    try {
-        const updated = await matchDao.matchModel.findByIdAndUpdate(
-            id,
-            {
-                matchStart: new Date(),
-                matchStatus: "In Progress"
-            },
-            { new: true }
-        );
-
-        if (!updated) return res.status(404).json({ message: "Match not found" });
-
-        res.json({ message: "Match started", match: updated });
-    } catch (err) {
-        console.error("Error starting match:", err);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-
-const endMatchTimer = async (req, res) => {
-    const user = req.session.user;
-    if (!user || user.role !== "admin") {
-        return res.status(403).json({ message: "Admins only" });
-    }
-
-    const { id } = req.params;
-
-    try {
-        const updated = await matchDao.matchModel.findByIdAndUpdate(
-            id,
-            {
-                matchEnd: new Date(),
-                matchStatus: "Final"
-            },
-            { new: true }
-        );
-
-        if (!updated) return res.status(404).json({ message: "Match not found" });
-
-        res.json({ message: "Match ended", match: updated });
-    } catch (err) {
-        console.error("Error ending match:", err);
-        res.status(500).json({ message: "Server error" });
-    }
-};
 
 module.exports = {
     createNewMatch,
@@ -263,6 +270,7 @@ module.exports = {
     getMatchDetails,
     updateMatchReaction,
     startMatchTimer,
-    endMatchTimer
+    endMatchTimer,
+    resetMatchTimer
 };
 

@@ -173,7 +173,11 @@
         </div>
     </div>
 
-
+    <script src="/socket.io/socket.io.js"></script>
+        <script>
+            // Create socket ONCE for entire page
+            window.socket = io();
+        </script>
     <script>
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -411,7 +415,7 @@
     <script type="module">
         const urlParams = new URLSearchParams(window.location.search);
         const matchId = urlParams.get('id');
-        const socket = io();
+        const socket = window.socket;
         const messages = document.getElementById('chatMessages');
         const input = document.getElementById('chatInputText');
         const sendBtn = document.getElementById('sendBtn');
@@ -561,37 +565,58 @@
         loadMessages();
     </script>
 
-    <script type="module" src="/Clock/Clock.js"></script>
 
-    <script type="module">
-        import { startStopClock, resetClock, initClock } from "/Clock/Clock.js";
 
-        const urlParams2 = new URLSearchParams(window.location.search);
-        const matchId2 = urlParams2.get('id');
+<script type="module">
+    import { startStopClock, resetClock, initClock } from "/Clock/Clock.js";
 
-        async function setupTimerUI() {
-            const userRes = await fetch('/loggedUser');
-            const user = await userRes.json();
-            const isAdmin = user && user.role === "admin";
-            const adminControls = document.getElementById("adminTimerControls");
 
-            if (isAdmin) {
-                adminControls.style.display = "block";
+    async function setupTimerUI() {
 
-                document.getElementById("startStopClockBtn").addEventListener("click", () => {
-                    startStopClock();
-                });
+        const userRes = await fetch('/loggedUser');
+        const user = await userRes.json();
 
-                document.getElementById("resetClockBtn").addEventListener("click", () => {
-                    resetClock();
-                });
-            }
+        const isAdmin = user && user.role === "admin";
+        const adminControls = document.getElementById("adminTimerControls");
+
+        // Only admins see the timer buttons
+        if (isAdmin) {
+            adminControls.style.display = "block";
+
+            document.getElementById("startStopClockBtn").addEventListener("click", () => {
+                startStopClock();
+            });
+
+            document.getElementById("resetClockBtn").addEventListener("click", () => {
+                resetClock();
+            });
         }
+    }
 
-        initClock(matchId2);
+
+    // clock socket events.
+    window.socket.on("clock:start", data => {
+        console.log("Clock start received", data);
+    });
+
+    window.socket.on("clock:stop", data => {
+        console.log("Clock stop received", data);
+    });
+
+    window.socket.on("clock:reset", data => {
+        console.log("Clock reset received", data);
+    });
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const matchId = urlParams.get('id');
+        initClock(matchId);
         setupTimerUI();
+    });
+</script>
 
-    </script>
+
 
 
 </body>
