@@ -183,16 +183,16 @@
 
 
     <script>
+        let currMatch = null;
         let matchEvents = [];
         let currScore = {
-            teamHome: match.homeScore,
-            teamAway: match.awayScore
+            teamHome: 0,
+            teamAway: 0
         }
-        let currMatch = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('id');
+            let matchId = urlParams.get('id');
 
             if (matchId) {
                 loadMatch(matchId);
@@ -216,11 +216,40 @@
                 logEvent();
             });
 
+            checkLoggedUser();
+            updateReactionVisibility();
+            attachReactionHandler();
+
+            if(currMatch){
+                document.getElementById('eventHomeTeam').textContent = currMatch.homeTeam;
+                document.getElementById('eventAwayTeam').textContent = currMatch.awayTeam;
+            }
 
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-        });
+        async function loadMatch(id) {
+            const res = await fetch(`/getMatchDetails/${id}`);
+
+            if (!res.ok) {
+                alert('Failed to load match details');
+                return;
+            }
+            const match = await res.json();
+            currMatch = match;
+
+            document.getElementById('homeTeam').textContent = match.homeTeam;
+            document.getElementById('awayTeam').textContent = match.awayTeam;
+            document.getElementById('homeScore').textContent = match.homeScore;
+            document.getElementById('awayScore').textContent = match.awayScore;
+            document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
+            document.getElementById('matchLocation').textContent = match.matchLocation;
+            document.getElementById('matchStatus').textContent = match.matchStatus;
+
+            loadTimeline();
+            loadReactions(match);
+            changeChatInputVisibility(match);
+            updateLiveBadgeDisplay(match);
+        }
 
         /**
         * Show sign in button if logged out or show account dropdown if signed in.
@@ -288,29 +317,6 @@
             }
         }
 
-        async function loadMatch(id) {
-            const res = await fetch(`/getMatchDetails/${id}`);
-
-            if (!res.ok) {
-                alert('Failed to load match details');
-                return;
-            }
-            const match = await res.json();
-            currMatch = match;
-
-            document.getElementById('homeTeam').textContent = match.homeTeam;
-            document.getElementById('awayTeam').textContent = match.awayTeam;
-            document.getElementById('homeScore').textContent = match.homeScore;
-            document.getElementById('awayScore').textContent = match.awayScore;
-            document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
-            document.getElementById('matchLocation').textContent = match.matchLocation;
-            document.getElementById('matchStatus').textContent = match.matchStatus;
-
-            loadReactions(match);
-            changeChatInputVisibility(match);
-            updateLiveBadgeDisplay(match);
-        }
-
         /*Event form and Timeline*/
         function updateScoreboard(){
             document.getElementById('homeScore').textContent = currScore.teamHome;
@@ -325,7 +331,7 @@
             });
 
             updateScoreboard();
-            updateScore(matchId, {homeScore: currScore.teamHome, awayScore: currScore.teamAway});
+            //updateScore(matchId, {homeScore: currScore.teamHome, awayScore: currScore.teamAway});
         }
 
         async function logEvent(){
@@ -371,12 +377,14 @@
         function loadTimeline(){
             /*recalcScore();*/
 
+            if(!currMatch) return;
+
             const timelineContainer = document.getElementById('timeline-container');
             timelineContainer.innerHTML = '';
 
             matchEvents.sort((home, away) => home.minute - away.minute);
             matchEvents.forEach(event => {
-                const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
+                const teamName = event.team == 'home' ? currMatch.homeTeam : currMatch.awayTeam;
                 const eventItem = document.createElement('div');
                 eventItem.className = 'timeline-item';
 
