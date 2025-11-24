@@ -111,7 +111,14 @@ export function initCalendar(user) {
 
     try {
       const title = buildTitle(tag);
-      const ok = await addEvent({ eventDate: date, title, tag, location, locationCoords });
+      const ok = await addEvent({ eventDate: date, 
+                                  title, 
+                                  tag, 
+                                  location, 
+                                  locationCoords,
+                                  startTime: document.getElementById("startTime").value,
+                                  endTime: document.getElementById("endTime").value
+                                 });
       formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
       if (ok) {
         addForm.reset();
@@ -400,7 +407,13 @@ export function openEditForm(eventObj, defaultDate) {
       return;
     }
 
-    const ok = await updateEvent(eventObj.id, { title: newTitle, eventDate: newDate, tag: newTag, location: newLocation, locationCoords: newCoordinates });
+    const ok = await updateEvent(eventObj.id, { title: newTitle, 
+                                                eventDate: newDate, 
+                                                tag: newTag, 
+                                                location: newLocation, 
+                                                locationCoords: newCoordinates,
+                                                startTime: document.getElementById("startTime").value,
+                                                endTime: document.getElementById("endTime").value });
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);

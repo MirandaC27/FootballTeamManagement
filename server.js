@@ -2,7 +2,18 @@
 require('dotenv').config();
 
 const dbcon = require('./model/DbConnection.js');
-dbcon.connect(); // Connect to MongoDB when starting the server.
+
+const { startDailyRunner } = require("./NotificationDailyRunner");
+
+dbcon.connect();
+
+const mongoose = require("mongoose");
+
+// Start DailyRunner ONLY AFTER DB CONNECTS
+mongoose.connection.once("open", () => {
+    console.log("Database connected — starting DailyRunner...");
+    startDailyRunner(); 
+});
 
 const ExpressApp = require('./app');
 

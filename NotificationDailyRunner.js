@@ -1,63 +1,69 @@
 // NotificationDailyRunner.js
-const Event = require("./model/EventDao");
+const EventDao = require("./model/EventDao");
 const NotificationDao = require("./model/NotificationDao");
 
+
 async function generateDailyEventNotifications() {
-    try {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  try {
+    const start = new Date();
+    start.setHours(0,0,0,0);
 
+    const end = new Date();
+    end.setHours(23,59,59,999);
 
-        const eventsToday = await Event.find({
-            eventDate: { $gte: start, $lt: end }
-        });
+    // Get today's events
+    const eventsToday = await EventDao.eventModel.find({
+      eventDate: { $gte: start, $lte: end }
+    });
 
-        //console.log("Events found today:", eventsToday);
+    console.log(`[DailyRunner] Events today: ${eventsToday.length}`);
 
-        if (eventsToday.length === 0) return;
+    if (!eventsToday.length) return;
 
-        for (const event of eventsToday) {
-            const title = `Event Today: ${event.title}`;
-            const message = `You have a ${event.tag} today at ${event.location}.`;
+    for (const event of eventsToday) {
 
+      // Prevent duplicates by checking if notification already exists today
+      const alreadyExists = await NotificationDao.Notification.findOne({
+        eventId: event._id,
+        timestamp: { $gte: start, $lte: end }
+      });
 
-            const exists = await NotificationDao.findNotificationByTitleAndDate(title, start, end);
+      if (alreadyExists) continue;
 
-            if (!exists) {
+      // Create simplified notification
+      await NotificationDao.createNotification({
+        eventId: event._id,
+        title: `Event Today: ${event.title}`,
+        message: `You have a ${event.tag} today at ${event.location}.`
+      });
 
-                await NotificationDao.createNotification(
-                    null,          
-                    event._id,     
-                    message,       
-                    title,         
-                    new Date()     
-                );
-
-                console.log(`Created notification for event: ${event.title}`);
-            }
-        }
-    } catch (err) {
-        console.error("Error generating daily event notifications:", err);
+      console.log(`[DailyRunner] Notification created for event: ${event.title}`);
     }
+  } catch (err) {
+    console.error("[DailyRunner] Error:", err);
+  }
 }
 
-async function startDailyRunner() {
-    console.log("Daily Event Notification Runner started.");
 
+function startDailyRunner() {
+  console.log("[DailyRunner] Started.");
+
+  // Run immediately at server start
+  generateDailyEventNotifications();
+
+  // Calculate time until next midnight
+  const now = new Date();
+  const millisUntilMidnight =
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+
+  // Schedule future runs
+  setTimeout(() => {
     generateDailyEventNotifications();
-
-    const now = new Date();
-    const millisUntilMidnight =
-        new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
-
-    setTimeout(() => {
-        generateDailyEventNotifications();
-        setInterval(generateDailyEventNotifications, 24 * 60 * 60 * 1000);
-    }, millisUntilMidnight);
+    setInterval(generateDailyEventNotifications, 24 * 60 * 60 * 1000);
+  }, millisUntilMidnight);
 }
 
 module.exports = {
-    startDailyRunner,
-    generateDailyEventNotifications
+  startDailyRunner,
+  generateDailyEventNotifications
 };
