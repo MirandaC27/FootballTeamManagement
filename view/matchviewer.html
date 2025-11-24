@@ -286,7 +286,7 @@
             currScore.teamHome = match.homeScore || 0;
             currScore.teamAway = match.awayScore || 0;
 
-            loadMatchInfo(currMatch);
+            //loadMatchInfo(currMatch);
             loadTimeline();
             loadReactions(match);
             changeChatInputVisibility(match);
@@ -445,7 +445,7 @@
 
             if(!currMatch) return;
 
-            const timelineContainer = document.getElementById('.timeline-container');
+            const timelineContainer = document.getElementById('timeline-container');
             timelineContainer.innerHTML = '';
 
             matchEvents.sort((a, b) => a.minute - b.minute);
@@ -479,7 +479,8 @@
                     console.log(`Match status updated to: ${newStatus}`);
                     // Force a refresh to update the UI immediately
                     // This calls your adapted loadMatchAndRender function from the previous step
-                    await loadMatchAndRender(matchId); 
+                    //await loadMatchAndRender(matchId); 
+                    await loadMatch(matchId);
                 } else {
                     // Handle server errors (e.g., status 400 or 500)
                     const errorData = await res.json();
