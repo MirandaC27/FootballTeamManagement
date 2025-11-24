@@ -1,7 +1,7 @@
 let cityInput = document.getElementById('city_input');
 let searchBtn = document.getElementById('searchBtn');
 api_key = 'c49d74aefaae765d7ac35e149d114bd1';
-currentWeatherCard = document.querySelectorAll('.weather-left .card');
+currentWeatherCard = document.querySelectorAll('.weather-left .card')[0];
 
 function getWeatherDetails(name, lat, lon, country, state){
     let FORECAST_API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${api_key}`,
