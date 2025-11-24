@@ -381,10 +381,10 @@
 
             if(!currMatch) return;
 
-            const timelineContainer = document.getElementById('timeline-container');
+            const timelineContainer = document.getElementById('.timeline-container');
             timelineContainer.innerHTML = '';
 
-            matchEvents.sort((home, away) => home.minute - away.minute);
+            matchEvents.sort((a, b) => a.minute - b.minute);
             matchEvents.forEach(event => {
                 const teamName = event.team == 'home' ? currMatch.homeTeam : currMatch.awayTeam;
                 const eventItem = document.createElement('div');
