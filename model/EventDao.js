@@ -6,14 +6,14 @@ const eventSchema = new mongoose.Schema({
   eventDate: { type: Date, required: true },
   title: { type: String, required: true },
   tag: {type: String, required: true, enum: ["practice", "match", "event"]},
-  
+
   startTime: { type: String, required: true }, 
   endTime: { type: String, required: true },   
 
-  location: {type: String, required: true},
+  location: {type: String}, //required: true},
   locationCoords: {
     type: Array, // index 0 is latitude, index 1 is longitude
-    required: true,
+    //required: true,
     validate: {
       validator: function(x) {
         return Array.isArray(x) && x.length > 0;

@@ -116,8 +116,8 @@ export function initCalendar(user) {
                                   tag, 
                                   location, 
                                   locationCoords,
-                                  startTime: document.getElementById("startTime").value,
-                                  endTime: document.getElementById("endTime").value
+                                  startTime: document.getElementById("editStartTime").value,
+                                  endTime: document.getElementById("editEndTime").value
                                  });
       formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
       if (ok) {
@@ -287,6 +287,7 @@ export function showEventDetails(eventsForDay, result, day, month, year) {
 
 // Edit form UI
 export function openEditForm(eventObj, defaultDate) {
+  const coordinates = eventObj.locationCoords;
   const detailsBox = document.getElementById('event-details');
   detailsBox.innerHTML = `
     <h4>Edit Event</h4>
@@ -337,8 +338,8 @@ export function openEditForm(eventObj, defaultDate) {
   `;
   detailsBox.style.display = 'block';
 
-  const priorLat = coordinates?.[0] ?? 39.8283;
-  const priorLng = coordinates?.[1] ?? -98.5795;
+  const priorLat = coordinates && coordinates.length > 0 ? coordinates[0] : null;
+  const priorLng = coordinates && coordinates.length > 1 ? coordinates[1] : null;
 
   const map = L.map('editMap').setView([39.8283, -98.5795], 4);
 
@@ -407,13 +408,13 @@ export function openEditForm(eventObj, defaultDate) {
       return;
     }
 
-    const ok = await updateEvent(eventObj.id, { title: newTitle, 
+    const ok = await updateEvent(eventObj._id, { title: newTitle, 
                                                 eventDate: newDate, 
                                                 tag: newTag, 
                                                 location: newLocation, 
                                                 locationCoords: newCoordinates,
-                                                startTime: document.getElementById("startTime").value,
-                                                endTime: document.getElementById("endTime").value });
+                                                startTime: document.getElementById("editStartTime").value,
+                                                endTime: document.getElementById("editEndTime").value });
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);

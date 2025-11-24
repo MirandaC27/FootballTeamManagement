@@ -1,5 +1,6 @@
 const dao = require('../model/EventDao');
 const calendarArray = require('../CalendarConfig');
+const NotificationDao = require("../model/NotificationDao");
 const TAGS = ["practice", "match", "event"];
 
 /**
@@ -21,7 +22,27 @@ const createNewEvent = async (req, res) => {
       }
 
       const localDate = new Date(`${eventDate}T00:00:00`);
-      await dao.create({ eventDate: localDate, title, tag, location, locationCoords, startTime, endTime });
+
+      const saved = await dao.create({ eventDate: localDate, title, tag, location, locationCoords, startTime, endTime });
+      
+     
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      const eventDay = new Date(localDate);
+      eventDay.setHours(0,0,0,0);
+
+      if (today.getTime() === eventDay.getTime()) {
+
+          await NotificationDao.createNotification({
+              eventId: saved._id,
+              title: `Event Today: ${title}`,
+              message: `You have a ${tag} today at ${location}.`
+          });
+
+          console.log("Same-day event notification created.");
+      }
+
       res.status(200).json({ message: "Event added successfully" });
   }
 
@@ -86,6 +107,33 @@ const updateEvent = async (req, res) => {
 
     if (!updated) {
       return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (updated.eventDate) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      const eventDay = new Date(updated.eventDate);
+      eventDay.setHours(0,0,0,0);
+
+      if (today.getTime() === eventDay.getTime()) {
+
+        // avoid duplicates for same-day updates
+        const exists = await NotificationDao.Notification.findOne({
+          eventId: updated._id,
+          timestamp: { $gte: today }
+        });
+
+        if (!exists) {
+          await NotificationDao.createNotification({
+            eventId: updated._id,
+            title: `Event Today: ${updated.title}`,
+            message: `You have a ${updated.tag} today at ${updated.location}.`
+          });
+
+          console.log("Same-day UPDATE notification created.");
+        }
+      }
     }
 
     res.json({ message: "Event updated successfully", updated });
