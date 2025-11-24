@@ -124,8 +124,8 @@
 
                         <label for="event-team">Team:</label>
                         <select id="event-team">
-                            <option value="home" id="eventHomeTeam"></option>
-                            <option value="away" id="eventAwayTeam"></option>
+                            <option value="home" id="eventHomeTeam">Home</option>
+                            <option value="away" id="eventAwayTeam">Away</option>
                         </select>
 
                         <label for="event-minute">Min:</label>
@@ -138,7 +138,7 @@
 
                 <div class="bg-white p-6 rounded-xl shadow-2xl">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4 border-b pb-2 text-center">Timeline</h2>
-                    <div class="timeline-container">
+                    <div id="timeline-container">
 
                     </div>
                 </div>
@@ -250,6 +250,8 @@
             }
             const match = await res.json();
             currMatch = match;
+
+            matchEvents = match.events || [];
 
             document.getElementById('homeTeam').textContent = match.homeTeam;
             document.getElementById('awayTeam').textContent = match.awayTeam;
@@ -393,17 +395,17 @@
 
             if(!currMatch) return;
 
-            const timelineContainer = document.getElementById('timeline-container');
+            const timelineContainer = document.getElementById('.timeline-container');
             timelineContainer.innerHTML = '';
 
-            matchEvents.sort((home, away) => home.minute - away.minute);
+            matchEvents.sort((a, b) => a.minute - b.minute);
             matchEvents.forEach(event => {
                 const teamName = event.team == 'home' ? currMatch.homeTeam : currMatch.awayTeam;
                 const eventItem = document.createElement('div');
                 eventItem.className = 'timeline-item';
 
                 eventItem.innerHTML =
-                 `<strong>${event.eventMinute} | ${event.typeSelected}:<strong>${event.eventDesc} <em>(${teamName})</em>`;
+                 `<strong>${event.minute} | ${event.type}:<strong>${event.description} <em>(${teamName})</em>`;
 
                 timelineContainer.appendChild(eventItem);
 
