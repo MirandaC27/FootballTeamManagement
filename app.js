@@ -87,6 +87,13 @@ const MinorCont = require('./controller/MinorController');
 app.put('/reassignMinor/:minorId/:newTeamId', MinorCont.reassignMinor);
 app.get('/getAllMinors', MinorCont.getAllMinors);
 
+// invite + respond controller routes
+const InviteCont = require('./controller/InviteMinor');
+const RespondInviteCont = require('./controller/RespondToInvite');
+
+app.get('/inviteMinor', InviteCont.inviteMinor);
+app.get('/respondToInvite', RespondInviteCont.respondToInvite);
+
 // team controller routes
 const TeamCont = require('./controller/TeamController');
 app.get('/getAllTeams', TeamCont.getAllTeams);
@@ -96,6 +103,10 @@ const MatchCont = require('./controller/MatchController');
 
 app.get('/matches', (req, res) => {
   res.sendFile(path.join(__dirname, 'view', 'matches.html'));
+});
+
+app.get('/teams', (req, res) => {
+  res.sendFile(path.join(__dirname, 'view', 'teams.html'));
 });
 
 app.get('/getAllMatches', MatchCont.getAllMatches);
@@ -160,6 +171,7 @@ app.post('/addMatchup/:name/:roundNumber', PlayoffCont.addMatchup);
 app.put('/updateResult/:name/:roundNumber', PlayoffCont.updatePlayoffMatchupResult);
 app.delete('/deleteBracket/:name', PlayoffCont.deleteBracket);
 app.delete('/deleteAllBrackets', PlayoffCont.deleteAllBrackets);
+app.delete('/deleteMatchup/:name/:round/:homeTeam/:awayTeam', PlayoffCont.deleteMatchup);
 
 // post controller routes
 const PostCont = require("./controller/PostController");

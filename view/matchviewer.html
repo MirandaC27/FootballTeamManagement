@@ -18,7 +18,6 @@
     <!--nav bar-->
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
         <nav class="navbar navbar-dark bg-primary">
-
             <!--logo-->
             <a class="navbar-brand" href="/index.html">
                 <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
@@ -29,7 +28,6 @@
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <!--options-->
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
@@ -45,7 +43,6 @@
         <div id="signin-btn" class="ms-auto">
             <a class="btn btn-dark btn-rounded" href="/login.html">SIGN IN</a>
         </div>
-
         <!--account and log out dropdown-->
         <div id="account-dropdown" class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -115,15 +112,36 @@
                 </div>
 
                 </section>
-                <section class="details-container">
-                    <nav class="nav-header">Timeline</nav>
-                    <div class="timeline-container">
-                        <div class="timeline-item">
-                            <span class="event-minute">15'</span>
-                            <div>⚽️ **Goal** (H) - A. Johnson (Assist: B. Smith)</div>
-                        </div>
+                <section class="eventform-container">
+                    <div class="eventform-content">
+                        <label for="event-type">Event:</label>
+                        <select id="event-type">
+                            <option value="goal">⚽</option>
+                            <option value="yellow-card">🟨</option>
+                            <option value="red-card">🟥</option>
+                            <option value="substitution">🔄</option>
+                        </select>
+
+                        <label for="event-team">Team:</label>
+                        <select id="event-team">
+                            <option value="home" id="eventHomeTeam"></option>
+                            <option value="away" id="eventAwayTeam"></option>
+                        </select>
+
+                        <label for="event-minute">Min:</label>
+                        <input type="number" id="event-minute" min="1" max="90" value="1" placeholder="Min">
+                        <label for="event-desc">Description:</label>
+                        <input type="text" id="event-desc" placeholder="e.g, #10; Own Goal">
+                        <button id="logEventButton">Submit</button>
                     </div>
                 </section>
+
+                <div class="bg-white p-6 rounded-xl shadow-2xl">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 border-b pb-2 text-center">Timeline</h2>
+                    <div class="timeline-container">
+
+                    </div>
+                </div>
             </main>
         </div>
 
@@ -179,11 +197,25 @@
             window.socket = io();
         </script>
     <script>
+        let currMatch = null;
+        let matchEvents = [];
+        let currScore = {
+            teamHome: 0,
+            teamAway: 0
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... existing loadMatch(SAMPLE_MATCH_DATA); and setupTabListeners(); ...
+            const urlParams = new URLSearchParams(window.location.search);
+            let matchId = urlParams.get('id');
 
-            // New logic for the back button
+            if (matchId) {
+                loadMatch(matchId);
+            }
+            else {
+                console.error("Error: No Match ID found in the URL.");
+            }
+            
+            // logic for the back button
             const backButton = document.getElementById('backButton');
             if (backButton) {
                 backButton.addEventListener('click', () => {
@@ -191,7 +223,47 @@
                     window.history.back();
                 });
             }
+
+            //logic for event form
+            document.getElementById('logEventButton').addEventListener('click', (e)=>{
+                e.preventDefault();
+                logEvent();
+            });
+
+            checkLoggedUser();
+            updateReactionVisibility();
+            attachReactionHandler();
+
+            if(currMatch){
+                document.getElementById('eventHomeTeam').textContent = currMatch.homeTeam;
+                document.getElementById('eventAwayTeam').textContent = currMatch.awayTeam;
+            }
+
         });
+
+        async function loadMatch(id) {
+            const res = await fetch(`/getMatchDetails/${id}`);
+
+            if (!res.ok) {
+                alert('Failed to load match details');
+                return;
+            }
+            const match = await res.json();
+            currMatch = match;
+
+            document.getElementById('homeTeam').textContent = match.homeTeam;
+            document.getElementById('awayTeam').textContent = match.awayTeam;
+            document.getElementById('homeScore').textContent = match.homeScore;
+            document.getElementById('awayScore').textContent = match.awayScore;
+            document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
+            document.getElementById('matchLocation').textContent = match.matchLocation;
+            document.getElementById('matchStatus').textContent = match.matchStatus;
+
+            loadTimeline();
+            loadReactions(match);
+            changeChatInputVisibility(match);
+            updateLiveBadgeDisplay(match);
+        }
 
         /**
         * Show sign in button if logged out or show account dropdown if signed in.
@@ -218,18 +290,6 @@
             }
         }
         checkLoggedUser();
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('id');
-
-            if (matchId) {
-                loadMatch(matchId);
-            }
-            else {
-                console.error("Error: No Match ID found in the URL.");
-            }
-        });
 
         /**
          * Show LIVE badge if match is in progress or END badge if match is final
@@ -271,29 +331,88 @@
             }
         }
 
-        async function loadMatch(id) {
-            const res = await fetch(`/getMatchDetails/${id}`);
+        /*Event form and Timeline*/
+        function updateScoreboard(){
+            document.getElementById('homeScore').textContent = currScore.teamHome;
+            document.getElementById('awayScore').textContent = currScore.teamAway;
+        }
 
-            if (!res.ok) {
-                alert('Failed to load match details');
-                return;
+        function recalcScore(){
+            matchEvents.forEach(event=> {
+                if(event.type == 'goal'){
+                    currScore[event.teamSelected]++;
+                }
+            });
+
+            updateScoreboard();
+            //updateScore(matchId, {homeScore: currScore.teamHome, awayScore: currScore.teamAway});
+        }
+
+        async function logEvent(){
+            const selectType = document.getElementById('event-type');
+            const typeSelected = selectType.value;
+            const selectTeam = document.getElementById('event-team');
+            const teamSelected = selectTeam.value;
+            const inputMin = document.getElementById('event-minute');
+            const inputDesc = document.getElementById('event-desc');
+
+            const eventMinute = parseInt(inputMin.value, 10);
+
+            const eventDesc = inputDesc.value.trim();
+
+            const newEvent = {
+                minute: eventMinute,
+                type: typeSelected,
+                description: eventDesc,
+                team: teamSelected,
+                timestamp: new Date().toISOString()
+            };
+
+            try{
+                const res = await fetch(`/api/matches/${matchId}/events`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(newEvent)
+                });
             }
-            const match = await res.json();
+            catch (err){
+                console.error("error logging event:", err.message);
+            }
 
-            document.getElementById('homeTeam').textContent = match.homeTeam;
-            document.getElementById('awayTeam').textContent = match.awayTeam;
-            document.getElementById('homeScore').textContent = match.homeScore;
-            document.getElementById('awayScore').textContent = match.awayScore;
-            document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
-            document.getElementById('matchLocation').textContent = match.matchLocation;
-            document.getElementById('matchStatus').textContent = match.matchStatus;
+            console.log("event saved, reloading page");
+            await loadMatch(matchId);
+            /*matchEvents.push(newEvent);*/
 
-            loadReactions(match);
-            changeChatInputVisibility(match);
-            updateLiveBadgeDisplay(match);
+
+            inputDesc.value = '';
+            inputDesc.focus();
+        }
+
+        function loadTimeline(){
+            /*recalcScore();*/
+
+            if(!currMatch) return;
+
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineContainer.innerHTML = '';
+
+            matchEvents.sort((home, away) => home.minute - away.minute);
+            matchEvents.forEach(event => {
+                const teamName = event.team == 'home' ? currMatch.homeTeam : currMatch.awayTeam;
+                const eventItem = document.createElement('div');
+                eventItem.className = 'timeline-item';
+
+                eventItem.innerHTML =
+                 `<strong>${event.eventMinute} | ${event.typeSelected}:<strong>${event.eventDesc} <em>(${teamName})</em>`;
+
+                timelineContainer.appendChild(eventItem);
+
+            });
+        
         }
 
     </script>
+
 
     <!-- Reaction Bar -->
     <script>

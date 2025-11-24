@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teams - littleLIGA</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="/index.html">
+      <img src="/images/logo placeholder.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+      littleLIGA
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/index.html">Home</a>
+        <a class="nav-item nav-link" href="#">League</a>
+        <a class="nav-item nav-link" href="/match.html">Matches</a>
+        <a class="nav-item nav-link active" href="/teams.html">Team</a>
+        <a class="nav-item nav-link" href="/calendar.html">Calendar</a>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container mt-4">
+
+    <h2 class="text-center mb-4">Teams</h2>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="alert alert-success text-center" style="display:none;">
+      Your team was sucessfully created!
+    </div>
+
+    <!-- Create Team (admin + manager) -->
+    <div id="teamCreationSection" style="display:none;">
+      <h3>Create a Team</h3>
+      <form action="/teamCreation" method="POST" class="card p-3 mb-4">
+
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label>Team Name</label>
+            <input type="text" name="name" class="form-control" required>
+          </div>
+
+          <div class="form-group col-md-4">
+            <label>Location</label>
+            <input type="text" name="location" class="form-control" required>
+          </div>
+
+          <div class="form-group col-md-4">
+            <label>Playoff Seed</label>
+            <input type="number" name="playoffSeed" class="form-control">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-3">
+            <label>Wins</label>
+            <input type="number" name="wins" class="form-control" required>
+          </div>
+
+          <div class="form-group col-md-3">
+            <label>Losses</label>
+            <input type="number" name="losses" class="form-control" required>
+          </div>
+
+          <div class="form-group col-md-3">
+            <label>Prior Season Wins</label>
+            <input type="number" name="priorSeasonWins" class="form-control" required>
+          </div>
+
+          <div class="form-group col-md-3">
+            <label>Prior Season Losses</label>
+            <input type="number" name="priorSeasonLosses" class="form-control" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Create Team</button>
+      </form>
+    </div>
+
+    <!-- Shows all teams for the admin -->
+    <div id="adminTeamsSection" style="display:none;">
+      <h3 class="mt-4">All Teams</h3>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Prior W</th>
+            <th>Prior L</th>
+            <th>Playoff Seed</th>
+          </tr>
+        </thead>
+        <tbody id="adminTeamTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- manager only sees their team -->
+    <div id="managerTeamSection" style="display:none;">
+      <h3>Your Team</h3>
+      <div id="managerTeamContainer" class="card p-3"></div>
+    </div>
+
+    <!-- what the adult sees -->
+    <div id="adultTeamSection" style="display:none;">
+      <h3>Your Child's Team</h3>
+      <div id="adultTeamContainer" class="card p-3"></div>
+    </div>
+
+    <div id="adultNoTeam" class="alert alert-warning text-center" style="display:none;">
+      Your child is not assigned to any team.
+    </div>
+
+    <div id="adultNoMinor" class="alert alert-danger text-center" style="display:none;">
+      You are not associated with any minors.
+    </div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === '1') {
+      document.getElementById('successMessage').style.display = 'block';
+    }
+
+    fetch('/loggedUser')
+      .then(res => res.json())
+      .then(user => {
+        if (!user) return;
+
+        if (user.role === 'admin') {
+          document.getElementById('teamCreationSection').style.display = 'block';
+          document.getElementById('adminTeamsSection').style.display = 'block';
+          loadAdminTeams();
+        }
+
+        if (user.role === 'manager') {
+          document.getElementById('teamCreationSection').style.display = 'block';
+          document.getElementById('managerTeamSection').style.display = 'block';
+          loadManagerTeam(user._id);
+        }
+
+        if (user.role === 'adult') {
+          loadAdultTeam(user._id);
+        }
+      });
+
+    function loadAdminTeams() {
+      fetch('/getAllTeams')
+        .then(res => res.json())
+        .then(teams => {
+          const tbody = document.getElementById('adminTeamTableBody');
+          tbody.innerHTML = '';
+          teams.forEach(t => {
+            tbody.innerHTML += `
+              <tr>
+                <td>${t.name}</td>
+                <td>${t.location}</td>
+                <td>${t.wins}</td>
+                <td>${t.losses}</td>
+                <td>${t.priorSeasonWins}</td>
+                <td>${t.priorSeasonLosses}</td>
+                <td>${t.playoffSeed || ''}</td>
+              </tr>
+            `;
+          });
+        });
+    }
+
+    function loadManagerTeam(managerId) {
+      fetch('/getAllTeams')
+        .then(res => res.json())
+        .then(teams => {
+          const team = teams.find(t => t.manager_id === managerId);
+          const c = document.getElementById('managerTeamContainer');
+
+          if (!team) {
+            c.innerHTML = "<p>You have not created a team yet.</p>";
+            return;
+          }
+
+          c.innerHTML = `
+            <p><strong>Name:</strong> ${team.name}</p>
+            <p><strong>Location:</strong> ${team.location}</p>
+            <p><strong>Record:</strong> ${team.wins}-${team.losses}</p>
+          `;
+        });
+    }
+
+    function loadAdultTeam(parentId) {
+      fetch('/getAllMinors')
+        .then(res => res.json())
+        .then(minors => {
+          const myMinors = minors.filter(m => m.parent_id === parentId);
+
+          if (myMinors.length === 0) {
+            document.getElementById('adultNoMinor').style.display = 'block';
+            return;
+          }
+
+          const minor = myMinors[0];
+
+          if (!minor.team_id) {
+            document.getElementById('adultNoTeam').style.display = 'block';
+            return;
+          }
+
+          fetch('/getAllTeams')
+            .then(res => res.json())
+            .then(teams => {
+              const t = teams.find(team => team._id === minor.team_id);
+              document.getElementById('adultTeamSection').style.display = 'block';
+
+              document.getElementById('adultTeamContainer').innerHTML = `
+                <p><strong>Name:</strong> ${t.name}</p>
+                <p><strong>Location:</strong> ${t.location}</p>
+                <p><strong>Record:</strong> ${t.wins}-${t.losses}</p>
+              `;
+            });
+        });
+    }
+  </script>
+
+</body>
+
+</html>
+

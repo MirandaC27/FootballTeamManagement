@@ -110,3 +110,14 @@ test('Deletes all brackets', async function () {
     expect(dao.deleteAllBrackets).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith(deletedAll);
 });
+
+/**
+ * Delete a matchup
+ */
+test('Delete matchup', async function () {
+    req.params = { name: "bracket1", round: 1, homeTeam: "lions", awayTeam: "tigers" };
+    dao.deleteSingleMatchup("bracket1", 1, 0);
+    await controller.deleteMatchup(req, res);
+    expect(dao.getMatchupIndex).toHaveBeenCalled();
+    expect(dao.deleteSingleMatchup).toHaveBeenCalled();
+});

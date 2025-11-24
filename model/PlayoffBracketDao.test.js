@@ -1,4 +1,5 @@
 const dbcon = require('./DbConnection');
+const { bracketModel } = require('./PlayoffBracketDao');
 let dao;
 let matchups;
 let roundOne
@@ -71,6 +72,35 @@ test('Read All', async function() {
 });
 
 /**
+ * Get round by number
+ */
+test('Get round by number', async function() {
+    await dao.create("bracket1", 6, roundOne);
+    const round = await dao.getRoundByNumber("bracket1", 1);
+    expect(round.roundNumber).toBe(1);
+});
+
+/**
+ * Get matchup index
+ */
+test('Get matchup index', async function() {
+    await dao.create("bracket1", 6, roundOne);
+    const matchIndex = await dao.getMatchupIndex("bracket1", 1, "lions", "tigers");
+    expect(matchIndex).toBe(0);
+});
+
+/**
+ * Get matchup by round number and index
+ */
+test('Get matchup by round number and index', async function() {
+    await dao.create("bracket1", 6, roundOne);
+    let matchup = await dao.getMatchupNumIndex("bracket1", 1, 0);
+    matchup = matchup.toObject();
+    expect(matchup.homeTeam).toBe("lions");
+    expect(matchup.awayTeam).toBe("tigers");
+});
+
+/**
  * Find by bracket name
  */
 test("Find a bracket by name", async function() {
@@ -138,4 +168,16 @@ test("Update result of matchup", async function () {
     const round = updated.rounds.find(r => r.roundNumber === 1);
     const matchup = round.roundMatchups.find(m => m.homeTeam === "lions" && m.awayTeam === "tigers");
     expect(matchup.result).toBe("2-1");
+});
+
+/**
+ * Delete a matchup from a round
+ */
+test("Delete a matchup from a round", async function () {
+    await dao.create("bracket1", 6, roundOne);
+    const updated = await dao.deleteSingleMatchup("bracket1", 1, 0);
+    let matchup = await dao.getMatchupNumIndex("bracket1", 1, 0);
+    matchup = matchup.toObject();
+    expect(matchup.homeTeam).toBe("TBD");
+    expect(matchup.awayTeam).toBe("TBD");
 });

@@ -107,16 +107,11 @@ export function initCalendar(user) {
     const tag = tagSelect.value;
     const date = document.getElementById('eventDate').value;
     const location = document.getElementById('eventLocation').value.trim();
+    const locationCoords = [parseFloat(document.getElementById('latitude').value), parseFloat(document.getElementById('longitude').value)];
 
     try {
       const title = buildTitle(tag);
-      const ok = await addEvent({ eventDate: date, 
-                                  title, 
-                                  tag, 
-                                  location, 
-                                  startTime: document.getElementById("startTime").value,
-                                  endTime: document.getElementById("endTime").value
-                                });
+      const ok = await addEvent({ eventDate: date, title, tag, location, locationCoords });
       formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
       if (ok) {
         addForm.reset();
@@ -311,7 +306,10 @@ export function openEditForm(eventObj, defaultDate) {
       <div class="form-group">
         <label for="editLocation">Location:</label>
         <input type="text" id="editLocation" class="form-control" value="${eventObj.location || ''}" placeholder="Enter event location" required>
+        <input type="hidden" id="latitude">
+        <input type="hidden" id="longitude">
       </div>
+      <div id="editMap" style="height: 300px; border: 1px solid #ccc; border-radius: 6px;"></div>
 
       <div class="form-group">
         <label for="editStartTime">Start Time:</label>
@@ -332,6 +330,62 @@ export function openEditForm(eventObj, defaultDate) {
   `;
   detailsBox.style.display = 'block';
 
+  const priorLat = coordinates?.[0] ?? 39.8283;
+  const priorLng = coordinates?.[1] ?? -98.5795;
+
+  const map = L.map('editMap').setView([39.8283, -98.5795], 4);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+  if (coordinates) {
+    marker = L.marker([priorLat, priorLng]).addTo(map);
+  }
+
+  function placeMarker(lat, lng, label = null) {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map);
+    if (label) marker.bindPopup(label).openPopup();
+    document.getElementById("latitude").value = lat;
+    document.getElementById("longitude").value = lng;
+  }
+
+  const provider = new window.GeoSearch.OpenStreetMapProvider();
+  const searchControl = new window.GeoSearch.GeoSearchControl({
+    provider: provider,
+    style: 'bar',
+    autoClose: true,
+    keepResult: true,
+    showMarker: false
+  });
+  map.addControl(searchControl);
+  map.on('geosearch/showlocation', (result) => {
+    const { x: lng, y: lat, label } = result.location;
+    placeMarker(lat, lng, label);
+    document.getElementById("editLocation").value = label;
+    map.setView([lat, lng], 15);
+  });
+  map.on('click', async (e) => {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    const results = await provider.search({ query: `${lat}, ${lng}` });
+    const label = results.length > 0 ? results[0].label : `${lat}, ${lng}`;
+
+    placeMarker(lat, lng, label);
+    document.getElementById("editLocation").value = label;
+  });
+  if (eventObj.location) {
+    provider.search({ query: eventObj.location }).then(results => {
+      if (results.length > 0) {
+        const { x: lng, y: lat, label } = results[0];
+        placeMarker(lat, lng, label);
+        map.setView([lat, lng], 14);
+      }
+    });
+  }
+
   const form = document.getElementById('edit-event-form');
   const statusText = document.getElementById('edit-status');
   form.addEventListener('submit', async (e) => {
@@ -340,18 +394,13 @@ export function openEditForm(eventObj, defaultDate) {
     const newDate = document.getElementById('editDate').value;
     const newTag = document.getElementById('editTag').value;
     const newLocation = document.getElementById('editLocation').value.trim();
-    if (!newTitle || !newDate || !newTag || !newLocation) {
-      statusText.textContent = 'Please provide title, date, tag, and location.';
+    const newCoordinates = [parseFloat(document.getElementById("latitude").value), parseFloat(document.getElementById("longitude").value)];
+    if (!newTitle || !newDate || !newTag || !newLocation || !newCoordinates) {
+      statusText.textContent = 'Please provide title, date, tag, location, and location coordinates.';
       return;
     }
 
-    const ok = await updateEvent(eventObj.id, { title: newTitle, 
-                                                eventDate: newDate, 
-                                                tag: newTag, 
-                                                location: newLocation,
-                                                startTime: document.getElementById("editStartTime").value,
-                                                endTime: document.getElementById("editEndTime").value 
-                                              });
+    const ok = await updateEvent(eventObj.id, { title: newTitle, eventDate: newDate, tag: newTag, location: newLocation, locationCoords: newCoordinates });
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);
