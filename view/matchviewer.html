@@ -114,8 +114,8 @@
 
                         <label for="event-team">Team:</label>
                         <select id="event-team">
-                            <option value="home" id="homeTeam"></option>
-                            <option value="away" id="awayTeam"></option>
+                            <option value="home" id="eventHomeTeam"></option>
+                            <option value="away" id="eventAwayTeam"></option>
                         </select>
 
                         <label for="event-minute">Min:</label>
@@ -188,8 +188,19 @@
             teamHome: match.homeScore,
             teamAway: match.awayScore
         }
+        let currMatch = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchId = urlParams.get('id');
+
+            if (matchId) {
+                loadMatch(matchId);
+            }
+            else {
+                console.error("Error: No Match ID found in the URL.");
+            }
+            
             // logic for the back button
             const backButton = document.getElementById('backButton');
             if (backButton) {
@@ -200,12 +211,15 @@
             }
 
             //logic for event form
-            docuemnt.getElementById('logEventButton').addEventListener('click', (e)=>{
+            document.getElementById('logEventButton').addEventListener('click', (e)=>{
                 e.preventDefault();
                 logEvent();
             });
 
 
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
         });
 
         /**
@@ -233,18 +247,6 @@
             }
         }
         checkLoggedUser();
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('id');
-
-            if (matchId) {
-                loadMatch(matchId);
-            }
-            else {
-                console.error("Error: No Match ID found in the URL.");
-            }
-        });
 
         /**
          * Show LIVE badge if match is in progress or END badge if match is final
@@ -294,6 +296,7 @@
                 return;
             }
             const match = await res.json();
+            currMatch = match;
 
             document.getElementById('homeTeam').textContent = match.homeTeam;
             document.getElementById('awayTeam').textContent = match.awayTeam;
@@ -327,10 +330,10 @@
 
         async function logEvent(){
             const selectType = document.getElementById('event-type');
-            const typeSelected = selectType.options[selectType.selectedIndex].text;
+            const typeSelected = selectType.value;
             const selectTeam = document.getElementById('event-team');
             const teamSelected = selectTeam.value;
-            const inputMin = document.getElementById('event-min');
+            const inputMin = document.getElementById('event-minute');
             const inputDesc = document.getElementById('event-desc');
 
             const eventMinute = parseInt(inputMin.value, 10);
@@ -373,7 +376,7 @@
 
             matchEvents.sort((home, away) => home.minute - away.minute);
             matchEvents.forEach(event => {
-                const teamName = event.team = 'teamHome' ? match.homeTeam : match.awayTeam;
+                const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
                 const eventItem = document.createElement('div');
                 eventItem.className = 'timeline-item';
 
