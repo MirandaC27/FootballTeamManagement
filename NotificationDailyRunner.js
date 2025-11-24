@@ -1,5 +1,5 @@
 // NotificationDailyRunner.js
-const Event = require("./model/EventDao").eventModel;
+const Event = require("./model/EventDao");
 const NotificationDao = require("./model/NotificationDao");
 
 async function generateDailyEventNotifications() {
@@ -12,6 +12,8 @@ async function generateDailyEventNotifications() {
         const eventsToday = await Event.find({
             eventDate: { $gte: start, $lt: end }
         });
+
+        //console.log("Events found today:", eventsToday);
 
         if (eventsToday.length === 0) return;
 

@@ -16,7 +16,7 @@ beforeEach(() => {
 * create event tests
 */
 
-// Fail to create an empty event without date, title, or tag
+// Fail to create an empty event
 test('Create empty event', async () => {
     const req = { body: {} };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -27,7 +27,7 @@ test('Create empty event', async () => {
     expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
 });
 
-// Fail to create an event without a date
+// Fail to create without date
 test('Create an event without a date', async () => {
     const req = { body: { title: 'no date', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -38,7 +38,7 @@ test('Create an event without a date', async () => {
     expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
 });
 
-// Fail to create an event without a title
+// Fail to create without title
 test('Create an event without a title', async () => {
     const req = { body: { eventDate: '2025-10-24', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -49,7 +49,7 @@ test('Create an event without a title', async () => {
     expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
 });
 
-// Fail to create an event without a tag
+// Fail to create without tag
 test('Create an event without a tag', async () => {
     const req = { body: { eventDate: '2025-10-24', title: 'No Tag', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -60,7 +60,7 @@ test('Create an event without a tag', async () => {
     expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
 });
 
-// Fail to create an event with invalid tag
+// Fail to create with invalid tag
 test('Create an event with invalid tag', async () => {
     const req = { body: { eventDate: '2025-10-24', title: 'Invalid Tag', tag: 'holiday', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -68,10 +68,10 @@ test('Create an event with invalid tag', async () => {
     await controller.createNewEvent(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('Invalid tag. Must be practice, match, or event.');
+    expect(res.send).toHaveBeenCalledWith("Invalid tag. Must be practice, match, or event.");
 });
 
-// Fail to create an event without a location
+// Fail to create without location
 test('Create an event without a location', async () => {
     const req = { body: { eventDate: '2025-10-24', title: 'No location', tag: 'match', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -82,9 +82,9 @@ test('Create an event without a location', async () => {
     expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
 });
 
-// Fail to create an event without location coordinates
-test('Create an event without a location', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'No location', tag: 'match', location: 'Loyola University' } };
+// Fail to create without locationCoords
+test('Create an event without locationCoords', async () => {
+    const req = { body: { eventDate: '2025-10-24', title: 'No coords', tag: 'match', location: 'Loyola University' } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
     await controller.createNewEvent(req, res);
@@ -93,7 +93,7 @@ test('Create an event without a location', async () => {
     expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
 });
 
-// Create a new event successfully
+// Create successfully
 test('Create new event successfully', async () => {
     const req = { body: { eventDate: '2025-10-24', title: 'Final', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -106,13 +106,15 @@ test('Create new event successfully', async () => {
         eventDate: new Date('2025-10-24T00:00:00'),
         title: 'Final',
         tag: 'practice',
-        location: 'Loyola University'
+        location: 'Loyola University',
+        locationCoords: [21.21, 19.19]
     });
+
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: 'Event added successfully' });
 });
 
-// Create event that has an error from the Database
+// DAO error
 test('Create new event with DAO error', async () => {
     const req = { body: { eventDate: '2025-10-24', title: 'Semi', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
     const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
@@ -418,4 +420,32 @@ test('Update event with only location provided keeps same date', async () => {
             locationCoords: [21.21, 19.19]
         }
     });
+});
+
+/*
+* getEventLocationCoords tests
+*/
+test('Get event location coords successfully', async () => {
+    const req = { params: { id: '123' } };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+
+    const coords = { _id: '123', locationCoords: [21.21, 19.19] };
+    dao.eventModel = { findById: jest.fn().mockResolvedValue(coords) };
+
+    await controller.getEventLocationCoords(req, res);
+
+    expect(dao.eventModel.findById).toHaveBeenCalledWith('123');
+    expect(res.json).toHaveBeenCalledWith(coords);
+});
+
+test('Get event location coords with DAO error', async () => {
+    const req = { params: { id: '123' } };
+    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+
+    dao.eventModel = { findById: jest.fn().mockRejectedValue(new Error('DB Error')) };
+
+    await controller.getEventLocationCoords(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith('Could not get coordinates');
 });

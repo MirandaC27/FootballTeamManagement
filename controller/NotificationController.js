@@ -11,25 +11,6 @@ async function getNotifications(req, res) {
     }
 }
 
-/*
-async function markNotificationRead(req, res) {
-    try {
-        const { id } = req.params;
-        const updated = await NotificationDao.markAsRead(id);
-
-        if (!updated) {
-            return res.status(404).send("Notification not found");
-        }
-
-        res.json(updated);
-    } catch (err) {
-        console.error("Error marking read:", err);
-        res.status(500).send("Error marking read");
-    }
-}
-    */
-
 module.exports = {
     getNotifications
-    //markNotificationRead
 };

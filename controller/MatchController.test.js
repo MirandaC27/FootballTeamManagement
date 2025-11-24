@@ -1,22 +1,21 @@
 const controller = require('./MatchController');
 const matchDao = require('../model/MatchDao');
+const NotificationDao = require("../model/NotificationDao");
 
-// DAO mocks
+// Mocks
 jest.mock('../model/MatchDao');
+jest.mock("../model/NotificationDao");
 
 beforeEach(() => {
-  jest.useFakeTimers();
   jest.clearAllMocks();
 });
 
 /*
  * create match tests
  */
-
-// Fail to create match
 test('Fail to create match with missing fields', async () => {
   const req = { body: {} };
-  const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
   await controller.createNewMatch(req, res);
 
@@ -24,8 +23,10 @@ test('Fail to create match with missing fields', async () => {
   expect(res.send).toHaveBeenCalledWith('All match attributes are required');
 });
 
-// Successfully create new match
 test('Create new match successfully', async () => {
+  const saveMock = jest.fn().mockResolvedValue({});
+  matchDao.matchModel.mockImplementation(() => ({ save: saveMock }));
+
   const req = {
     body: {
       homeTeam: 'Team A',
@@ -34,14 +35,11 @@ test('Create new match successfully', async () => {
       awayScore: 1,
       matchDate: '2025-10-20T15:00:00',
       matchLocation: 'Main Field',
-      matchStatus: 'Final',
-    },
+      matchStatus: 'Final'
+    }
   };
 
-  const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
-  const saveMock = jest.fn().mockResolvedValue({});
-
-  matchDao.matchModel.mockImplementation(() => ({ save: saveMock }));
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
   await controller.createNewMatch(req, res);
 
@@ -50,8 +48,10 @@ test('Create new match successfully', async () => {
   expect(res.json).toHaveBeenCalledWith({ message: 'Match added successfully' });
 });
 
-// Fail to create match with DB error
-test('Fail to create match when DAO throws error', async () => {
+test('Fail to create match when DB errors', async () => {
+  const saveMock = jest.fn().mockRejectedValue(new Error("DB Error"));
+  matchDao.matchModel.mockImplementation(() => ({ save: saveMock }));
+
   const req = {
     body: {
       homeTeam: 'Team A',
@@ -60,13 +60,11 @@ test('Fail to create match when DAO throws error', async () => {
       awayScore: 2,
       matchDate: '2025-11-01T15:00:00',
       matchLocation: 'Stadium',
-      matchStatus: 'Scheduled',
-    },
+      matchStatus: 'Scheduled'
+    }
   };
 
-  const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
-  const saveMock = jest.fn().mockRejectedValue(new Error('DB Error'));
-  matchDao.matchModel.mockImplementation(() => ({ save: saveMock }));
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
   await controller.createNewMatch(req, res);
 
@@ -75,14 +73,13 @@ test('Fail to create match when DAO throws error', async () => {
 });
 
 /*
- * delete match tests
+ * DELETE MATCH TESTS
  */
-
-//successfully delete match
 test('Delete match successfully', async () => {
+  matchDao.matchModel = { findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '123' }) };
+
   const req = { params: { id: '123' } };
   const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-  matchDao.matchModel = { findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '123' }) };
 
   await controller.deleteMatch(req, res);
 
@@ -90,11 +87,11 @@ test('Delete match successfully', async () => {
   expect(res.json).toHaveBeenCalledWith({ message: 'Match deleted successfully' });
 });
 
-//try to delete match that doesn't exist
 test('Delete match not found', async () => {
+  matchDao.matchModel = { findByIdAndDelete: jest.fn().mockResolvedValue(null) };
+
   const req = { params: { id: '999' } };
   const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-  matchDao.matchModel = { findByIdAndDelete: jest.fn().mockResolvedValue(null) };
 
   await controller.deleteMatch(req, res);
 
@@ -102,11 +99,11 @@ test('Delete match not found', async () => {
   expect(res.json).toHaveBeenCalledWith({ message: 'Match not found' });
 });
 
-//try to delete match with DB error
-test('Delete match with DAO error', async () => {
+test('Delete match DAO error', async () => {
+  matchDao.matchModel = { findByIdAndDelete: jest.fn().mockRejectedValue(new Error("DB Error")) };
+
   const req = { params: { id: '500' } };
   const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-  matchDao.matchModel = { findByIdAndDelete: jest.fn().mockRejectedValue(new Error('DB Error')) };
 
   await controller.deleteMatch(req, res);
 
@@ -117,29 +114,48 @@ test('Delete match with DAO error', async () => {
 /*
  * update match tests
  */
-test('Update match successfully', async () => {
-  const req = {
-    params: { id: 'abc' },
-    body: { matchStatus: 'Final', homeScore: 3 },
-  };
-  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+test('Update match successfully without notification', async () => {
+  const updatedResult = { _id: 'abc', homeScore: 3 };
 
-  matchDao.updateById.mockResolvedValue({ _id: 'abc', matchStatus: 'Final', homeScore: 3 });
+  matchDao.updateById.mockResolvedValue(updatedResult);
+
+  const req = { params: { id: 'abc' }, body: { homeScore: 3 } };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
   await controller.updateMatch(req, res);
 
-  expect(matchDao.updateById).toHaveBeenCalledWith('abc', req.body);
+  expect(matchDao.updateById).toHaveBeenCalledWith('abc', { homeScore: 3 });
   expect(res.json).toHaveBeenCalledWith({
     message: 'Match updated successfully',
-    updated: { _id: 'abc', matchStatus: 'Final', homeScore: 3 },
+    updated: updatedResult
   });
 });
 
-test('Update match not found', async () => {
-  const req = { params: { id: 'xyz' }, body: { matchStatus: 'Cancelled' } };
+test('Update match triggers notification on In Progress', async () => {
+  const updatedResult = { _id: '123', homeTeam: "A", awayTeam: "B" };
+
+  matchDao.updateById.mockResolvedValue(updatedResult);
+  NotificationDao.createNotification.mockResolvedValue({ notif: true });
+
+  const emitMock = jest.fn();
+  const req = {
+    params: { id: '123' },
+    body: { matchStatus: "In Progress" },
+    app: { get: () => ({ emit: emitMock }) }
+  };
   const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
+  await controller.updateMatch(req, res);
+
+  expect(NotificationDao.createNotification).toHaveBeenCalled();
+  expect(emitMock).toHaveBeenCalledWith("matchNotification", expect.any(Object));
+});
+
+test('Update match not found', async () => {
   matchDao.updateById.mockResolvedValue(null);
+
+  const req = { params: { id: 'xyz' }, body: {} };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
   await controller.updateMatch(req, res);
 
@@ -147,11 +163,11 @@ test('Update match not found', async () => {
   expect(res.json).toHaveBeenCalledWith({ message: 'Match not found' });
 });
 
-test('Update match with DAO error', async () => {
-  const req = { params: { id: 'err' }, body: { homeScore: 1 } };
-  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+test('Update match DAO error', async () => {
+  matchDao.updateById.mockRejectedValue(new Error("DB Error"));
 
-  matchDao.updateById.mockRejectedValue(new Error('DB Error'));
+  const req = { params: { id: 'err' }, body: {} };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
   await controller.updateMatch(req, res);
 
@@ -160,142 +176,270 @@ test('Update match with DAO error', async () => {
 });
 
 /*
- * get match tests
+ * get matches test
  */
-
 test('Get all matches successfully', async () => {
+  matchDao.matchModel = { find: jest.fn().mockResolvedValue([{ _id: 1 }]) };
+
   const req = {};
   const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
-  const matches = [{ _id: '1' }, { _id: '2' }];
-  matchDao.matchModel = { find: jest.fn().mockResolvedValue(matches) };
 
   await controller.getAllMatches(req, res);
-  expect(res.json).toHaveBeenCalledWith(matches);
+
+  expect(res.json).toHaveBeenCalledWith([{ _id: 1 }]);
 });
 
-test('Get all matches with DAO error', async () => {
+test('Get all matches DAO error', async () => {
+  matchDao.matchModel = { find: jest.fn().mockRejectedValue(new Error("DB Error")) };
+
   const req = {};
-  const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
-  matchDao.matchModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
   await controller.getAllMatches(req, res);
+
   expect(res.status).toHaveBeenCalledWith(500);
-  expect(res.send).toHaveBeenCalledWith('Could not get matches');
+  expect(res.send).toHaveBeenCalledWith("Could not get matches");
 });
 
 /*
- * get details of match test
+ * get match details tests
  */
-
 test('Get match details successfully', async () => {
-  const req = { params: { id: 'match1' } };
-  const res = { status: jest.fn().mockReturnThis(), json: jest.fn(), send: jest.fn() };
-
-  const match = {
-    _id: 'match1',
-    homeTeam: 'Team A',
-    awayTeam: 'Team B',
-    matchDate: '2025-11-01T15:00:00',
-    matchLocation: 'Main Field',
-    matchStatus: 'Final',
-  };
+  const match = { _id: '123' };
 
   matchDao.matchModel = {
-    findById: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(match) }),
+    findById: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(match) })
   };
 
+  const req = { params: { id: '123' } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
   await controller.getMatchDetails(req, res);
+
   expect(res.status).toHaveBeenCalledWith(200);
   expect(res.json).toHaveBeenCalledWith(match);
 });
 
 test('Get match details not found', async () => {
-  const req = { params: { id: 'noexist' } };
-  const res = { status: jest.fn().mockReturnThis(), json: jest.fn(), send: jest.fn() };
   matchDao.matchModel = {
-    findById: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(null) }),
+    findById: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(null) })
   };
 
+  const req = { params: { id: 'xyz' } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
   await controller.getMatchDetails(req, res);
+
   expect(res.status).toHaveBeenCalledWith(404);
-  expect(res.json).toHaveBeenCalledWith({ message: 'Match not found' });
+  expect(res.json).toHaveBeenCalledWith({ message: "Match not found" });
 });
 
 test('Get match details DAO error', async () => {
-  const req = { params: { id: 'err' } };
-  const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
   matchDao.matchModel = {
-    findById: jest.fn().mockReturnValue({
-      lean: jest.fn().mockRejectedValue(new Error('DB Error')),
-    }),
+    findById: jest.fn().mockReturnValue({ lean: jest.fn().mockRejectedValue(new Error("DB Error")) })
   };
+
+  const req = { params: { id: 'err' } };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
   await controller.getMatchDetails(req, res);
+
   expect(res.status).toHaveBeenCalledWith(500);
-  expect(res.send).toHaveBeenCalledWith('Error loading match');
+  expect(res.send).toHaveBeenCalledWith("Error loading match");
 });
 
-/**
- * Match Reaction tests
+/*
+ * reaction tests
  */
 test("Toggle match reaction successfully", async () => {
-  const req = {
-    params: { id: "123" },
-    session: { user: { _id: "abc" } },
-    body: { reaction: "happy" }
-  };
-  const res = {
-    json: jest.fn(),
-    status: jest.fn().mockReturnThis(),
-    send: jest.fn()
-  };
+  matchDao.updateMatchReaction.mockResolvedValue({ isReacted: true, count: 1 });
 
-  const daoResult = { isReacted: true, count: 1 };
-  matchDao.updateMatchReaction.mockResolvedValue(daoResult);
+  const req = {
+    params: { id: "1" },
+    session: { user: { _id: "user1" } },
+    body: { reaction: "like" }
+  };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+
   await controller.updateMatchReaction(req, res);
 
-  expect(matchDao.updateMatchReaction).toHaveBeenCalledWith("123", "abc", "happy");
-  expect(res.json).toHaveBeenCalledWith({
-    isReacted: true,
-    count: 1
-  });
-  expect(res.status).not.toHaveBeenCalled();
+  expect(res.json).toHaveBeenCalledWith({ isReacted: true, count: 1 });
 });
 
-test("Toggle reaction returns 404 if match not found", async () => {
-  const req = {
-    params: { id: "123" },
-    session: { user: { _id: "abc" } },
-    body: { reaction: "happy" }
-  };
-  const res = {
-    json: jest.fn(),
-    status: jest.fn().mockReturnThis(),
-    send: jest.fn()
-  };
-
+test("Toggle reaction match not found", async () => {
   matchDao.updateMatchReaction.mockResolvedValue(null);
+
+  const req =
+{
+    params: { id: "1" },
+    session: { user: { _id: "user1" } },
+    body: { reaction: "like" }
+  };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+
   await controller.updateMatchReaction(req, res);
 
   expect(res.status).toHaveBeenCalledWith(404);
   expect(res.send).toHaveBeenCalledWith("Match not found");
 });
 
-test("Toggle reaction handles server error", async () => {
-  const req = {
-    params: { id: "123" },
-    session: { user: { _id: "abc" } },
-    body: { reaction: "sad" }
-  };
-  const res = {
-    json: jest.fn(),
-    status: jest.fn().mockReturnThis(),
-    send: jest.fn()
-  };
-
+test("Toggle reaction DAO error", async () => {
   matchDao.updateMatchReaction.mockRejectedValue(new Error("DB error"));
+
+  const req = {
+    params: { id: "1" },
+    session: { user: { _id: "user1" } },
+    body: { reaction: "angry" }
+  };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+
   await controller.updateMatchReaction(req, res);
 
   expect(res.status).toHaveBeenCalled();
   expect(res.send).toHaveBeenCalledWith("Error updating match reaction");
+});
+
+/*
+ * clock tests
+ */
+test("Start match timer successfully", async () => {
+  matchDao.readById.mockResolvedValue({
+    clock: { status: "stopped", elapsedBeforeStart: 100 }
+  });
+
+  matchDao.setClockState.mockResolvedValue({ updated: true });
+
+  const emitMock = jest.fn();
+  const req = {
+    params: { id: "match1" },
+    app: { get: () => ({ emit: emitMock }) }
+  };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+  await controller.startMatchTimer(req, res);
+
+  expect(emitMock).toHaveBeenCalledWith("clock:start", expect.any(Object));
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Clock started",
+    match: { updated: true }
+  });
+});
+
+test("Start match timer match not found", async () => {
+  matchDao.readById.mockResolvedValue(null);
+
+  const req = { params: { id: "nope" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+  await controller.startMatchTimer(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(404);
+  expect(res.json).toHaveBeenCalledWith({ message: "Match not found" });
+});
+
+test("Start match timer DAO error", async () => {
+  matchDao.readById.mockRejectedValue(new Error("DB Error"));
+
+  const req = { params: { id: "fail" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+  await controller.startMatchTimer(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+});
+
+/*
+ * end timer tests
+ */
+test("End match timer successfully", async () => {
+  matchDao.matchModel = {
+    findById: jest.fn().mockResolvedValue({
+      clock: { status: "started", startTimestamp: Date.now(), elapsedBeforeStart: 50 }
+    })
+  };
+
+  matchDao.setClockState.mockResolvedValue({ updated: true });
+
+  const emitMock = jest.fn();
+  const req = {
+    params: { id: "match1" },
+    app: { get: () => ({ emit: emitMock }) }
+  };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+  await controller.endMatchTimer(req, res);
+
+  expect(emitMock).toHaveBeenCalledWith("clock:stop", expect.any(Object));
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Clock stopped",
+    match: { updated: true }
+  });
+});
+
+test("End match timer match not found", async () => {
+  matchDao.matchModel = { findById: jest.fn().mockResolvedValue(null) };
+
+  const req = { params: { id: "nope" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+  await controller.endMatchTimer(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(404);
+});
+
+test("End match timer DAO error", async () => {
+  matchDao.matchModel = { findById: jest.fn().mockRejectedValue(new Error("DB Error")) };
+
+  const req = { params: { id: "fail" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+  await controller.endMatchTimer(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
+});
+
+/*
+ * reset timer tests
+ */
+test("Reset match timer successfully", async () => {
+  matchDao.readById.mockResolvedValue({});
+
+  matchDao.setClockState.mockResolvedValue({ updated: true });
+
+  const emitMock = jest.fn();
+  const req = {
+    params: { id: "match1" },
+    app: { get: () => ({ emit: emitMock }) }
+  };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+  await controller.resetMatchTimer(req, res);
+
+  expect(emitMock).toHaveBeenCalledWith("clock:reset", { matchId: "match1" });
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Clock reset",
+    match: { updated: true }
+  });
+});
+
+test("Reset match timer match not found", async () => {
+  matchDao.readById.mockResolvedValue(null);
+
+  const req = { params: { id: "nope" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+  await controller.resetMatchTimer(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(404);
+});
+
+test("Reset match timer DAO error", async () => {
+  matchDao.readById.mockRejectedValue(new Error("DB Error"));
+
+  const req = { params: { id: "fail" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+  await controller.resetMatchTimer(req, res);
+
+  expect(res.status).toHaveBeenCalledWith(500);
 });

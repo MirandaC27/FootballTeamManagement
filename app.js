@@ -126,6 +126,9 @@ app.post("/match/reset/:id", MatchCont.resetMatchTimer);
 const NotificationCont = require("./controller/NotificationController");
 app.get("/notifications", NotificationCont.getNotifications);
 
+const { startDailyRunner } = require("./NotificationDailyRunner");
+startDailyRunner();
+
 //calendar routes
 const EventCont = require('./controller/EventController');
 console.log("EventCont loaded:", EventCont);

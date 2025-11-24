@@ -67,8 +67,8 @@ const updateEvent = async (req, res) => {
 
     const updatedFields = {};
 
-    if (startTime) updatedFields.startTime = startTime;
-    if (endTime) updatedFields.endTime = endTime;
+    //if (startTime) updatedFields.startTime = startTime;
+    //if (endTime) updatedFields.endTime = endTime;
 
     if (eventDate) updatedFields.eventDate = new Date(`${eventDate}T00:00:00`);
     if (title) updatedFields.title = title;
@@ -152,9 +152,9 @@ function eventByMonth(events, year, monthIndex){
       id: m._id,
       title: m.title,
       tag: m.tag,
-      location: m.location,
-      startTime: m.startTime,   
-      endTime: m.endTime   
+      location: m.location
+      //startTime: m.startTime,   
+      //endTime: m.endTime   
     }));
 
 
