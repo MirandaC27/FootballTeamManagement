@@ -62,7 +62,9 @@ function getWeatherDetails(name, lat, lon, country, state){
             if(!uniqueForecastDays.includes(forecastDate)){
                 return uniqueForecastDays.push(forecastDate);
             }
-        });for(i = 1; i < fiveDaysForecast.length; i++){
+        });
+        fiveDaysForecastCard.innerHTML = '';
+        for(i = 1; i < fiveDaysForecast.length; i++){
             let date = new Date(fiveDaysForecast[i].dt_txt);
             fiveDaysForecastCard.innerHTML += `
                 <div class="forecast-item">
@@ -75,8 +77,6 @@ function getWeatherDetails(name, lat, lon, country, state){
                 </div>
             `;
         }
-        fiveDaysForecastCard.innerHTML = '';
-
     }).catch(() => {
         alert('Failed to fetch weather forecast');
     });
