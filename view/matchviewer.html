@@ -64,6 +64,20 @@
         <button id="backButton" class="btn back-btn" type="button">
             &larr; Back to Schedule
         </button>
+        <div id="admin-match-controls" class="p-4 bg-gray-100 rounded-lg flex justify-center space-x-4">
+            <button 
+                id="startButton" 
+                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                type="button">
+                Start
+            </button>
+            <button 
+                id="endButton" 
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                type="button">
+                End
+            </button>
+        </div>
     </header>
 
     <div class="match-layout">
@@ -210,6 +224,14 @@
                 });
             }
 
+            //logic for the start and end buttons
+            document.getElementById('startButton').addEventListener('click', () => {
+                changeMatchStatus('In Progress');
+            });
+            document.getElementById('endButton').addEventListener('click', () => {
+                changeMatchStatus('Finished');
+            });
+
             //logic for event form
             document.getElementById('logEventButton').addEventListener('click', (e)=>{
                 e.preventDefault();
@@ -247,6 +269,10 @@
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
+            currScore.teamHome = match.homeScore || 0;
+            currScore.teamAway = match.awayScore || 0;
+
+            loadMatchInfo(currMatch);
             loadTimeline();
             loadReactions(match);
             changeChatInputVisibility(match);
@@ -326,15 +352,39 @@
         }
 
         function recalcScore(){
+            let newScores = {teamHome: 0, teamAway: 0};
             matchEvents.forEach(event=> {
                 if(event.type == 'goal'){
-                    currScore[event.teamSelected]++;
+                    if(event.team == 'home'){
+                        newScores.teamHome++;
+                    }
+                    else if(event.team == 'away'){
+                        newScores.teamAway++;
+                    }
                 }
+
             });
 
-            updateScoreboard();
+            const scoreChanged = newScores.teamHome !== currScore.teamHome || newScores.teamAway !== currScore.teamAway;
+            currScore = newScores;
+            document.getElementById('homeScore').textContent = currScore.teamHome;
+            document.getElementById('awayScore').textContent = currScore.teamAway;
+
+            const matchId = new URLSearchParams(window.location.search).get('id');
+            if (scoreChanged && matchId) {
+                updateScore(matchId, { homeScore: currScore.teamHome, awayScore: currScore.teamAway });
+            }
+
+            //updateScoreboard();
             //updateScore(matchId, {homeScore: currScore.teamHome, awayScore: currScore.teamAway});
         }
+
+        /*async function updateScore(id, scores){
+            try{
+                await fetch(`/api/matches/${matchId}/score`);
+            }
+
+        }*/
 
         async function logEvent(){
             const selectType = document.getElementById('event-type');
@@ -397,6 +447,34 @@
 
             });
         
+        }
+
+        async function changeMatchStatus(newStatus) {
+            const matchId = new URLSearchParams(window.location.search).get('id');
+
+            if (!matchId) return console.error('Match ID not found.');
+
+            try {
+                const res = await fetch(`getMatchDetails/${matchId}/matchStatus`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (res.ok) {
+                    console.log(`Match status updated to: ${newStatus}`);
+                    // Force a refresh to update the UI immediately
+                    // This calls your adapted loadMatchAndRender function from the previous step
+                    await loadMatchAndRender(matchId); 
+                } else {
+                    // Handle server errors (e.g., status 400 or 500)
+                    const errorData = await res.json();
+                    alert(`Failed to update status: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error('Network error during status update:', error);
+                alert('Could not connect to the server.');
+            }
         }
 
     </script>
