@@ -8,7 +8,7 @@ async function generateDailyEventNotifications() {
         const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
-        // Get today’s events
+
         const eventsToday = await Event.find({
             eventDate: { $gte: start, $lt: end }
         });
@@ -19,17 +19,17 @@ async function generateDailyEventNotifications() {
             const title = `Event Today: ${event.title}`;
             const message = `You have a ${event.tag} today at ${event.location}.`;
 
-            // Check if a similar notification already exists today
+
             const exists = await NotificationDao.findNotificationByTitleAndDate(title, start, end);
 
             if (!exists) {
-                // Correct order of arguments: matchId, eventId, message, title, timestamp
+
                 await NotificationDao.createNotification(
-                    null,          // matchId (none for events)
-                    event._id,     // eventId
-                    message,       // message
-                    title,         // title
-                    new Date()     // timestamp
+                    null,          
+                    event._id,     
+                    message,       
+                    title,         
+                    new Date()     
                 );
 
                 console.log(`Created notification for event: ${event.title}`);
@@ -40,7 +40,7 @@ async function generateDailyEventNotifications() {
     }
 }
 
-function startDailyRunner() {
+async function startDailyRunner() {
     console.log("Daily Event Notification Runner started.");
 
     generateDailyEventNotifications();
