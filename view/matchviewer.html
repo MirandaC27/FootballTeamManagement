@@ -237,6 +237,8 @@
             const match = await res.json();
             currMatch = match;
 
+            matchEvents = match.events || [];
+
             document.getElementById('homeTeam').textContent = match.homeTeam;
             document.getElementById('awayTeam').textContent = match.awayTeam;
             document.getElementById('homeScore').textContent = match.homeScore;
@@ -389,7 +391,7 @@
                 eventItem.className = 'timeline-item';
 
                 eventItem.innerHTML =
-                 `<strong>${event.eventMinute} | ${event.typeSelected}:<strong>${event.eventDesc} <em>(${teamName})</em>`;
+                 `<strong>${event.minute} | ${event.type}:<strong>${event.description} <em>(${teamName})</em>`;
 
                 timelineContainer.appendChild(eventItem);
 
