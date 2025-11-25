@@ -232,13 +232,6 @@
         </script>
 
     <script>
-        //let currMatch = null;
-        //let matchEvents = [];
-        /*et currScore = {
-            teamHome: 0,
-            teamAway: 0
-        }*/
-        //let cityInput = document.getElementById('matchLocation'), 
         let api_key = 'c49d74aefaae765d7ac35e149d114bd1',
         currentWeatherCard,
         match = {},
@@ -304,7 +297,7 @@
                 alert('Failed to load match details');
                 return;
             }
-            const match = await res.json();
+            match = await res.json();
 
             matchEvents = match.matchEvents || match.events;
 
@@ -500,7 +493,8 @@
             let matchId = urlParams.get('id');
 
             if (matchId) {
-                loadMatch(matchId);
+                glblmatchId = matchId;
+                loadMatch(glblmatchId);
             }
             else {
                 console.error("Error: No Match ID found in the URL.");
