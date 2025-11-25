@@ -59,7 +59,7 @@ const deleteMatch = async (req, res) => {
 
 
 /**
- * Update a matches from the database.
+ * Update a matches from the database, sends out notification if a match becomes in progress.
  * @param {*} req request object containing data
  * @param {*} res response object used to send back
  */
@@ -71,37 +71,32 @@ const updateMatch = async (req, res) => {
     const updated = await matchDao.updateById(id, newData);
 
     if (!updated) {
-      return res.status(404).json({ message: 'Match not found' });
+      return res.status(404).json({ message: "Match not found" });
     }
 
-    // In progress notification
+    // If match has just started, create database notification
     if (newData.matchStatus === "In Progress") {
-      const io = req.app.get("io");
 
-      const notifTitle = "Match started!";
-      const notifMessage = `Match ${updated.homeTeam} vs ${updated.awayTeam} is now In Progress`;
-      const notifTimestamp = new Date(); // Correct timestamp
+      await NotificationDao.createNotification({
+        matchId: updated._id,
+        title: "Match Started!",
+        message: `Match ${updated.homeTeam} vs ${updated.awayTeam} is now In Progress`
+      });
 
-      // Create the notification
-      const notif = await NotificationDao.createNotification(
-        updated._id,      
-        notifMessage,     
-        notifTitle,       
-        notifTimestamp    
-      );
-
-      // Emit through socket.io
-      io.emit("matchNotification", notif);
+      console.log("Match start notification created.");
     }
 
-    res.json({ message: 'Match updated successfully', updated });
-    io.emit("matchUpdated", updatedMatch);
+    return res.json({ message: "Match updated successfully", updated });
 
   } catch (err) {
-    console.error('Error updating match:', err);
-    res.status(500).json({ message: 'Server error while updating match' });
+    console.error("Error updating match:", err);
+    return res.status(500).json({
+      message: "Server error while updating match",
+      error: err.message
+    });
   }
 };
+
 
 /**
  * Get all matches from the database.
