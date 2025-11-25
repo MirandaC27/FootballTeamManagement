@@ -148,22 +148,22 @@
                     <div class="eventform-content">
                         <label for="event-type">Event:</label>
                         <select id="event-type">
-                            <option value="goal">⚽</option>
-                            <option value="yellow-card">🟨</option>
-                            <option value="red-card">🟥</option>
-                            <option value="substitution">🔄</option>
+                            <option value="goal">⚽ Goal</option>
+                            <option value="yellow-card">🟨 Yellow Card</option>
+                            <option value="red-card">🟥 Red Card</option>
+                            <option value="substitution">🔄 Substitution</option>
                         </select>
 
                         <label for="event-team">Team:</label>
                         <select id="event-team">
-                            <option value="home" id="eventHomeTeam">Home</option>
-                            <option value="away" id="eventAwayTeam">Away</option>
+                            <option value="home" id="homeTeam">Home</option>
+                            <option value="away" id="awayTeam">Away</option>
                         </select>
 
                         <label for="event-minute">Min:</label>
                         <input type="number" id="event-minute" min="1" max="90" value="1" placeholder="Min">
                         <label for="event-desc">Description:</label>
-                        <input type="text" id="event-desc" placeholder="e.g, #10; Own Goal">
+                        <input type="text" id="event-desc" placeholder="e.g, #10; Own Goal" required>
                         <button id="logEventButton">Submit</button>
                     </div>
                 </section>
@@ -228,6 +228,7 @@
             // Create socket ONCE for entire page
             window.socket = io();
         </script>
+
     <script>
         //let currMatch = null;
         //let matchEvents = [];
@@ -237,7 +238,8 @@
         }*/
         //let cityInput = document.getElementById('matchLocation'), 
         let api_key = 'c49d74aefaae765d7ac35e149d114bd1',
-        currentWeatherCard;
+        currentWeatherCard,
+        matchEvents = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -288,6 +290,13 @@
 
         });
 
+        function formatDisplayDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' }; 
+            return date.toLocaleDateString('en-US', options);
+        }
+
         async function loadMatch(id) {
             const res = await fetch(`/getMatchDetails/${id}`);
 
@@ -306,7 +315,7 @@
             document.getElementById('awayTeam').textContent = match.awayTeam;
             document.getElementById('homeScore').textContent = match.homeScore;
             document.getElementById('awayScore').textContent = match.awayScore;
-            document.getElementById('matchDate').textContent = match.matchDate.split('T')[0];
+            document.getElementById('matchDate').textContent = formatDisplayDate(match.matchDate);
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
@@ -317,7 +326,7 @@
             //currScore.teamAway = match.awayScore || 0;
 
             //loadMatchInfo(currMatch);
-            //loadTimeline();
+            loadTimeline();
             loadReactions(match);
             changeChatInputVisibility(match);
             updateLiveBadgeDisplay(match);
@@ -391,6 +400,80 @@
                 alert(`Failed to fetch coordinates of ${cityName}`);
             });
         }
+
+        /**
+         * Loads the timeline entries from matchEvents
+         */
+        function loadTimeline(){
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineContainer.innerHTML = '';
+
+            if(matchEvents.length == 0){
+                timelineContainer.innerHTML = 'No events recorded yet';
+                return;
+            }
+
+            matchEvents.forEach(event => {
+                const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
+
+                /*
+                const icoMap = {
+                    'goal': '⚽',
+                    'yellow-card': '🟨',
+                    'red-card': '🟥',
+                    'substitution': '🔄'
+                }*/
+
+                //const eventIco = icoMap[event.type] || '';
+                const eventEntry = document.createElement('div');
+                eventEntry.className = 'timeline-entry';
+
+                eventEntry.innerHTML = `
+                <span>
+                    <strong>${event.minute} | ${event.type}:<strong>${event.description} <em>(${teamName})</em>
+                </span>`;
+
+               timelineContainer.appendChild(eventEntry); 
+            })
+        }
+
+        /**
+         * log the event entry locally and update timeline
+         */
+        function logEvent(){
+            const selectType = document.getElementById('event-type');
+            const typeVal = selectType.value;
+            const selectTeam = document.getElementById('event-team');
+            const teamVal = selectTeam.value;
+            const inputMinute = document.getElementById('event-minute');
+            const inputDesc = document.getElementById('event-desc');
+
+            const eventMinute = parseInt(inputMinute.value, 10);
+            const eventDesc = inputDesc.value.trim();
+
+            const newEvent = {
+                minute: eventMinute,
+                type: typeVal,
+                description: eventDesc,
+                team: teamVal,
+                timestamp: new Date().toISOString()
+            };
+
+            matchEvents.push(newEvent);
+
+            loadTimeline();
+
+            inputDesc.value = '';
+            inputMinute.value = eventMinute +1;
+            //inputDesc.focus();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('logEventButton').addEventListener('click', (e) => {
+                e.preventDefault();
+                logEvent();
+            })
+        });
 
         /**
          * Show LIVE badge if match is in progress or END badge if match is final
