@@ -519,10 +519,13 @@ main {
 
 /* 1. Header Styles: Centered and Dominant */
 .scoreboard-container {
-  text-align: center;
+  /*text-align: center;
   padding: 25px 20px;
   background: white;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eee;*/
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
 }
 
 .scoreboard-header {
