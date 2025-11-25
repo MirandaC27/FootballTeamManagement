@@ -297,7 +297,7 @@
             }
             const match = await res.json();
 
-            //getCityCoordinates(match.matchLocation);
+            getCityCoordinates(match.matchLocation);
             //currMatch = match;
 
             //matchEvents = match.events || [];
@@ -351,7 +351,7 @@
         /**
          * Get the weather details of a given City
          * @params city name, latitude, longitude, country, state
-         
+         */
         function getWeatherDetails(name, lat, lon, country, state){
             let FORECAST_API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${api_key}`,
             WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}`;
@@ -374,7 +374,6 @@
             alert('Failed to fetch current weather');
         });
     }
-        */
 
         /**
          * Get the coordinates of the city the match is located in
