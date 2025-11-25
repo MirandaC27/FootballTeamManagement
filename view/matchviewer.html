@@ -156,8 +156,8 @@
 
                         <label for="event-team">Team:</label>
                         <select id="event-team">
-                            <option value="home" id="homeTeam">Home</option>
-                            <option value="away" id="awayTeam">Away</option>
+                            <option value="home" id="eventHomeTeam">Home</option>
+                            <option value="away" id="eventAwayTeam">Away</option>
                         </select>
 
                         <label for="event-minute">Min:</label>
@@ -318,6 +318,9 @@
             document.getElementById('matchDate').textContent = formatDisplayDate(match.matchDate);
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
+
+            document.getElementById('eventHomeTeam').textContent = match.homeTeam;
+            document.getElementById('eventAwayTeam').textContent = match.awayTeam;
 
             //let cityInput = document.getElementById('matchLocation').textContent;
             getCityCoordinates(match.matchLocation);
