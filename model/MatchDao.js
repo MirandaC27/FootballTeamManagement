@@ -13,14 +13,14 @@ const eventSchema = new mongoose.Schema({
     required: true 
   },
   type: { 
-    type: Any, 
+    type: String, 
     required: true 
   },
   description: { 
-    type: Any 
+    type: String 
   },
   team: { 
-    type: Any, 
+    type: String, 
     required: true 
   },
   timestamp: { 
