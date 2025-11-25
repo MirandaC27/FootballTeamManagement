@@ -13,20 +13,18 @@ const eventSchema = new mongoose.Schema({
     required: true 
   },
   type: { 
-    type: String, 
+    type: Any, 
     required: true 
   },
   description: { 
-    type: String 
+    type: Any 
   },
   team: { 
-    type: String, 
-    enum: ['home', 'away'], 
+    type: Any, 
     required: true 
   },
   timestamp: { 
-    type: Date, 
-    default: Date.now 
+    type: String,  
   }
 });
 

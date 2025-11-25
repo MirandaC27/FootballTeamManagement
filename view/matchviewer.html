@@ -299,7 +299,7 @@
             }
             match = await res.json();
 
-            matchEvents = match.matchEvents || match.events;
+            matchEvents = match.matchEvents;
 
             //getCityCoordinates(match.matchLocation);
             //currMatch = match;
@@ -467,6 +467,7 @@
                 timestamp: new Date().toISOString()
             };
 
+            /*
             try{
                 const res = await fetch(`api/matches/${glblmatchId}/events`,{
                     method: 'POST',
@@ -477,7 +478,7 @@
                 await loadMatch(glblmatchId);
             }catch (err) {
                 console.error("Error logging event:", err.message);
-            }
+            }*/ 
             //matchEvents.push(newEvent);
 
             //loadTimeline();
