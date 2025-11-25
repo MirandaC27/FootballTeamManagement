@@ -421,11 +421,11 @@
             matchEvents.sort((a, b) => a.minute - b.minute);
             matchEvents.forEach(event => {
                 //const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
-                const teamName = (event.team === 'home' && match.homeTeam) 
+                const teamName = (event.team == 'home' && match.homeTeam) 
                  ? match.homeTeam 
                  : (event.team === 'away' && match.awayTeam)
                    ? match.awayTeam
-                   : `Team: ${event.team || 'Unknown'}`;
+                   : `${event.team || 'Unknown'}`;
 
                 
                 const icoMap = {
