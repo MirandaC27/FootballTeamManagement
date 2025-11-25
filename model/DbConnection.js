@@ -10,7 +10,7 @@ exports.connect = function(where){
     if(where==='test') uri = process.env.TESTDB_URI; //Test DB
     if(process.env.CI) uri = 'mongodb://adm:secret@localhost:27017';
 
-    mongoose.connect(uri);
+    return mongoose.connect(uri);
 }
 
 /**

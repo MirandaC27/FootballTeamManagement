@@ -25,30 +25,31 @@ const notificationSchema = new mongoose.Schema({
 
 const Notification = mongoose.model("notification", notificationSchema);
 
-async function createNotification(matchId, eventId, message, title, timestamp) {
-  const notif = new Notification({ matchId, eventId, message, title, timestamp });
-  return await notif.save();
+
+/** Create a notification */
+async function createNotification({ matchId=null, eventId=null, title, message }) {
+  return await Notification.create({ matchId, eventId, title, message, timestamp: new Date() });
 }
 
+/** Get all notifications */
 async function getAllNotifications() {
-  return await Notification.find().sort({ timestamp: -1 });
+  return Notification.find().sort({ timestamp: -1 });
 }
 
-async function getNotificationsBetween(start, end) {
-  return await Notification
-    .find({ timestamp: { $gte: start, $lt: end } })
-    .sort({ timestamp: -1 });
-}
+/** Get notifications that occurred today */
+async function getTodaysNotifications() {
+  const start = new Date();
+  start.setHours(0,0,0,0);
 
+  const end = new Date();
+  end.setHours(23,59,59,999);
 
-async function findNotificationByTitleAndDate(title, start, end) {
-    return Notification.findOne({ title, timestamp: { $gte: start, $lt: end } });
+  return Notification.find({ timestamp: { $gte: start, $lte: end }}).sort({ timestamp: -1 });
 }
 
 module.exports = {
-  Notification, 
-  createNotification, 
+  Notification,
+  createNotification,
   getAllNotifications,
-  getNotificationsBetween,
-  findNotificationByTitleAndDate              
+  getTodaysNotifications
 };

@@ -124,10 +124,10 @@ app.post("/match/reset/:id", MatchCont.resetMatchTimer);
 
 
 const NotificationCont = require("./controller/NotificationController");
-app.get("/notifications", NotificationCont.getNotifications);
 
-const { startDailyRunner } = require("./NotificationDailyRunner");
-startDailyRunner();
+app.get("/notifications", NotificationCont.getAll);
+app.get("/notifications/today", NotificationCont.getToday);
+
 
 //calendar routes
 const EventCont = require('./controller/EventController');

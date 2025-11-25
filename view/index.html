@@ -201,21 +201,6 @@
 
     <div class="toast-box" id="toastBox"></div>
 
-    <!-- Toast layout -->
-    <div id="toast-template" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
-        data-delay="3500"
-        style="position: absolute; top: 0; right: 0; min-width: 250px;">
-        <div class="toast-header bg-primary text-white">
-            <strong class="mr-auto">Notification</strong>
-            <small>now</small>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="toast-body"></div>
-    </div>
-
-
 
     <!-- COMMENT MODAL (social feed) -->
     <div class="modal" id="commentModal" tabindex="-1" role="dialog">
@@ -890,90 +875,108 @@
     </script>
 
     <script>
-     document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
 
-            const notificationList = document.getElementById("notificationList");
-            const toastBox = document.getElementById("toastBox");
-            const socket = io();
+        const notificationList = document.getElementById("notificationList");
+        const toastBox = document.getElementById("toastBox");
 
-            function createNotificationElement(n) {
-                const div = document.createElement("div");
-                div.className = "single-notification";
+        /** Toast popup */
+        function showToast(message, duration = 3000) {
+            const toast = document.createElement("div");
+            toast.classList.add("toast-msg");
+            toast.innerText = message;
 
-                div.innerHTML = `
-                    <strong>${n.title}</strong><br>
-                    <span class="notification-message">${n.message}</span><br>
-                    <span class="notification-timestamp">
-                        ${new Date(n.timestamp).toLocaleString()}
-                    </span>
-                `;
+            toastBox.appendChild(toast);
 
-                return div;
-            }
+            setTimeout(() => toast.classList.add("show"), 20);
 
-            //load notification
-            async function loadNotifications() {
-                if (!notificationList) {
-                    console.error(" notificationList element missing in DOM");
-                    return;
-                }
+            setTimeout(() => {
+                toast.classList.remove("show");
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
 
-                try {
-                    const res = await fetch("/notifications");
-                    const notifications = await res.json();
+        /** Sidebar list entry */
+        function createNotificationElement(n) {
+            const div = document.createElement("div");
+            div.className = "single-notification";
 
+            div.innerHTML = `
+                <strong>${n.title}</strong><br>
+                <span class="notification-message">${n.message}</span><br>
+                <span class="notification-timestamp">
+                    ${new Date(n.timestamp).toLocaleString()}
+                </span>
+            `;
+            return div;
+        }
+
+        /** Fetch and show ONLY today’s notifications */
+        async function loadTodaysNotifications() {
+            try {
+                const res = await fetch("/notifications/today");
+                const notifications = await res.json();
+
+                // show toast for each
+                notifications.forEach(n => showToast(n.message));
+
+                // update sidebar list
+                if (notificationList) {
                     notificationList.innerHTML = "";
-                    for (let n of notifications) {
+                    notifications.forEach(n => {
                         notificationList.appendChild(createNotificationElement(n));
-                    }
-                } catch (err) {
-                    console.error("Error loading notifications:", err);
+                    });
                 }
+            } catch (err) {
+                console.error("Error loading today's notifications:", err);
             }
+        }
 
-            //toast notif
-            function showToast(message, duration = 3000) {
-                if (!toastBox) {
-                    console.error("toastBox missing in DOM");
-                    return;
-                }
-
-                const toast = document.createElement("div");
-                toast.classList.add("toast-msg");
-                toast.innerText = message;
-
-                toastBox.appendChild(toast);
-
-                // small delay → trigger CSS transition
-                setTimeout(() => toast.classList.add("show"), 20);
-
-                // auto remove
-                setTimeout(() => {
-                    toast.classList.remove("show");
-                    setTimeout(() => toast.remove(), 300);
-                }, duration);
-            }
-
-
-            //socket lookout for notifications
-            socket.on("matchNotification", (data) => {
-                console.log("Received socket notification:", data);
-
-                // Toast popup
-                showToast(data.message);
+        /** Only load notifications if user is logged in */
+        const userRes = await fetch('/loggedUser');
+        const user = await userRes.json();
+        
+        //If the user has logged in, only toast notifs once per login session
+        async function updateSidebarOnly() {
+            try {
+                const res = await fetch("/notifications/today");
+                const notifications = await res.json();
 
                 if (notificationList) {
-                    notificationList.prepend(createNotificationElement({
-                        title: data.title || "New Notification",
-                        message: data.message,
-                        timestamp: Date.now()
-                    }));
+                    notificationList.innerHTML = "";
+                    notifications.forEach(n => {
+                        notificationList.appendChild(createNotificationElement(n));
+                    });
                 }
-            });
+            } catch (err) {
+                console.error("Sidebar notification error:", err);
+            }
+        }
 
-            loadNotifications();
-        });
+        if (user) {
+
+            const hasShown = sessionStorage.getItem("notificationsShown");
+
+
+            updateSidebarOnly();
+
+
+            if (!hasShown) {
+                loadTodaysNotifications();
+                sessionStorage.setItem("notificationsShown", "true");
+            }
+        }
+
+    });
+
+    //logging out will reset toasts, and they'll re-appear only when user logs back in.
+    document.addEventListener("click", (e) => {
+        if (e.target.matches('a[href="/logout"]')) {
+            sessionStorage.removeItem("notificationsShown");
+        }
+    });
     </script>
+
 
 </body>
 

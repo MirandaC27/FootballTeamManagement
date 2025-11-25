@@ -1405,9 +1405,10 @@ main {
    right: 20px;
    z-index: 9999;
 }
+
 .toast-msg {
-    background: #333;
-    color: white;
+    background: #ffc444;
+    color: black;
     padding: 10px 14px;
     margin-top: 8px;
     border-radius: 6px;
@@ -1415,6 +1416,7 @@ main {
     transform: translateX(20px);
     transition: all 0.3s ease;
 }
+
 .toast-msg.show {
     opacity: 1;
     transform: translateX(0);
