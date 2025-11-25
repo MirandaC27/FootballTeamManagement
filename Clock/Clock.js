@@ -7,7 +7,10 @@ let currentMatchId = null;
 let displayEl;
 const socket = window.socket;
 
-
+/**
+ * convert miliseconds into seconds, minutes and hours
+ * @param {*} ms miliseconds
+ */
 function msToClock(ms) {
     if (ms < 0) ms = 0;
 
@@ -22,12 +25,18 @@ function msToClock(ms) {
     );
 }
 
+/**
+ * display miliseconds in a readable way
+ * @param {*} ms miliseconds
+ */
 function updateDisplayFromMS(ms) {
     if (!displayEl) return;
     displayEl.textContent = msToClock(ms);
 }
 
-
+/**
+ * tick the clock by calculating the start and the time before the start
+ */
 function timerTick() {
     if (status !== "started" || startTimestamp == null) return;
 
@@ -37,7 +46,9 @@ function timerTick() {
     updateDisplayFromMS(elapsed);
 }
 
-
+/**
+ * start and stop the clock so that it synchronizes with everyone
+ */
 export async function startStopClock() {
     if (!currentMatchId) return;
 
@@ -48,6 +59,7 @@ export async function startStopClock() {
         startTimestamp = Date.now();
         status = "started";
 
+        //repeatedly call the timer tick every 200ms
         interval = setInterval(timerTick, 200);
 
     } else {
@@ -64,6 +76,9 @@ export async function startStopClock() {
     }
 }
 
+/**
+ * reset the clock so that it synchronizes with everyone
+ */
 export async function resetClock() {
     if (!currentMatchId) return;
 
@@ -79,7 +94,10 @@ export async function resetClock() {
     updateDisplayFromMS(0);
 }
 
-
+/**
+ * initialize the clock for a specific match so that it synchronizes with everyone via socket
+ *  @param {*} matchId id of the match for the clock
+ */
 export function initClock(matchId) {
     currentMatchId = matchId;
     displayEl = document.getElementById("matchClock");

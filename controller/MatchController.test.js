@@ -300,7 +300,7 @@ test("Toggle reaction DAO error", async () => {
 });
 
 /*
- * clock tests
+ * start timer tests
  */
 test("Start match timer successfully", async () => {
   matchDao.readById.mockResolvedValue({
@@ -347,6 +347,42 @@ test("Start match timer DAO error", async () => {
 
   expect(res.status).toHaveBeenCalledWith(500);
 });
+
+
+test("startMatchTimer returns 'Clock already running' when clock is already started", async () => {
+    const req = {
+        params: { id: "M1" },
+        app: { get: () => ({ emit: jest.fn() }) }
+    };
+
+    const res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+    };
+
+    //match exists and is already started
+    matchDao.readById.mockResolvedValue({
+        clock: {
+            status: "started",
+            startTimestamp: Date.now(),
+            elapsedBeforeStart: 5000
+        }
+    });
+
+    await controller.startMatchTimer(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({
+        message: "Clock already running",
+        match: {
+            clock: {
+                status: "started",
+                startTimestamp: expect.any(Number),
+                elapsedBeforeStart: 5000
+            }
+        }
+    });
+});
+
 
 /*
  * end timer tests
@@ -397,6 +433,43 @@ test("End match timer DAO error", async () => {
 
   expect(res.status).toHaveBeenCalledWith(500);
 });
+
+test("endMatchTimer returns 'Clock already stopped' when clock is not running", async () => {
+    const req = {
+        params: { id: "M2" },
+        app: { get: () => ({ emit: jest.fn() }) }
+    };
+
+    const res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+    };
+
+    //match exists but is already stopped
+    matchDao.matchModel = {
+        findById: jest.fn().mockResolvedValue({
+            clock: {
+                status: "stopped",
+                startTimestamp: null,
+                elapsedBeforeStart: 3000
+            }
+        })
+    };
+
+    await controller.endMatchTimer(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({
+        message: "Clock already stopped",
+        match: {
+            clock: {
+                status: "stopped",
+                startTimestamp: null,
+                elapsedBeforeStart: 3000
+            }
+        }
+    });
+});
+
 
 /*
  * reset timer tests

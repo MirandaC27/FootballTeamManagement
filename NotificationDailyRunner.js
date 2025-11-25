@@ -2,7 +2,9 @@
 const EventDao = require("./model/EventDao");
 const NotificationDao = require("./model/NotificationDao");
 
-
+/**
+ * generate event notificaitons for all events for one day
+ */
 async function generateDailyEventNotifications() {
   try {
     const start = new Date();
@@ -44,7 +46,9 @@ async function generateDailyEventNotifications() {
   }
 }
 
-
+/**
+ * start daily runner at midnight that gets all events that day and generates notifications for all of them
+ */
 function startDailyRunner() {
   console.log("[DailyRunner] Started.");
 

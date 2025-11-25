@@ -179,3 +179,60 @@ test('toggle reaction, removing reaction', async () => {
   const updatedMatch = await dao.readById(created._id);
   expect(updatedMatch.reactions[reactionType].map(String)).not.toContain(userId);
 });
+
+
+/*
+ * match clock tests
+ */
+test('setClockState replaces entire clock object', async () => {
+  const created = await dao.create(validMatchData);
+
+  const newClock = {
+    status: "started",
+    startTimestamp: 123456,
+    elapsedBeforeStart: 999
+  };
+
+  const updated = await dao.setClockState(created._id, newClock);
+
+  expect(updated.clock.status).toBe("started");
+  expect(updated.clock.startTimestamp).toBe(123456);
+  expect(updated.clock.elapsedBeforeStart).toBe(999);
+});
+
+
+test('updateElapsed updates only clock.elapsedBeforeStart', async () => {
+  const created = await dao.create(validMatchData);
+
+  // First start the clock
+  await dao.setClockState(created._id, {
+    status: "started",
+    startTimestamp: 1000,
+    elapsedBeforeStart: 5000
+  });
+
+  const updated = await dao.updateElapsed(created._id, 7777);
+
+  expect(updated.clock.elapsedBeforeStart).toBe(7777);
+  expect(updated.clock.status).toBe("started");             
+  expect(updated.clock.startTimestamp).toBe(1000);          
+});
+
+
+
+test('resetClock resets clock fields to default values', async () => {
+  const created = await dao.create(validMatchData);
+
+  // Give it a non-default clock first
+  await dao.setClockState(created._id, {
+    status: "started",
+    startTimestamp: 888888,
+    elapsedBeforeStart: 2222
+  });
+
+  const reset = await dao.resetClock(created._id);
+
+  expect(reset.clock.status).toBe("stopped");
+  expect(reset.clock.startTimestamp).toBeNull();
+  expect(reset.clock.elapsedBeforeStart).toBe(0);
+});

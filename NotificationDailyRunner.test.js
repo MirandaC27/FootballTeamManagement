@@ -1,115 +1,201 @@
 // NotificationDailyRunner.test.js
-const EventDao = require('./model/EventDao');
-const NotificationDao = require('./model/NotificationDao');
-const { generateDailyEventNotifications, startDailyRunner } = require('./NotificationDailyRunner');
+const EventDao = require("./model/EventDao");
+const NotificationDao = require("./model/NotificationDao");
+const { generateDailyEventNotifications, startDailyRunner } = require("./NotificationDailyRunner");
 
-// Correct DAO mocks
-jest.mock('./model/EventDao', () => ({
-  find: jest.fn()
+// Mock Event DAO
+jest.mock("./model/EventDao", () => ({
+  eventModel: {
+    find: jest.fn()
+  }
 }));
 
-jest.mock('./model/NotificationDao', () => ({
-  findNotificationByTitleAndDate: jest.fn(),
+// Mock Notification DAO
+jest.mock("./model/NotificationDao", () => ({
+  Notification: { findOne: jest.fn() },
   createNotification: jest.fn()
 }));
 
-// mock generateDailyEventNotifications separately for startDailyRunner tests
-jest.mock('./NotificationDailyRunner', () => {
-  const original = jest.requireActual('./NotificationDailyRunner');
+// Separate mock for generateDailyEventNotifications used by startDailyRunner
+jest.mock("./NotificationDailyRunner", () => {
+  const original = jest.requireActual("./NotificationDailyRunner");
   return {
     ...original,
     generateDailyEventNotifications: jest.fn()
   };
 });
 
-describe("NotificationDailyRunner.generateDailyEventNotifications", () => {
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.useFakeTimers();
+});
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+afterEach(() => {
+  jest.useRealTimers();
+});
 
-  test("creates notifications for today's events", async () => {
-    const today = new Date();
+/*
+* generateDailyEventNotificaiton tests
+*/
+test("generateDailyEventNotifications  no events today (early return)", async () => {
+  EventDao.eventModel.find.mockResolvedValue([]);
 
-    const mockEvents = [
-      { _id: '1', title: 'Practice', tag: 'practice', location: 'Field A', eventDate: today },
-      { _id: '2', title: 'Match vs Team A', tag: 'match', location: 'Stadium A', eventDate: today },
-    ];
+  const { generateDailyEventNotifications: realFn } = jest.requireActual("./NotificationDailyRunner");
+  await realFn();
 
-    EventDao.find.mockResolvedValue(mockEvents);
-    NotificationDao.findNotificationByTitleAndDate.mockResolvedValue(null);
-    NotificationDao.createNotification.mockResolvedValue({});
+  expect(EventDao.eventModel.find).toHaveBeenCalledTimes(1);
+  expect(NotificationDao.Notification.findOne).not.toHaveBeenCalled();
+  expect(NotificationDao.createNotification).not.toHaveBeenCalled();
+});
 
-    await generateDailyEventNotifications();
 
-    expect(EventDao.find).toHaveBeenCalledTimes(1);
-    expect(NotificationDao.findNotificationByTitleAndDate).toHaveBeenCalledTimes(2);
-    expect(NotificationDao.createNotification).toHaveBeenCalledTimes(2);
+test("generateDailyEventNotifications  creates notifications for all events", async () => {
+  const today = new Date();
+  const mockEvents = [
+    { _id: "A", title: "Practice", tag: "practice", location: "Gym", eventDate: today },
+    { _id: "B", title: "Match", tag: "match", location: "Field", eventDate: today }
+  ];
 
-    // verify formatted message + title
-    expect(NotificationDao.createNotification.mock.calls[0][2]).toBe("You have a practice today at Field A.");
-    expect(NotificationDao.createNotification.mock.calls[0][3]).toBe("Event Today: Practice");
-  });
+  EventDao.eventModel.find.mockResolvedValue(mockEvents);
+  NotificationDao.Notification.findOne.mockResolvedValue(null);
+  NotificationDao.createNotification.mockResolvedValue({});
 
-  test("does not create notifications when no events today", async () => {
-    EventDao.find.mockResolvedValue([]);
+  const { generateDailyEventNotifications: realFn } = jest.requireActual("./NotificationDailyRunner");
+  await realFn();
 
-    await generateDailyEventNotifications();
+  expect(NotificationDao.Notification.findOne).toHaveBeenCalledTimes(2);
+  expect(NotificationDao.createNotification).toHaveBeenCalledTimes(2);
 
-    expect(EventDao.find).toHaveBeenCalledTimes(1);
-    expect(NotificationDao.findNotificationByTitleAndDate).not.toHaveBeenCalled();
-    expect(NotificationDao.createNotification).not.toHaveBeenCalled();
-  });
-
-  test("does not create notification if one already exists for the day", async () => {
-    const today = new Date();
-    const mockEvents = [
-      { _id: '1', title: 'Match vs Team B', tag: 'match', location: 'Stadium C', eventDate: today }
-    ];
-
-    EventDao.find.mockResolvedValue(mockEvents);
-    NotificationDao.findNotificationByTitleAndDate.mockResolvedValue({ _id: 'existing' });
-
-    await generateDailyEventNotifications();
-
-    expect(NotificationDao.findNotificationByTitleAndDate).toHaveBeenCalledTimes(1);
-    expect(NotificationDao.createNotification).not.toHaveBeenCalled();
-  });
-
-  test("handles errors gracefully without throwing", async () => {
-    EventDao.find.mockRejectedValue(new Error("DB failure"));
-
-    await expect(generateDailyEventNotifications()).resolves.not.toThrow();
+  expect(NotificationDao.createNotification.mock.calls[0][0]).toEqual({
+    eventId: "A",
+    title: "Event Today: Practice",
+    message: "You have a practice today at Gym."
   });
 });
 
-describe("NotificationDailyRunner.startDailyRunner", () => {
 
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+test("generateDailyEventNotifications does NOT create when duplicate exists", async () => {
+  const today = new Date();
+  const event = { _id: "X", title: "Meeting", tag: "event", location: "HQ", eventDate: today };
+
+  EventDao.eventModel.find.mockResolvedValue([event]);
+  NotificationDao.Notification.findOne.mockResolvedValue({ _id: "existing" });
+
+  const { generateDailyEventNotifications: realFn } = jest.requireActual("./NotificationDailyRunner");
+  await realFn();
+
+  expect(NotificationDao.Notification.findOne).toHaveBeenCalledTimes(1);
+  expect(NotificationDao.createNotification).not.toHaveBeenCalled();
+});
+
+
+test("generateDailyEventNotifications skips some events and creates others", async () => {
+  const today = new Date();
+  const mockEvents = [
+    { _id: "1", title: "Morning Run", tag: "practice", location: "Track", eventDate: today },
+    { _id: "2", title: "Scrimmage", tag: "match", location: "Stadium", eventDate: today }
+  ];
+
+  EventDao.eventModel.find.mockResolvedValue(mockEvents);
+
+  // First event already has a notification
+  NotificationDao.Notification.findOne
+    .mockResolvedValueOnce({ _id: "existing" })
+    .mockResolvedValueOnce(null);
+
+  NotificationDao.createNotification.mockResolvedValue({});
+
+  const { generateDailyEventNotifications: realFn } = jest.requireActual("./NotificationDailyRunner");
+  await realFn();
+
+  expect(NotificationDao.Notification.findOne).toHaveBeenCalledTimes(2);
+  expect(NotificationDao.createNotification).toHaveBeenCalledTimes(1);
+
+  expect(NotificationDao.createNotification.mock.calls[0][0]).toEqual({
+    eventId: "2",
+    title: "Event Today: Scrimmage",
+    message: "You have a match today at Stadium."
   });
+});
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
 
-  test("startDailyRunner triggers immediate generation and schedules future executions", () => {
-    startDailyRunner();
+test("generateDailyEventNotifications handles find failure gracefully", async () => {
+  EventDao.eventModel.find.mockRejectedValue(new Error("DB error"));
 
-    expect(generateDailyEventNotifications).toHaveBeenCalledTimes(1);
+  const { generateDailyEventNotifications: realFn } = jest.requireActual("./NotificationDailyRunner");
 
-    // simulate reaching the timeout (midnight)
-    jest.runOnlyPendingTimers();
+  await expect(realFn()).resolves.not.toThrow();
+});
 
-    // should run again
-    expect(generateDailyEventNotifications).toHaveBeenCalledTimes(2);
 
-    // simulate 24 hours passing (interval)
-    jest.advanceTimersByTime(24 * 60 * 60 * 1000);
+test("generateDailyEventNotifications continues after per-event error", async () => {
+  const today = new Date();
+  const events = [
+    { _id: "1", title: "One", tag: "practice", location: "Field", eventDate: today },
+    { _id: "2", title: "Two", tag: "match", location: "Arena", eventDate: today }
+  ];
 
-    // should run a third time
-    expect(generateDailyEventNotifications).toHaveBeenCalledTimes(3);
-  });
+  EventDao.eventModel.find.mockResolvedValue(events);
 
+  // First event errors, second succeeds
+  NotificationDao.Notification.findOne
+    .mockRejectedValueOnce(new Error("Event error"))
+    .mockResolvedValueOnce(null);
+
+  NotificationDao.createNotification.mockResolvedValue({});
+
+  const { generateDailyEventNotifications: realFn } = jest.requireActual("./NotificationDailyRunner");
+  await realFn();
+
+  expect(NotificationDao.createNotification).toHaveBeenCalledTimes(1);
+});
+
+/*
+* startDailyRunner tests
+*/
+//immediate call test
+test("startDailyRunner calls generateDailyEventNotifications once immediately", () => {
+  startDailyRunner();
+  expect(generateDailyEventNotifications).toHaveBeenCalledTimes(1);
+});
+
+//scheduled server timeout
+test("startDailyRunner schedules timeout for midnight", () => {
+  startDailyRunner();
+  expect(jest.getTimerCount()).toBeGreaterThan(0);
+});
+
+//runs again after timeout
+test("startDailyRunner runs again after midnight timeout", () => {
+  startDailyRunner();
+
+  jest.runOnlyPendingTimers(); // Simulate midnight
+
+  expect(generateDailyEventNotifications).toHaveBeenCalledTimes(2);
+});
+
+//starts the runner daily
+test("startDailyRunner daily interval triggers execution", () => {
+  startDailyRunner();
+
+  jest.runOnlyPendingTimers(); // Midnight timeout
+
+  jest.advanceTimersByTime(24 * 60 * 60 * 1000); // 24 hours
+
+  expect(generateDailyEventNotifications).toHaveBeenCalledTimes(3);
+});
+
+//no duplicate intervals
+test("startDailyRunner ensures only one repeating interval exists", () => {
+  startDailyRunner();
+  jest.runOnlyPendingTimers(); // Midnight
+
+  const initialCount = jest.getTimerCount();
+
+  jest.advanceTimersByTime(24 * 60 * 60 * 1000);
+  jest.advanceTimersByTime(24 * 60 * 60 * 1000);
+
+  const finalCount = jest.getTimerCount();
+
+  expect(finalCount).toBe(initialCount);
 });

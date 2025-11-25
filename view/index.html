@@ -880,7 +880,12 @@
         const notificationList = document.getElementById("notificationList");
         const toastBox = document.getElementById("toastBox");
 
-        /** Toast popup */
+        
+        /**
+        * generate toast poup
+        * @param message notif message
+        * @param message duration of toast
+        */
         function showToast(message, duration = 3000) {
             const toast = document.createElement("div");
             toast.classList.add("toast-msg");
@@ -896,7 +901,9 @@
             }, duration);
         }
 
-        /** Sidebar list entry */
+        /**
+        * generate notif element on sidebar
+        */
         function createNotificationElement(n) {
             const div = document.createElement("div");
             div.className = "single-notification";
@@ -911,7 +918,9 @@
             return div;
         }
 
-        /** Fetch and show ONLY today’s notifications */
+        /**
+        * load notifs for today and put them in sidebar
+        */
         async function loadTodaysNotifications() {
             try {
                 const res = await fetch("/notifications/today");
@@ -932,7 +941,7 @@
             }
         }
 
-        /** Only load notifications if user is logged in */
+        //only load notifs for logged users
         const userRes = await fetch('/loggedUser');
         const user = await userRes.json();
         
@@ -954,13 +963,8 @@
         }
 
         if (user) {
-
             const hasShown = sessionStorage.getItem("notificationsShown");
-
-
             updateSidebarOnly();
-
-
             if (!hasShown) {
                 loadTodaysNotifications();
                 sessionStorage.setItem("notificationsShown", "true");

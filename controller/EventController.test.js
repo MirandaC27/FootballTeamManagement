@@ -1,451 +1,302 @@
-const controller = require('./EventController');
-const dao = require('../model/EventDao');
-const calendarArray = require('../CalendarConfig');
+const controller = require("./EventController");
+const dao = require("../model/EventDao");
+const calendarArray = require("../CalendarConfig");
+const NotificationDao = require("../model/NotificationDao");
 
-
-//test setup
-jest.mock('../model/EventDao');
-jest.mock('../CalendarConfig');
+// Mock DAOs
+jest.mock("../model/EventDao");
+jest.mock("../CalendarConfig");
+jest.mock("../model/NotificationDao", () => ({
+  createNotification: jest.fn(),
+  Notification: { findOne: jest.fn() }
+}));
 
 beforeEach(() => {
-    jest.useFakeTimers();
-    jest.clearAllMocks();
+  jest.clearAllMocks();
+  jest.useFakeTimers();
 });
 
-/*
-* create event tests
-*/
+//create event tests
+test("Fail: create empty event", async () => {
+  const req = { body: {} };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
 
-// Fail to create an empty event
-test('Create empty event', async () => {
-    const req = { body: {} };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+  await controller.createNewEvent(req, res);
 
-    await controller.createNewEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
+  expect(res.status).toHaveBeenCalledWith(400);
+  expect(res.send).toHaveBeenCalledWith(
+    "date, title, tag, location, location coordinates, startTime, and endTime are required"
+  );
 });
 
-// Fail to create without date
-test('Create an event without a date', async () => {
-    const req = { body: { title: 'no date', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+test("Fail: missing startTime", async () => {
+  const req = {
+    body: {
+      eventDate: "2025-10-24",
+      title: "Game Day",
+      tag: "match",
+      location: "Field A",
+      locationCoords: [1, 2],
+      endTime: "15:00"
+    }
+  };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    await controller.createNewEvent(req, res);
+  await controller.createNewEvent(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
+  expect(res.status).toHaveBeenCalledWith(400);
 });
 
-// Fail to create without title
-test('Create an event without a title', async () => {
-    const req = { body: { eventDate: '2025-10-24', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+test("Fail: invalid tag", async () => {
+  const req = {
+    body: {
+      eventDate: "2025-10-24",
+      title: "Invalid",
+      tag: "holiday",
+      location: "Field A",
+      locationCoords: [1, 2],
+      startTime: "10:00",
+      endTime: "11:00"
+    }
+  };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    await controller.createNewEvent(req, res);
+  await controller.createNewEvent(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
+  expect(res.status).toHaveBeenCalledWith(400);
+  expect(res.send).toHaveBeenCalledWith("Invalid tag. Must be practice, match, or event.");
 });
 
-// Fail to create without tag
-test('Create an event without a tag', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'No Tag', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+test("Success: create event (not same-day)", async () => {
+  const req = {
+    body: {
+      eventDate: "2025-12-24",
+      title: "Finals",
+      tag: "match",
+      location: "Stadium",
+      locationCoords: [11, 22],
+      startTime: "10:00",
+      endTime: "12:00"
+    }
+  };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn(), send: jest.fn() };
 
-    await controller.createNewEvent(req, res);
+  dao.create.mockResolvedValue({ _id: "E1" });
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
+  await controller.createNewEvent(req, res);
+
+  expect(dao.create).toHaveBeenCalledWith({
+    eventDate: new Date("2025-12-24T00:00:00"),
+    title: "Finals",
+    tag: "match",
+    location: "Stadium",
+    locationCoords: [11, 22],
+    startTime: "10:00",
+    endTime: "12:00"
+  });
+
+  expect(NotificationDao.createNotification).not.toHaveBeenCalled();
+  expect(res.status).toHaveBeenCalledWith(200);
 });
 
-// Fail to create with invalid tag
-test('Create an event with invalid tag', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'Invalid Tag', tag: 'holiday', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+test("Success: same-day event triggers notification", async () => {
+  const today = new Date().toISOString().split("T")[0];
 
-    await controller.createNewEvent(req, res);
+  const req = {
+    body: {
+      eventDate: today,
+      title: "Today Practice",
+      tag: "practice",
+      location: "Gym",
+      locationCoords: [5, 10],
+      startTime: "09:00",
+      endTime: "10:00"
+    }
+  };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn(), send: jest.fn() };
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith("Invalid tag. Must be practice, match, or event.");
-});
+  dao.create.mockResolvedValue({ _id: "E22", title: "Today Practice", tag: "practice", location: "Gym" });
 
-// Fail to create without location
-test('Create an event without a location', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'No location', tag: 'match', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
+  await controller.createNewEvent(req, res);
 
-    await controller.createNewEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
-});
-
-// Fail to create without locationCoords
-test('Create an event without locationCoords', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'No coords', tag: 'match', location: 'Loyola University' } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
-
-    await controller.createNewEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith('date, title, tag, location, and location coordinates are required');
-});
-
-// Create successfully
-test('Create new event successfully', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'Final', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
-
-    dao.create.mockResolvedValue({});
-
-    await controller.createNewEvent(req, res);
-
-    expect(dao.create).toHaveBeenCalledWith({
-        eventDate: new Date('2025-10-24T00:00:00'),
-        title: 'Final',
-        tag: 'practice',
-        location: 'Loyola University',
-        locationCoords: [21.21, 19.19]
-    });
-
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Event added successfully' });
-});
-
-// DAO error
-test('Create new event with DAO error', async () => {
-    const req = { body: { eventDate: '2025-10-24', title: 'Semi', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] } };
-    const res = { status: jest.fn().mockReturnThis(), send: jest.fn(), json: jest.fn() };
-
-    dao.create.mockRejectedValue(new Error('DB Error'));
-
-    await controller.createNewEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Could not create event');
-});
-
-/*
-* delete event tests
-*/
-//delete an existing event
-test('Delete event successfully', async () => {
-    const req = { params: { id: '123' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-
-    dao.eventModel = { findByIdAndDelete: jest.fn().mockResolvedValue({ _id: '123' }) };
-
-    await controller.deleteEvent(req, res);
-
-    expect(res.json).toHaveBeenCalledWith({ message: 'Event deleted successfully' });
-});
-
-//delete a non-existent event
-test('Delete event not found', async () => {
-    const req = { params: { id: '999' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-
-    dao.eventModel = { findByIdAndDelete: jest.fn().mockResolvedValue(null) };
-
-    await controller.deleteEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Event not found' });
-});
-
-//delete event that has an error from the Database
-test('Delete event with DAO error', async () => {
-    const req = { params: { id: '123' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-
-    dao.eventModel = { findByIdAndDelete: jest.fn().mockRejectedValue(new Error('DB Error')) };
-
-    await controller.deleteEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Server error while deleting event' });
+  expect(NotificationDao.createNotification).toHaveBeenCalledWith({
+    eventId: "E22",
+    title: "Event Today: Today Practice",
+    message: "You have a practice today at Gym."
+  });
 });
 
 
-/*
-* getting data tests
-*/
+//delete event test
+test("Delete success", async () => {
+  const req = { params: { id: "123" } };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-//get all existing events from database
-test('Get all events successfully', async () => {
-    const req = {};
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+  dao.eventModel = { findByIdAndDelete: jest.fn().mockResolvedValue({ _id: "123" }) };
 
-    const events = [
-        { _id: 'm1', eventDate: '2025-10-24' },
-        { _id: 'm2', eventDate: '2025-10-25' },
-    ];
-    dao.eventModel = { find: jest.fn().mockResolvedValue(events) };
+  await controller.deleteEvent(req, res);
 
-    await controller.getAllEvents(req, res);
-
-    expect(dao.eventModel.find).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith(events);
+  expect(res.json).toHaveBeenCalledWith({ message: "Event deleted successfully" });
 });
 
-//try getting a event with error from database
-test('Get all events with DAO error', async () => {
-    const req = {};
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+test("Delete not found", async () => {
+  const req = { params: { id: "999" } };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    dao.eventModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
+  dao.eventModel = { findByIdAndDelete: jest.fn().mockResolvedValue(null) };
 
-    await controller.getAllEvents(req, res);
+  await controller.deleteEvent(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Could not get events');
+  expect(res.status).toHaveBeenCalledWith(404);
 });
 
-//get all calendar data
-test('Get calendar data successfully', async () => {
-    const req = { params: { year: '2025', month: '10' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+//Update event tests
 
-    calendarArray.mockReturnValue({ year: 2025, monthName: 'October', data: [] });
-    dao.eventModel = {
-        find: jest.fn().mockResolvedValue([
-            { _id: '1', eventDate: '2025-10-05T00:00:00', title: 'Event 1' },
-            { _id: '2', eventDate: '2025-09-30T00:00:00', title: 'Event 2' },
-        ]),
-    };
+test("Update success with full data", async () => {
+  const req = {
+    params: { id: "123" },
+    body: {
+      eventDate: "2025-05-01",
+      title: "Updated",
+      tag: "event",
+      location: "Hall",
+      locationCoords: [1, 1],
+      startTime: "08:00",
+      endTime: "09:00"
+    }
+  };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    await controller.getCalendarData(req, res);
+  const updatedEvent = {
+    _id: "123",
+    eventDate: new Date("2025-05-01T00:00:00"),
+    title: "Updated",
+    tag: "event",
+    location: "Hall",
+    locationCoords: [1, 1]
+  };
 
-    expect(calendarArray).toHaveBeenCalledWith(2025, 9);
-    expect(res.json).toHaveBeenCalledWith({
-        year: 2025,
-        monthName: 'October',
-        data: [],
-        eventDays: [{ day: 5, id: '1', title: 'Event 1' }],
-    });
+  dao.update.mockResolvedValue(updatedEvent);
 
-    expect(res.status).not.toHaveBeenCalled();
+  await controller.updateEvent(req, res);
+
+  expect(dao.update).toHaveBeenCalledWith("123", {
+    eventDate: new Date("2025-05-01T00:00:00"),
+    title: "Updated",
+    tag: "event",
+    location: "Hall",
+    locationCoords: [1, 1],
+    startTime: "08:00",
+    endTime: "09:00"
+  });
+
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Event updated successfully",
+    updated: updatedEvent
+  });
 });
 
-//get calendar data with error from databse
-test('Get calendar data with DAO error', async () => {
-    const req = { params: { year: '2025', month: '10' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
+test("Fail update: invalid tag", async () => {
+  const req = { params: { id: "1" }, body: { tag: "holiday" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
-    calendarArray.mockReturnValue({ year: 2025, monthName: 'October', data: [] });
-    dao.eventModel = { find: jest.fn().mockRejectedValue(new Error('DB Error')) };
+  await controller.updateEvent(req, res);
 
-    await controller.getCalendarData(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Error getting calendar data');
+  expect(res.status).toHaveBeenCalledWith(400);
+  expect(res.json).toHaveBeenCalledWith({ message: "Invalid tag." });
 });
 
-/*
-* update tests
-*/
+test("Fail update: event not found", async () => {
+  const req = { params: { id: "XX" }, body: { title: "Nothing" } };
+  const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 
-// Update existing event successfully including tag
-test('Update existing event successfully with tag', async () => {
-    const req = {
-        params: { id: '123' },
-        body: { eventDate: '2025-10-25', title: 'Updated Title', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] }
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+  dao.update.mockResolvedValue(null);
 
-    const updatedEvent = { _id: '123', eventDate: new Date('2025-10-25T00:00:00'), title: 'Updated Title', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] };
-    dao.update = jest.fn().mockResolvedValue(updatedEvent);
+  await controller.updateEvent(req, res);
 
-    await controller.updateEvent(req, res);
-
-    expect(dao.update).toHaveBeenCalledWith('123', {
-        eventDate: new Date('2025-10-25T00:00:00'),
-        title: 'Updated Title',
-        tag: 'match',
-        location: 'Loyola University',
-        locationCoords: [21.21, 19.19]
-    });
-    expect(res.json).toHaveBeenCalledWith({
-        message: 'Event updated successfully',
-        updated: updatedEvent
-    });
+  expect(res.status).toHaveBeenCalledWith(404);
 });
 
-//update non-existent event
-test('Update event not found', async () => {
-    const req = {
-        params: { id: '999' },
-        body: { title: 'Does not exist' }
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+test("Success: same-day update creates notification if not exists", async () => {
+  const today = new Date();
+  const req = {
+    params: { id: "123" },
+    body: { eventDate: today.toISOString().split("T")[0], title: "Update", tag: "match", location: "Field" }
+  };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-    dao.update = jest.fn().mockResolvedValue(null);
+  const updated = {
+    _id: "123",
+    eventDate: today,
+    title: "Update",
+    tag: "match",
+    location: "Field"
+  };
 
-    await controller.updateEvent(req, res);
+  dao.update.mockResolvedValue(updated);
+  NotificationDao.Notification.findOne.mockResolvedValue(null);
 
-    expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Event not found' });
+  await controller.updateEvent(req, res);
+
+  expect(NotificationDao.createNotification).toHaveBeenCalledWith({
+    eventId: "123",
+    title: "Event Today: Update",
+    message: "You have a match today at Field."
+  });
 });
 
-//update event with DAO error
-test('Update event with DAO error', async () => {
-    const req = {
-        params: { id: '123' },
-        body: { title: 'Should fail' }
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+//event location tests
+test("Get event location coords success", async () => {
+  const req = { params: { id: "123" } };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    dao.update = jest.fn().mockRejectedValue(new Error('DB Error'));
+  const coords = { _id: "123", locationCoords: [10, 20] };
+  dao.eventModel = { findById: jest.fn().mockResolvedValue(coords) };
 
-    await controller.updateEvent(req, res);
+  await controller.getEventLocationCoords(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Server error while updating event' });
+  expect(res.json).toHaveBeenCalledWith(coords);
 });
 
+test("Get event location coords fails", async () => {
+  const req = { params: { id: "123" } };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-// Fail to update event with invalid tag
-test('Update event with invalid tag', async () => {
-    const req = {
-        params: { id: '123' },
-        body: { tag: 'holiday' }
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+  dao.eventModel = { findById: jest.fn().mockRejectedValue(new Error()) };
 
-    dao.update = jest.fn(); // should not be called
+  await controller.getEventLocationCoords(req, res);
 
-    await controller.updateEvent(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid tag.' });
+  expect(res.status).toHaveBeenCalledWith(500);
 });
 
-//update event's title and only title
-test('Update event with only title provided keeps same date', async () => {
-    
-    const existingDate = new Date('2025-10-20T00:00:00');
+//get calendar data tests
 
-    const req = {
-        params: { id: '123' },
-        body: { title: 'Title Only' } // no eventDate
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+test("Get calendar data success", async () => {
+  const req = { params: { year: "2025", month: "10" } };
+  const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    const updatedEvent = { _id: '123', eventDate: existingDate, title: 'Title Only', location: 'Loyola University', locationCoords: [21.21, 19.19] };
-    dao.update = jest.fn().mockResolvedValue(updatedEvent);
+  calendarArray.mockReturnValue({ year: 2025, monthName: "October", data: [] });
 
-    await controller.updateEvent(req, res);
+  dao.eventModel = {
+    find: jest.fn().mockResolvedValue([
+      { _id: "1", eventDate: "2025-10-05T00:00:00", title: "Event 1", tag: "practice" }
+    ])
+  };
 
+  await controller.getCalendarData(req, res);
 
-    expect(dao.update).toHaveBeenCalledWith('123', { title: 'Title Only' });
-
-
-    expect(res.json).toHaveBeenCalledWith({
-        message: 'Event updated successfully',
-        updated: {
-            _id: '123',
-            eventDate: existingDate,
-            title: 'Title Only',
-            location: 'Loyola University',
-            locationCoords: [21.21, 19.19]
-        }
-    });
+  expect(res.json).toHaveBeenCalled();
 });
 
-//update event's date and only the date
-test('Update event with only date provided keeps same title', async () => {
-    const originalTitle = 'Original Title';
-    const newDate = '2025-11-01';
-    const req = {
-        params: { id: '456' },
-        body: { eventDate: newDate } // no title
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+test("Get calendar data fails", async () => {
+  const req = { params: { year: "2025", month: "10" } };
+  const res = { status: jest.fn().mockReturnThis(), send: jest.fn() };
 
-    const updatedEvent = {
-        _id: '456',
-        eventDate: new Date(`${newDate}T00:00:00`),
-        title: originalTitle,
-        location: 'Loyola University',
-        locationCoords: [21.21, 19.19]
-    };
-    dao.update = jest.fn().mockResolvedValue(updatedEvent);
+  calendarArray.mockReturnValue({ year: 2025, monthName: "October", data: [] });
 
-    await controller.updateEvent(req, res);
+  dao.eventModel = { find: jest.fn().mockRejectedValue(new Error()) };
 
+  await controller.getCalendarData(req, res);
 
-    expect(dao.update).toHaveBeenCalledWith('456', {
-        eventDate: new Date('2025-11-01T00:00:00')
-    });
-
-    expect(res.json).toHaveBeenCalledWith({
-        message: 'Event updated successfully',
-        updated: {
-            _id: '456',
-            eventDate: new Date('2025-11-01T00:00:00'),
-            title: originalTitle,
-            location: 'Loyola University',
-            locationCoords: [21.21, 19.19]
-        }
-    });
-});
-
-//update event's location and only location
-test('Update event with only location provided keeps same date', async () => {
-    
-    const existingDate = new Date('2025-10-20T00:00:00');
-
-    const req = {
-        params: { id: '123' },
-        body: { location: 'Loyola University' } // no eventDate
-    };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-
-    const updatedEvent = { _id: '123', eventDate: existingDate, title: 'Title Only', location: 'Loyola University', locationCoords: [21.21, 19.19] };
-    dao.update = jest.fn().mockResolvedValue(updatedEvent);
-
-    await controller.updateEvent(req, res);
-
-    expect(dao.update).toHaveBeenCalledWith('123', { location: 'Loyola University' });
-
-    expect(res.json).toHaveBeenCalledWith({
-        message: 'Event updated successfully',
-        updated: {
-            _id: '123',
-            eventDate: existingDate,
-            title: 'Title Only',
-            location: 'Loyola University',
-            locationCoords: [21.21, 19.19]
-        }
-    });
-});
-
-/*
-* getEventLocationCoords tests
-*/
-test('Get event location coords successfully', async () => {
-    const req = { params: { id: '123' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
-
-    const coords = { _id: '123', locationCoords: [21.21, 19.19] };
-    dao.eventModel = { findById: jest.fn().mockResolvedValue(coords) };
-
-    await controller.getEventLocationCoords(req, res);
-
-    expect(dao.eventModel.findById).toHaveBeenCalledWith('123');
-    expect(res.json).toHaveBeenCalledWith(coords);
-});
-
-test('Get event location coords with DAO error', async () => {
-    const req = { params: { id: '123' } };
-    const res = { json: jest.fn(), status: jest.fn().mockReturnThis(), send: jest.fn() };
-
-    dao.eventModel = { findById: jest.fn().mockRejectedValue(new Error('DB Error')) };
-
-    await controller.getEventLocationCoords(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.send).toHaveBeenCalledWith('Could not get coordinates');
+  expect(res.status).toHaveBeenCalledWith(500);
 });

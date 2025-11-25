@@ -26,17 +26,30 @@ const notificationSchema = new mongoose.Schema({
 const Notification = mongoose.model("notification", notificationSchema);
 
 
-/** Create a notification */
+/**
+ * create a notification oject
+ * @param {*} matchId id of the match, defaults to null
+ * @param {*} eventId id of the event, defaults to null
+ * @param {*} title title of notification
+ * @param {*} message message of notification
+ * @returns notification object
+ */
 async function createNotification({ matchId=null, eventId=null, title, message }) {
   return await Notification.create({ matchId, eventId, title, message, timestamp: new Date() });
 }
 
-/** Get all notifications */
+/**
+ * get all notifications in database
+ * @returns all notifications sorted by time
+ */
 async function getAllNotifications() {
   return Notification.find().sort({ timestamp: -1 });
 }
 
-/** Get notifications that occurred today */
+/**
+ * get all notifications for the current day
+ * @returns all notifications today sorted by time
+ */
 async function getTodaysNotifications() {
   const start = new Date();
   start.setHours(0,0,0,0);
