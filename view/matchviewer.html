@@ -423,21 +423,23 @@
                 const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
 
                 
-                /*const icoMap = {
+                const icoMap = {
                     'goal': '⚽',
                     'yellow-card': '🟨',
                     'red-card': '🟥',
                     'substitution': '🔄'
-                }*/
+                }
 
-                //const eventIco = icoMap[event.type] || '';
+                const eventIco = icoMap[event.type] || '';
                 const eventEntry = document.createElement('div');
                 eventEntry.className = 'timeline-entry';
 
-                eventEntry.innerHTML = `
-                <span>
-                    <strong>${event.minute} | ${event.type}:</strong>${event.description} <em>(${teamName})</em>
-                </span>`;
+                eventEntry.innerHTML =
+                 `<span>
+                     <strong>${event.minute}' | ${eventIco} ${eventType.replace('-', ' ')}:</strong>
+                     ${description} 
+                     <em>(${teamName})</em>
+                 </span>`;
 
                timelineContainer.appendChild(eventEntry); 
             })
