@@ -458,7 +458,7 @@
         /**
          * log the event entry locally and update timeline
          */
-        function logEvent(){
+        async function logEvent(){
             const selectType = document.getElementById('event-type');
             const typeVal = selectType.value;
             const selectTeam = document.getElementById('event-team');
@@ -477,6 +477,17 @@
                 timestamp: new Date().toISOString()
             };
 
+            try{
+                const res = await fetch(`api/matches/${matchId}/events`,{
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(newEvent)
+                });
+
+                await loadMatch(matchId);
+            }catch (err) {
+                console.error("Error logging event:", err.message);
+            }
             matchEvents.push(newEvent);
 
             loadTimeline();
