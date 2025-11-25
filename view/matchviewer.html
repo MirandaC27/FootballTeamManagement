@@ -236,8 +236,8 @@
             teamAway: 0
         }*/
         //let cityInput = document.getElementById('matchLocation'), 
-        let api_key = 'c49d74aefaae765d7ac35e149d114bd1',
-        currentWeatherCard;
+        let api_key = 'c49d74aefaae765d7ac35e149d114bd1';
+        //currentWeatherCard;
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -249,6 +249,8 @@
             else {
                 console.error("Error: No Match ID found in the URL.");
             }
+
+            //currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0];
             
             // logic for the back button
             const backButton = document.getElementById('backButton');
@@ -295,7 +297,7 @@
             }
             const match = await res.json();
 
-            getCityCoordinates(match.matchLocation);
+            //getCityCoordinates(match.matchLocation);
             //currMatch = match;
 
             //matchEvents = match.events || [];
@@ -349,7 +351,7 @@
         /**
          * Get the weather details of a given City
          * @params city name, latitude, longitude, country, state
-         */
+         
         function getWeatherDetails(name, lat, lon, country, state){
             let FORECAST_API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${api_key}`,
             WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}`;
@@ -372,10 +374,11 @@
             alert('Failed to fetch current weather');
         });
     }
+        */
 
         /**
          * Get the coordinates of the city the match is located in
-         */
+         
         function getCityCoordinates(){
             let cityName = cityInput.value.trim();
             cityInput.value = '';
@@ -388,6 +391,7 @@
                 alert(`Failed to fetch coordinates of ${cityName}`);
             });
         }
+            */
 
         /**
          * Show LIVE badge if match is in progress or END badge if match is final
