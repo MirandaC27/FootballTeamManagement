@@ -510,22 +510,22 @@ footer {
 
 /*.match-container{}*/
 main {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   max-width: 960px;
   margin: 20px auto;
   background-color: var(--score-bg);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /*box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);*/
 }
 
 /* 1. Header Styles: Centered and Dominant */
 .scoreboard-container {
-  /*text-align: center;
+  text-align: center;
   padding: 25px 20px;
   background: white;
-  border-bottom: 1px solid #eee;*/
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  border-bottom: 1px solid #eee;
 }
 
 .scoreboard-header {
@@ -641,9 +641,6 @@ main {
 
 /* == MATCH VIEWER WEATHER CSS == */
 .weather-container{
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
   grid-column: span 1;
   & .match-weather{
       display: flex;
