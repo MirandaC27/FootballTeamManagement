@@ -510,9 +510,6 @@ footer {
 
 /*.match-container{}*/
 main {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
   max-width: 960px;
   margin: 20px auto;
   background-color: var(--score-bg);
@@ -526,6 +523,9 @@ main {
   padding: 25px 20px;
   background: white;
   border-bottom: 1px solid #eee;
+  display: grid;
+  /*grid-template-columns: repeat(4, 1fr);*/
+  gap: 12px;
 }
 
 .scoreboard-header {
