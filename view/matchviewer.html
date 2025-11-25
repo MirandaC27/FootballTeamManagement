@@ -134,7 +134,7 @@
                         <div class="match-weather">
                             <div class="details">
                                 <h2>Weather</h2>
-                                <h3>___&deg;F</h3>
+                                <h4>___&deg;F</h4>
                                 <p>_____</p>
                             </div>
                             <div class="weather-icon">
@@ -229,12 +229,14 @@
             window.socket = io();
         </script>
     <script>
-        let currMatch = null;
-        let matchEvents = [];
-        let currScore = {
+        //let currMatch = null;
+        //let matchEvents = [];
+        /*et currScore = {
             teamHome: 0,
             teamAway: 0
-        }
+        }*/
+        api_key = 'c49d74aefaae765d7ac35e149d114bd1',
+        currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0],
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -274,10 +276,12 @@
             updateReactionVisibility();
             attachReactionHandler();
 
+            /*
             if(currMatch){
                 document.getElementById('eventHomeTeam').textContent = currMatch.homeTeam;
                 document.getElementById('eventAwayTeam').textContent = currMatch.awayTeam;
             }
+            */
 
         });
 
@@ -289,9 +293,9 @@
                 return;
             }
             const match = await res.json();
-            currMatch = match;
+            //currMatch = match;
 
-            matchEvents = match.events || [];
+            //matchEvents = match.events || [];
 
             document.getElementById('homeTeam').textContent = match.homeTeam;
             document.getElementById('awayTeam').textContent = match.awayTeam;
@@ -301,11 +305,13 @@
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
-            currScore.teamHome = match.homeScore || 0;
-            currScore.teamAway = match.awayScore || 0;
+            let cityInput = document.getElementById('matchLocation').textContent;
+
+            //currScore.teamHome = match.homeScore || 0;
+            //currScore.teamAway = match.awayScore || 0;
 
             //loadMatchInfo(currMatch);
-            loadTimeline();
+            //loadTimeline();
             loadReactions(match);
             changeChatInputVisibility(match);
             updateLiveBadgeDisplay(match);
@@ -336,6 +342,49 @@
             }
         }
         checkLoggedUser();
+
+        /**
+         * Get the weather details of a given City
+         * @params city name, latitude, longitude, country, state
+         */
+        function getWeatherDetails(name, lat, lon, country, state){
+            let FORECAST_API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${api_key}`,
+            WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}`;
+
+            fetch(WEATHER_API_URL).then(res => res.json()).then(data => {
+            let date = new Date();
+            currentWeatherCard.innerHTML = `
+                <div class="match-weather">
+                    <div class="details">
+                        <h2>Weather</h2>
+                        <h4>${((data.main.temp - 273.15)*1.8+32).toFixed()}&deg;F</h4>
+                        <p>${data.weather[0].description}</p>
+                    </div>
+                    <div class="weather-icon">
+                        <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="">
+                    </div>
+                </div>
+            `;
+        }).catch(() => {
+            alert('Failed to fetch current weather');
+        });
+    }
+
+        /**
+         * Get the coordinates of the city the match is located in
+         */
+        function getCityCoordinates(){
+            let cityName = cityInput.value.trim();
+            cityInput.value = '';
+            if(!cityName) return;
+            let GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${api_key}`;
+            fetch(GEOCODING_API_URL).then(res => res.json()).then(data => {
+                let {name, lat, lon, country, state} = data[0];
+                getWeatherDetails(name, lat, lon, country, state);
+            }).catch(() => {
+                alert(`Failed to fetch coordinates of ${cityName}`);
+            });
+        }
 
         /**
          * Show LIVE badge if match is in progress or END badge if match is final
@@ -378,137 +427,6 @@
         }
 
         /*Event form and Timeline*/
-        function updateScoreboard(){
-            document.getElementById('homeScore').textContent = currScore.teamHome;
-            document.getElementById('awayScore').textContent = currScore.teamAway;
-        }
-
-        function recalcScore(){
-            let newScores = {teamHome: 0, teamAway: 0};
-            matchEvents.forEach(event=> {
-                if(event.type == 'goal'){
-                    if(event.team == 'home'){
-                        newScores.teamHome++;
-                    }
-                    else if(event.team == 'away'){
-                        newScores.teamAway++;
-                    }
-                }
-
-            });
-
-            const scoreChanged = newScores.teamHome !== currScore.teamHome || newScores.teamAway !== currScore.teamAway;
-            currScore = newScores;
-            document.getElementById('homeScore').textContent = currScore.teamHome;
-            document.getElementById('awayScore').textContent = currScore.teamAway;
-
-            const matchId = new URLSearchParams(window.location.search).get('id');
-            if (scoreChanged && matchId) {
-                updateScore(matchId, { homeScore: currScore.teamHome, awayScore: currScore.teamAway });
-            }
-
-            //updateScoreboard();
-            //updateScore(matchId, {homeScore: currScore.teamHome, awayScore: currScore.teamAway});
-        }
-
-        /*async function updateScore(id, scores){
-            try{
-                await fetch(`/api/matches/${matchId}/score`);
-            }
-
-        }*/
-
-        async function logEvent(){
-            const selectType = document.getElementById('event-type');
-            const typeSelected = selectType.value;
-            const selectTeam = document.getElementById('event-team');
-            const teamSelected = selectTeam.value;
-            const inputMin = document.getElementById('event-minute');
-            const inputDesc = document.getElementById('event-desc');
-
-            const eventMinute = parseInt(inputMin.value, 10);
-
-            const eventDesc = inputDesc.value.trim();
-
-            const newEvent = {
-                minute: eventMinute,
-                type: typeSelected,
-                description: eventDesc,
-                team: teamSelected,
-                timestamp: new Date().toISOString()
-            };
-
-            try{
-                const res = await fetch(`/api/matches/${matchId}/events`, {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify(newEvent)
-                });
-            }
-            catch (err){
-                console.error("error logging event:", err.message);
-            }
-
-            console.log("event saved, reloading page");
-            await loadMatch(matchId);
-            /*matchEvents.push(newEvent);*/
-
-
-            inputDesc.value = '';
-            inputDesc.focus();
-        }
-
-        function loadTimeline(){
-            /*recalcScore();*/
-
-            if(!currMatch) return;
-
-            const timelineContainer = document.getElementById('timeline-container');
-            timelineContainer.innerHTML = '';
-
-            matchEvents.sort((a, b) => a.minute - b.minute);
-            matchEvents.forEach(event => {
-                const teamName = event.team == 'home' ? currMatch.homeTeam : currMatch.awayTeam;
-                const eventItem = document.createElement('div');
-                eventItem.className = 'timeline-item';
-
-                eventItem.innerHTML =
-                 `<strong>${event.minute} | ${event.type}:<strong>${event.description} <em>(${teamName})</em>`;
-
-                timelineContainer.appendChild(eventItem);
-
-            });
-        
-        }
-
-        async function changeMatchStatus(newStatus) {
-            const matchId = new URLSearchParams(window.location.search).get('id');
-
-            if (!matchId) return console.error('Match ID not found.');
-
-            try {
-                const res = await fetch(`getMatchDetails/${matchId}/matchStatus`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                });
-
-                if (res.ok) {
-                    console.log(`Match status updated to: ${newStatus}`);
-                    // Force a refresh to update the UI immediately
-                    // This calls your adapted loadMatchAndRender function from the previous step
-                    //await loadMatchAndRender(matchId); 
-                    await loadMatch(matchId);
-                } else {
-                    // Handle server errors (e.g., status 400 or 500)
-                    const errorData = await res.json();
-                    alert(`Failed to update status: ${errorData.message}`);
-                }
-            } catch (error) {
-                console.error('Network error during status update:', error);
-                alert('Could not connect to the server.');
-            }
-        }
 
     </script>
 
@@ -626,6 +544,7 @@
         }
 
     </script>
+
 
     <!-- Live Match Chat-->
     <script src="/socket.io/socket.io.js"></script>
