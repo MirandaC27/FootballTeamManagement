@@ -430,6 +430,7 @@
                     'substitution': '🔄'
                 }
 
+                //const eventType 
                 const eventIco = icoMap[event.type] || '';
                 const eventEntry = document.createElement('div');
                 eventEntry.className = 'timeline-entry';
@@ -437,7 +438,7 @@
                 eventEntry.innerHTML =
                  `<span>
                      <strong>${event.minute}' | ${eventIco} ${event.type.replace('-', ' ')}:</strong>
-                     ${description} 
+                     ${event.description} 
                      <em>(${teamName})</em>
                  </span>`;
 
