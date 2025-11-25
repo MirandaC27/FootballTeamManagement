@@ -236,8 +236,8 @@
             teamAway: 0
         }*/
         //let cityInput = document.getElementById('matchLocation'), 
-        let api_key = 'c49d74aefaae765d7ac35e149d114bd1';
-        //currentWeatherCard;
+        let api_key = 'c49d74aefaae765d7ac35e149d114bd1',
+        currentWeatherCard;
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -250,7 +250,7 @@
                 console.error("Error: No Match ID found in the URL.");
             }
 
-            //currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0];
+            currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0];
             
             // logic for the back button
             const backButton = document.getElementById('backButton');
@@ -311,7 +311,7 @@
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
             //let cityInput = document.getElementById('matchLocation').textContent;
-            //getCityCoordinates(match.matchLocation);
+            getCityCoordinates(match.matchLocation);
 
             //currScore.teamHome = match.homeScore || 0;
             //currScore.teamAway = match.awayScore || 0;
