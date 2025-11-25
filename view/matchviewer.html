@@ -290,6 +290,31 @@
             return date.toLocaleDateString('en-US', options);
         }
 
+        /**
+         * iterate through local timeline and add to score
+         */
+        function updateScore(){
+            let eventHomeScore = 0;
+            let eventawayScore = 0;
+
+            match.matchEvents.forEach(event => {
+                if(event.type == 'goal'){
+                    if(event.team == 'home'){
+                        eventHomeScore ++;
+                    }
+                    else if (event.team == 'away'){
+                        eventawayScore ++;
+                    }
+                }
+            });
+
+            match.homeScore += eventHomeScore;
+            match.awayScore += eventawayScore;
+
+            document.getElementById('homeScore').textContent = match.homeScore;
+            document.getElementById('awayScore').textContent = match.awayScore;
+        }
+
         async function loadMatch(id) {
             const res = await fetch(`/getMatchDetails/${id}`);
 
@@ -325,6 +350,7 @@
             //currScore.teamAway = match.awayScore || 0;
 
             //loadMatchInfo(currMatch);
+            updateScore();
             loadTimeline();
             loadReactions(match);
             changeChatInputVisibility(match);
@@ -445,30 +471,6 @@
             })
         }
 
-        /**
-         * iterate through local timeline and add to score
-         */
-        function updateScore(){
-            let eventHomeScore = 0;
-            let eventawayScore = 0;
-
-            match.matchEvents.forEach(event => {
-                if(event.type == 'goal'){
-                    if(event.team == 'home'){
-                        eventHomeScore ++;
-                    }
-                    else if (event.team == 'away'){
-                        eventawayScore ++;
-                    }
-                }
-            });
-
-            match.homeScore += eventHomeScore;
-            match.awayScore += eventawayScore;
-
-            document.getElementById('homeScore').textContent = match.homeScore;
-            document.getElementById('awayScore').textContent = match.awayScore;
-        }
 
         /**
          * log the event entry locally and update timeline
@@ -514,6 +516,7 @@
             }*/
             matchEvents.push(newEvent);
 
+            updateScore();
             loadTimeline();
 
             inputDesc.value = '';
