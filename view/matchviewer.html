@@ -310,8 +310,8 @@
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
-            let cityInput = document.getElementById('matchLocation').textContent;
-            getCityCoordinates();
+            //let cityInput = document.getElementById('matchLocation').textContent;
+            getCityCoordinates(match.matchLocation);
 
             //currScore.teamHome = match.homeScore || 0;
             //currScore.teamAway = match.awayScore || 0;
@@ -379,9 +379,9 @@
         /**
          * Get the coordinates of the city the match is located in
          */
-        function getCityCoordinates(){
-            let cityName = cityInput.value.trim();
-            cityInput.value = '';
+        function getCityCoordinates(cityName){
+            //let cityName = cityInput.value.trim();
+            //cityInput.value = '';
             if(!cityName) return;
             let GEOCODING_API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${api_key}`;
             fetch(GEOCODING_API_URL).then(res => res.json()).then(data => {
