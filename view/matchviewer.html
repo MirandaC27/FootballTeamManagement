@@ -92,7 +92,8 @@
                         <div class="scoreboard-header">
                             <span id="matchStatus" class="match-status"></span>
                             <span class="seperator">•</span>
-                            <span id="matchLocation"></span>
+                            <span id="matchLocation">,</span>
+                            <span id="matchCity"></span>
                         </div>
                         <div class="scoreboard-content">
                             <div class="team-content home">
@@ -319,13 +320,14 @@
             document.getElementById('awayScore').textContent = match.awayScore;
             document.getElementById('matchDate').textContent = formatDisplayDate(match.matchDate);
             document.getElementById('matchLocation').textContent = match.matchLocation;
+            document.getElementById('matchCity').textContent = match.matchCity;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
             document.getElementById('eventHomeTeam').textContent = match.homeTeam;
             document.getElementById('eventAwayTeam').textContent = match.awayTeam;
 
             //let cityInput = document.getElementById('matchLocation').textContent;
-            getCityCoordinates(match.matchLocation);
+            getCityCoordinates(match.matchCity);
 
             //currScore.teamHome = match.homeScore || 0;
             //currScore.teamAway = match.awayScore || 0;
