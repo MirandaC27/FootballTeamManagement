@@ -12,6 +12,8 @@ const createNewMatch = async (req, res) => {
   try {
     const { homeTeam, awayTeam, homeScore, awayScore, matchDate, matchLocation, matchStatus } = req.body;
 
+    console.log(homeTeam); 
+
     // Validate required attributes
     if (!homeTeam || !awayTeam || homeScore == null || awayScore == null || !matchDate || !matchLocation || !matchStatus) {
       return res.status(400).send('All match attributes are required');
