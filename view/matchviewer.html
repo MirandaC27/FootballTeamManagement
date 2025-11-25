@@ -235,8 +235,9 @@
             teamHome: 0,
             teamAway: 0
         }*/
+        let cityInput = document.getElementById('matchLocation'), 
         api_key = 'c49d74aefaae765d7ac35e149d114bd1',
-        currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0],
+        currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0];
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -305,7 +306,7 @@
             document.getElementById('matchLocation').textContent = match.matchLocation;
             document.getElementById('matchStatus').textContent = match.matchStatus;
 
-            let cityInput = document.getElementById('matchLocation').textContent;
+            //let cityInput = document.getElementById('matchLocation').textContent;
 
             //currScore.teamHome = match.homeScore || 0;
             //currScore.teamAway = match.awayScore || 0;
