@@ -148,54 +148,23 @@
     <div class="container">
         <h2 class="text-center mb-4">🏆 Manage Playoff Brackets</h2>
 
-        <!-- Action Cards -->
-        <div class="row justify-content-center mb-4">
-            <!-- Delete Bracket -->
-            <div class="col-md-5 mb-3">
-                <div class="card shadow text-center">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow">
                     <div class="card-body">
-                        <h5 class="card-title">Delete Current Bracket</h5>
-                        <p class="card-text text-muted">Remove the currently loaded playoff bracket.</p>
-                        <button class="btn btn-danger" id="deleteBracketBtn">Delete Bracket</button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Add Matchup -->
-            <div class="card shadow mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Add Match to Round</h5>
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Select Round</label>
-                            <select id="roundSelect" class="form-select"></select>
+                        <!-- Header with Delete Button -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">🏆 Current Bracket</h5>
+                            <button class="btn btn-danger btn-sm" id="deleteBracketBtn">
+                                🗑️ Delete Bracket
+                            </button>
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label">Home Team</label>
-                            <select id="homeTeamSelect" class="form-select"></select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Away Team</label>
-                            <select id="awayTeamSelect" class="form-select"></select>
-                        </div>
-
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button class="btn btn-primary w-100" onclick="addMatchToRound()">Add Match</button>
+                        <div id="bracketContainer" class="bracket-container">
+                            <p class="text-muted">Loading bracket...</p>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bracket Table -->
-        <div class="card shadow">
-            <div class="card-body">
-                <h5 class="card-title">🏆 Current Bracket</h5>
-                <div id="bracketContainer" class="bracket-container">
-                    <p class="text-muted">Loading bracket...</p>
                 </div>
             </div>
         </div>
@@ -205,7 +174,6 @@
     <script>
         // Load the bracket on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            await populateTeamDropdowns();
             const params = new URLSearchParams(window.location.search);
             const size = parseInt(params.get('size'));
 
@@ -228,7 +196,6 @@
                     const bracket = await response.json();
                     window.currentBracket = bracket;
                     displayBracket(bracket);
-                    populateRoundsDropdown(bracket);
                 } catch (err) {
                     console.error(err);
                     alert('Error generating bracket');
@@ -266,146 +233,147 @@
             return rounds;
         }
 
+        function createTeamField(teamValue, side) {
+            if (teamValue === "TBD" || !teamValue) {
+                return `
+                    <select class="tbd-select" data-side="${side}">
+                        <option value="">Select Team</option>
+                    </select>
+                `;
+            }
+            return `<div class="team">${teamValue}</div>`;
+        }
+
         // Display bracket in table
-        function displayBracket(bracket) {
+        async function displayBracket(bracket) {
             const container = document.getElementById("bracketContainer");
-            container.innerHTML = ""; // clear old bracket
+            container.innerHTML = "";
+
+            // Fetch all teams for dropdowns
+            const teamsRes = await fetch('/getAllTeams');
+            const teams = await teamsRes.json();
+
+            const lastRoundNumber = Math.max(...bracket.rounds.map(r => r.roundNumber));
 
             bracket.rounds.forEach(round => {
                 const roundCol = document.createElement("div");
                 roundCol.className = "bracket-round";
 
+                if (round.roundNumber === lastRoundNumber) roundCol.classList.add("championship-round");
+
                 const title = document.createElement("div");
                 title.className = "bracket-title";
-                title.textContent = `Round ${round.roundNumber}`;
+                title.textContent = round.roundNumber === lastRoundNumber
+                    ? "🏆 Championship Round"
+                    : `Round ${round.roundNumber}`;
                 roundCol.appendChild(title);
 
-                round.roundMatchups.forEach(match => {
+                round.roundMatchups.forEach((match, index) => {
                     const box = document.createElement("div");
                     box.className = "matchup";
 
+                    // Function to generate team field (TBD or fixed)
+                    const createTeamField = (teamValue, side) => {
+                        if (teamValue === "TBD" || !teamValue) {
+                            return `
+                                <select class="tbd-select" data-round="${round.roundNumber}" data-index="${index}" data-side="${side}">
+                                    <option value="">Select Team</option>
+                                    ${teams.map(t => `<option value="${t.name}">${t.name}</option>`).join("")}
+                                </select>
+                            `;
+                        }
+                        return `<div class="team">${teamValue}</div>`;
+                    };
+
                     box.innerHTML = `
                         <div class="matchup-header">
-                            <span class="delete-matchup" data-round="${round.roundNumber}" data-home="${match.homeTeam}" data-away="${match.awayTeam}">🗑️</span>
+                            <span class="delete-matchup" data-round="${round.roundNumber}" data-index="${index}">🗑️</span>
                         </div>
-                        <div class="team">${match.homeTeam}</div>
-                        <div class="team">${match.awayTeam}</div>
+                        ${createTeamField(match.homeTeam, "home")}
+                        ${createTeamField(match.awayTeam, "away")}
+                        <button class="confirm-matchup btn btn-success btn-sm mt-2" style="display:none"
+                            data-round="${round.roundNumber}" data-index="${index}">
+                            ✅ Confirm Matchup
+                        </button>
                     `;
 
                     roundCol.appendChild(box);
                 });
 
                 container.appendChild(roundCol);
-                deleteMatchup();
             });
+
+            // Re-attach events for dropdowns and confirm buttons
+            enableTbdDropdowns();
+            deleteMatchup();
         }
 
-        // Populate rounds dropdown
-        function populateRoundsDropdown(bracket) {
-            const select = document.getElementById('roundSelect');
-            select.innerHTML = '';
+        function enableTbdDropdowns() {
+            document.querySelectorAll(".tbd-select").forEach(select => {
 
-            bracket.rounds.forEach(r => {
-                const opt = document.createElement('option');
-                opt.value = r.roundNumber;
-                opt.textContent = `Round ${r.roundNumber}`;
-                select.appendChild(opt);
-            });
-        }
+                select.addEventListener("change", function () {
 
-        // Populate teams dropdown
-        async function populateTeamDropdowns() {
-            const res = await fetch('/getAllTeams');
-            const teams = await res.json();
+                    const matchupBox = this.closest(".matchup");
+                    const confirmBtn = matchupBox.querySelector(".confirm-matchup");
 
-            const homeSel = document.getElementById('homeTeamSelect');
-            const awaySel = document.getElementById('awayTeamSelect');
+                    const selects = matchupBox.querySelectorAll(".tbd-select");
+                    let homeTeam = "TBD";
+                    let awayTeam = "TBD";
 
-            homeSel.innerHTML = "";
-            awaySel.innerHTML = "";
+                    selects.forEach(sel => {
+                        if (sel.dataset.side === "home") homeTeam = sel.value || "TBD";
+                        if (sel.dataset.side === "away") awayTeam = sel.value || "TBD";
+                    });
 
-            teams.forEach(t => {
-                const opt1 = document.createElement("option");
-                opt1.textContent = t.name;
-                opt1.value = t.name;
-
-                const opt2 = opt1.cloneNode(true);
-
-                homeSel.appendChild(opt1);
-                awaySel.appendChild(opt2);
-            });
-        }
-        
-        // Add a match to a round
-        async function addMatchToRound() {
-            if (!window.currentBracket) {
-                return alert("No bracket loaded.");
-            }
-
-            const roundNumber = parseInt(document.getElementById("roundSelect").value);
-            const homeTeam = document.getElementById("homeTeamSelect").value;
-            const awayTeam = document.getElementById("awayTeamSelect").value;
-
-            if (homeTeam === awayTeam) {
-                return alert("A team cannot play against itself.");
-            }
-
-            if (!homeTeam || !awayTeam) {
-                return alert("You must select both teams.");
-            }
-
-            const round = window.currentBracket.rounds.find(r => r.roundNumber === roundNumber);
-            if (!round) return alert("Invalid round selected.");
-
-            // Prevent team from having more than one game in a round
-            const hasDuplicate = round.roundMatchups.some(m =>
-                m.homeTeam === homeTeam ||
-                m.awayTeam === homeTeam ||
-                m.homeTeam === awayTeam ||
-                m.awayTeam === awayTeam
-            )
-            if (hasDuplicate) {
-                return alert("One or more of these teams already play in this round.")
-            }
-
-            // Prevent matchups in round from exceeding maximum
-            const expectedNumTeams = window.currentBracket.numTeams / Math.pow(2, roundNumber - 1);
-            const maxNumMatchups = expectedNumTeams / 2;
-            const realMatchCount = round.roundMatchups.filter(m =>
-                m.homeTeam !== "TBD" && m.awayTeam !== "TBD"
-            ).length;
-
-            if (realMatchCount >= maxNumMatchups) {
-                return alert("This round is already full — cannot add more matchups.");
-            }
-
-
-
-            const match = {
-                homeTeam,
-                awayTeam,
-                result: null
-            };
-
-            try {
-                const res = await fetch(`/addMatchup/${window.currentBracket.name}/${roundNumber}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(match)
+                    // Show confirm button only if both are selected
+                    if (homeTeam !== "TBD" && awayTeam !== "TBD") {
+                        confirmBtn.style.display = "block";
+                    } else {
+                        confirmBtn.style.display = "none";
+                    }
                 });
+            });
 
-                if (!res.ok) throw new Error("Server error adding match");
+            // Confirm Button Click (database push)
+            document.querySelectorAll(".confirm-matchup").forEach(btn => {
+                btn.addEventListener("click", async function () {
 
-                const updatedBracket = await res.json();
-                window.currentBracket = updatedBracket;
+                    const roundNumber = this.dataset.round;
+                    const matchupBox = this.closest(".matchup");
 
-                displayBracket(updatedBracket);
+                    const selects = matchupBox.querySelectorAll(".tbd-select");
 
-                alert("Match added successfully.");
-            } catch (err) {
-                console.error(err);
-                alert("Failed to add match.");
-            }
+                    let homeTeam = "TBD";
+                    let awayTeam = "TBD";
+
+                    selects.forEach(sel => {
+                        if (sel.dataset.side === "home") homeTeam = sel.value;
+                        if (sel.dataset.side === "away") awayTeam = sel.value;
+                    });
+
+                    const match = {
+                        homeTeam,
+                        awayTeam,
+                        result: null
+                    };
+
+                    try {
+                        const res = await fetch(`/addMatchup/${window.currentBracket.name}/${roundNumber}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(match)
+                        });
+
+                        const updated = await res.json();
+                        window.currentBracket = updated;
+                        displayBracket(updated);
+
+                    } catch (err) {
+                        console.error(err);
+                        alert("Failed to update matchup.");
+                    }
+                });
+            });
         }
 
         // Load existing brackets
