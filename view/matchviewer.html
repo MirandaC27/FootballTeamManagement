@@ -416,6 +416,7 @@
                 return;
             }
 
+            matchEvents.sort((a, b) => a.minute - b.minute);
             matchEvents.forEach(event => {
                 const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
 
