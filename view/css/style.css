@@ -638,6 +638,9 @@ main {
 
 /* == MATCH VIEWER WEATHER CSS == */
 .weather-container{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   grid-column: span 1;
   & .match-weather{
       display: flex;
