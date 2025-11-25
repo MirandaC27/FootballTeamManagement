@@ -241,7 +241,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0]
+            currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0];
             let matchId = urlParams.get('id');
 
             if (matchId) {
