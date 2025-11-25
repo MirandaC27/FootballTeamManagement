@@ -96,7 +96,7 @@ function getWeatherDetails(name, lat, lon, country, state){
             <div class="current-weather">
                 <div class="details">
                     <p>Now</p>
-                    <h2>${((data.main.temp - 273.15)*1.8+32).toFixed(2)}&deg;F</h2>
+                    <h2>${((data.main.temp - 273.15)*1.8+32).toFixed()}&deg;F</h2>
                     <p>${data.weather[0].description}</p>
                 </div>
                 <div class="weather-icon">
@@ -145,7 +145,7 @@ function getWeatherDetails(name, lat, lon, country, state){
         pressureVal.innerHTML = `${pressure}hPa`;
         visibilityVal.innerHTML = `${visibility / 1000}km`;
         windSpeedVal.innerHTML = `${speed}m/s`;
-        feelsVal.innerHTML = `${((feels_like - 273.15)*1.8+32).toFixed(2)}&deg;F`;
+        feelsVal.innerHTML = `${((feels_like - 273.15)*1.8+32).toFixed()}&deg;F`;
     }).catch(() => {
         alert('Failed to fetch current weather');
     });
@@ -164,7 +164,7 @@ function getWeatherDetails(name, lat, lon, country, state){
                 <div class="card">
                     <p>${hr} ${a}</p>
                     <img src="https://openweathermap.org/img/wn/${hourlyForecast[i].weather[0].icon}.png" alt="">
-                    <p>${((hourlyForecast[i].main.temp - 273.15)*1.8+32).toFixed(2)}&deg;F</p>
+                    <p>${((hourlyForecast[i].main.temp - 273.15)*1.8+32).toFixed()}&deg;F</p>
                 </div>
             `;
         }
@@ -182,7 +182,7 @@ function getWeatherDetails(name, lat, lon, country, state){
                 <div class="forecast-item">
                         <div class="icon-wrapper">
                             <img src="https://openweathermap.org/img/wn/${fiveDaysForecast[i].weather[0].icon}.png" alt="">
-                            <span>${((fiveDaysForecast[i].main.temp - 273.15)*1.8+32).toFixed(2)}&deg;F</span>
+                            <span>${((fiveDaysForecast[i].main.temp - 273.15)*1.8+32).toFixed()}&deg;F</span>
                         </div>
                         <p>${date.getDate()} ${months[date.getMonth()]}</p>
                         <p>${days[date.getDay()]}</p>
