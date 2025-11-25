@@ -239,6 +239,8 @@
         //let cityInput = document.getElementById('matchLocation'), 
         let api_key = 'c49d74aefaae765d7ac35e149d114bd1',
         currentWeatherCard,
+        match = {},
+        //matchId = null,
         matchEvents = [];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -416,32 +418,25 @@
                 return;
             }
 
-            if (!match.homeTeam || !match.awayTeam) {
-                timelineContainer.innerHTML = 'Error: Match details (Team Names) not fully loaded for timeline.';
-                return;
-            }
-
             matchEvents.sort((a, b) => a.minute - b.minute);
             matchEvents.forEach(event => {
                 const teamName = event.team == 'home' ? match.homeTeam : match.awayTeam;
 
                 
-                const icoMap = {
+                /*const icoMap = {
                     'goal': '⚽',
                     'yellow-card': '🟨',
                     'red-card': '🟥',
                     'substitution': '🔄'
-                }
+                }*/
 
-                const eventType = event.type || 'Unknown';
-                const eventIco = icoMap[event.type] || '';
+                //const eventIco = icoMap[event.type] || '';
                 const eventEntry = document.createElement('div');
                 eventEntry.className = 'timeline-entry';
-                const description = event.description || 'No details provided';
 
                 eventEntry.innerHTML = `
                 <span>
-                    <strong>${event.minute} | ${eventIco} ${eventType.replace('-', ' ')}:<strong>${event.description} <em>(${teamName})</em>
+                    <strong>${event.minute} | ${event.type}:</strong>${event.description} <em>(${teamName})</em>
                 </span>`;
 
                timelineContainer.appendChild(eventEntry); 
