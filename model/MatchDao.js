@@ -7,6 +7,29 @@ const mongoose = require('mongoose');
 
 const MATCH_STATUSES = ['Scheduled', 'In Progress', 'Final', 'Delayed', 'Cancelled', 'Forefeit'];
 
+const eventSchema = new mongoose.Schema({
+  minute: {
+    type: Number,
+    required: true 
+  },
+  type: { 
+    type: String, 
+    required: true 
+  },
+  description: { 
+    type: String 
+  },
+  team: { 
+    type: String, 
+    enum: ['home', 'away'], 
+    required: true 
+  },
+  timestamp: { 
+    type: Date, 
+    default: Date.now 
+  }
+});
+
 //match view schema
 const matchSchema = new mongoose.Schema({
   homeTeam: {
@@ -45,10 +68,17 @@ const matchSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  matchCity: {
+    type: String,
+  },
   matchStatus: {
     type: String,
     required: true,
     default: 'Scheduled'
+  },
+  matchEvents: {
+    type: [eventSchema],
+    default: []
   },
   reactions: {
     happy: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
