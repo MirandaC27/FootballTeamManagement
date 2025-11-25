@@ -1140,7 +1140,6 @@ main {
 
 #sendBtn:hover {
   background-color: #1e62ff;
-  transform: translateY(-2px);
 }
 
 #sendBtn:active {
