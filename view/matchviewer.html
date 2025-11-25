@@ -467,21 +467,29 @@
                 timestamp: new Date().toISOString()
             };
 
-            /*
-            try{
+            
+            /*try{
                 const res = await fetch(`api/matches/${glblmatchId}/events`,{
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'}, 
                     body: JSON.stringify(newEvent)
                 });
 
+                const res = await fetch('/updateTimeline/' + id, { method: 'POST' });
+                if (res.ok) {
+                    showStatus('Match updated successfully!', 'success');
+                    loadMatches();
+                } else {
+                    showStatus('Failed to update match.', 'danger');
+                }
+
                 await loadMatch(glblmatchId);
             }catch (err) {
                 console.error("Error logging event:", err.message);
-            }*/ 
-            //matchEvents.push(newEvent);
+            }*/
+            matchEvents.push(newEvent);
 
-            //loadTimeline();
+            loadTimeline();
 
             inputDesc.value = '';
             inputMinute.value = eventMinute +1;

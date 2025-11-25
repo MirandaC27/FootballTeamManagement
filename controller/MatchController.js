@@ -12,7 +12,8 @@ const createNewMatch = async (req, res) => {
   try {
     const { homeTeam, awayTeam, homeScore, awayScore, matchDate, matchLocation, matchStatus } = req.body;
 
-    console.log(homeTeam); 
+    console.log(homeTeam);
+     
 
     // Validate required attributes
     if (!homeTeam || !awayTeam || homeScore == null || awayScore == null || !matchDate || !matchLocation || !matchStatus) {
@@ -257,6 +258,38 @@ async function resetMatchTimer(req, res) {
   }
 }
 
+/**
+ * Update a matches events from the database
+ * @param {*} req request object containing data
+ * @param {*} res response object used to send back
+ */
+const updateTimeline = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const newEvent = req.body;
+
+    const updated = await matchDao.findByIdAndUpdate(id, {
+        $push: {matchEvents : newEvent}}, {
+          new: true,
+          runValidators: true
+        });
+
+    if (!updated) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    res.status(200).send(updated);
+
+    //return res.json({ message: "Match updated successfully", updated });
+
+  } catch (err) {
+    console.error("Error updating match:", err);
+    return res.status(500).json({
+      message: "Server error while updating match",
+      error: err.message
+    });
+  }
+};
 
 
 module.exports = {
@@ -268,6 +301,7 @@ module.exports = {
     updateMatchReaction,
     startMatchTimer,
     endMatchTimer,
-    resetMatchTimer
+    resetMatchTimer,
+    updateTimeline
 };
 
