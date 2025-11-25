@@ -485,7 +485,21 @@ footer {
   opacity: 1;
 }
 
-/*css for matchviewer.html*/
+/* == MATCHVIEWER.HTML CSS == */
+.matchVwr-card{
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    & p{
+        font-size: 14px;
+        color: #000;
+    }
+    & h2{
+        font-size: 32px;
+        font-weight: 500;
+    }
+}
 .clickable-row {
   cursor: pointer;
 }
@@ -559,7 +573,7 @@ main {
   margin: 0 5px;
 }
 
-/* --- Input Form Styling (Based on your provided CSS) --- */
+/* == MATCH TIMELINE FORM CSS == */
 .eventform-container {
     margin-bottom: 30px;
 }
@@ -592,35 +606,50 @@ main {
     cursor: pointer;
     border: none;
     transition: background-color 0.3s;
-    background-color: #007bff; /* Blue to match your CSS */
+    background-color: #007bff;
     color: white;
 }
 
-/* --- Simplified Timeline Layout Styling (Based on your provided CSS) --- */
 #timeline-container {
     width: 95%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px 0;
 }
-/* Style for each event item in the list */
+
 .timeline-item {
     background-color: white;
     padding: 12px 16px;
     border-radius: 8px;
     margin-bottom: 10px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-left: 4px solid #4f46e5; /* Indigo accent border */
+    border-left: 4px solid #007bff;
     font-size: 0.9em;
 }
 .timeline-item strong {
-    color: #1f2937; /* Dark gray for minute/type */
+    color: #1f2937; 
     margin-right: 8px;
     font-weight: 600;
 }
 .timeline-item em {
-    color: #6b7280; /* Lighter gray for team name */
+    color: #6b7280;
     font-style: normal;
+}
+
+/* == MATCH VIEWER WEATHER CSS == */
+.weather-container{
+  grid-column: span 1;
+  & .match-weather{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      & h2{
+          margin: 7px 0;
+      }
+      & p{
+          color: #000;
+      }
+  }
 }
 
 /* Landing page's large banner */
