@@ -245,6 +245,7 @@
         glblmatchId = null,
         matchEvents = [];
 
+        /*
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             let matchId = urlParams.get('id');
@@ -276,24 +277,18 @@
             });
 
             //logic for event form
-            /*document.getElementById('logEventButton').addEventListener('click', (e)=>{
+            document.getElementById('logEventButton').addEventListener('click', (e)=>{
                 e.preventDefault();
                 logEvent();
-            });*/
+            });
 
             glblmatchId = matchId;
             checkLoggedUser();
             updateReactionVisibility();
             attachReactionHandler();
+            
 
-            /*
-            if(currMatch){
-                document.getElementById('eventHomeTeam').textContent = currMatch.homeTeam;
-                document.getElementById('eventAwayTeam').textContent = currMatch.awayTeam;
-            }
-            */
-
-        });
+        });*/
 
         function formatDisplayDate(dateString) {
             if (!dateString) return 'N/A';
@@ -310,6 +305,8 @@
                 return;
             }
             const match = await res.json();
+
+            matchEvents = match.matchEvents || match.events;
 
             //getCityCoordinates(match.matchLocation);
             //currMatch = match;
@@ -330,7 +327,6 @@
 
             //let cityInput = document.getElementById('matchLocation').textContent;
             getCityCoordinates(match.matchCity);
-            matchEvents = match.matchEvents;
 
             //currScore.teamHome = match.homeScore || 0;
             //currScore.teamAway = match.awayScore || 0;
@@ -499,10 +495,45 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            let matchId = urlParams.get('id');
+
+            if (matchId) {
+                loadMatch(matchId);
+            }
+            else {
+                console.error("Error: No Match ID found in the URL.");
+            }
+
+            currentWeatherCard = document.querySelectorAll('.weather-container .matchVwr-card')[0];
+            
+            // logic for the back button
+            const backButton = document.getElementById('backButton');
+            if (backButton) {
+                backButton.addEventListener('click', () => {
+                    // Tells the browser to go back one step in its history
+                    window.history.back();
+                });
+            }
+
+            //logic for the start and end buttons
+            document.getElementById('startButton').addEventListener('click', () => {
+                changeMatchStatus('In Progress');
+            });
+            document.getElementById('endButton').addEventListener('click', () => {
+                changeMatchStatus('Finished');
+            });
+
             document.getElementById('logEventButton').addEventListener('click', (e) => {
                 e.preventDefault();
                 logEvent();
             })
+
+            glblmatchId = matchId;
+            checkLoggedUser();
+            updateReactionVisibility();
+            attachReactionHandler();
         });
 
         /**
