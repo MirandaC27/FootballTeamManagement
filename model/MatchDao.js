@@ -174,7 +174,11 @@ async function updateMatchReaction(matchId, userId, reactionType) {
 
 //ClockDAO things. Brute forcing the clock.
 
-//brute force setting the clock state via mongoDB
+/** 
+* brute force setting the clock state via mongoDB
+* @param {*} id id of the match
+* @param {*} newClockObj clock that you're updating
+*/
 async function setClockState(id, newClockObj) {
   return await matchModel.findByIdAndUpdate(
     id,
@@ -183,7 +187,12 @@ async function setClockState(id, newClockObj) {
   ).lean();
 }
 
-//brute force updating elapsed before start time
+
+/** 
+* brute force updating elapsed before start time
+* @param {*} id id of the match
+* @param {*} elasedBeforeStart elpased time before start parameter of clock
+*/
 async function updateElapsed(id, elapsedBeforeStart) {
   return await matchModel.findByIdAndUpdate(
     id,
@@ -192,7 +201,11 @@ async function updateElapsed(id, elapsedBeforeStart) {
   ).lean();
 }
 
-//brute force resetting the clock
+
+/** 
+* brute force resetting the clock
+* @param {*} id id of the match
+*/
 async function resetClock(id) {
   return await matchModel.findByIdAndUpdate(
     id,
