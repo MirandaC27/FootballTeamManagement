@@ -518,20 +518,20 @@ main {
 }
 
 /* 1. Header Styles: Centered and Dominant */
-.viewer-container {
+.scoreboard-container {
   text-align: center;
   padding: 25px 20px;
   background: white;
   border-bottom: 1px solid #eee;
 }
 
-.viewer-header {
+.scoreboard-header {
   font-size: 0.85em;
   color: var(--secondary-text-color);
   margin-bottom: 15px;
 }
 
-.viewer-content {
+.scoreboard-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
