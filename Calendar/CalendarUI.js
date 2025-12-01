@@ -116,8 +116,8 @@ export function initCalendar(user) {
                                   tag, 
                                   location, 
                                   locationCoords,
-                                  startTime: document.getElementById("editStartTime").value,
-                                  endTime: document.getElementById("editEndTime").value
+                                  startTime: document.getElementById("startTime").value,
+                                  endTime: document.getElementById("endTime").value
                                  });
       formStatus.textContent = ok ? 'Event added successfully!' : 'Could not add event.';
       if (ok) {
@@ -320,13 +320,13 @@ export function openEditForm(eventObj, defaultDate) {
       <div id="editMap" style="height: 300px; border: 1px solid #ccc; border-radius: 6px;"></div>
 
       <div class="form-group">
-        <label for="editStartTime">Start Time:</label>
-        <input type="time" id="editStartTime" class="form-control" value="${eventObj.startTime}" required>
+        <label for="startTime">Start Time:</label>
+        <input type="time" id="startTime" class="form-control" value="${eventObj.startTime}" required>
       </div>
 
       <div class="form-group">
-        <label for="editEndTime">End Time:</label>
-        <input type="time" id="editEndTime" class="form-control" value="${eventObj.endTime}" required>
+        <label for="endTime">End Time:</label>
+        <input type="time" id="endTime" class="form-control" value="${eventObj.endTime}" required>
       </div>
 
       <div class="text-center">
@@ -413,8 +413,8 @@ export function openEditForm(eventObj, defaultDate) {
                                                 tag: newTag, 
                                                 location: newLocation, 
                                                 locationCoords: newCoordinates,
-                                                startTime: document.getElementById("editStartTime").value,
-                                                endTime: document.getElementById("editEndTime").value });
+                                                startTime: document.getElementById("startTime").value,
+                                                endTime: document.getElementById("endTime").value });
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);

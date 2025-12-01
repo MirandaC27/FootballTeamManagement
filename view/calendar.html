@@ -127,7 +127,7 @@
                 <div class="form-group mt-3">
                     <label>Pick Location on Map:</label>
                     <input type="text" id="eventLocation" class="form-control mb-2" placeholder="Use map to search for location"
-                        required />
+                        />
                     <input type="hidden" id="latitude">
                     <input type="hidden" id="longitude">
                     <div id="map" style="height: 300px; border-radius: 10px;"></div>
@@ -265,7 +265,7 @@
             }
 
             setTimeout(() => {
-                map.invalidateSize();
+                if (map) map.invalidateSize();
             }, 400);
 
             document.getElementById("show-add-form").addEventListener("click", () => {

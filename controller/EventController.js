@@ -13,8 +13,8 @@ const createNewEvent = async (req, res) => {
   try{
     const{ eventDate, title, tag, location, locationCoords, startTime, endTime } = req.body;
       
-    if(!eventDate || !title || !tag || !location || !locationCoords || !startTime || !endTime){
-        return res.status(400).send('date, title, tag, location, location coordinates, startTime, and endTime are required');
+    if(!eventDate || !title || !tag || !startTime || !endTime){
+        return res.status(400).send('date, title, tag, startTime, and endTime are required');
       }
 
       if (!TAGS.includes(tag)) {
@@ -37,7 +37,7 @@ const createNewEvent = async (req, res) => {
           await NotificationDao.createNotification({
               eventId: saved._id,
               title: `Event Today: ${title}`,
-              message: `You have a ${tag} today at ${location}.`
+              message: `You have a(n) ${tag} today.`
           });
 
           console.log("Same-day event notification created.");
