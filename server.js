@@ -42,7 +42,7 @@ io.on('connection', (socket) => {
 });
 
 //sync up clock for everyone
-const setupClockSocket = require("./Clock/ClockSocket.js");   
+const setupClockSocket = require("./controller/ClockSocket.js");   
 const matchDao = require("./model/MatchDao.js");
 
 setupClockSocket(io, matchDao);   

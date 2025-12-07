@@ -1,11 +1,11 @@
 const controller = require("./EventController");
 const dao = require("../model/EventDao");
-const calendarArray = require("../CalendarConfig");
+const calendarArray = require("../model/CalendarConfig");
 const NotificationDao = require("../model/NotificationDao");
 
 // Mock DAOs
 jest.mock("../model/EventDao");
-jest.mock("../CalendarConfig");
+jest.mock("../model/CalendarConfig");
 jest.mock("../model/NotificationDao", () => ({
   createNotification: jest.fn(),
   Notification: { findOne: jest.fn() }

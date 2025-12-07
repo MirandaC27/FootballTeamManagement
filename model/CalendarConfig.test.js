@@ -1,4 +1,4 @@
-const calendarArray = require('./CalendarConfig');
+const calendarArray = require('../model/CalendarConfig');
 
   //Create a normal month
   test('generate the month of January 2025 correctly', () => {

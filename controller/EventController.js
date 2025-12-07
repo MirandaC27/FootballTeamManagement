@@ -1,5 +1,5 @@
 const dao = require('../model/EventDao');
-const calendarArray = require('../CalendarConfig');
+const calendarArray = require('../model/CalendarConfig');
 const NotificationDao = require("../model/NotificationDao");
 const TAGS = ["practice", "match", "event"];
 
