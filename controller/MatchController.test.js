@@ -131,24 +131,38 @@ test('Update match successfully without notification', async () => {
   });
 });
 
-test('Update match triggers notification on In Progress', async () => {
-  const updatedResult = { _id: '123', homeTeam: "A", awayTeam: "B" };
+test("Update match triggers notification on In Progress", async () => {
+  const updatedResult = {
+    _id: "123",
+    homeTeam: "A",
+    awayTeam: "B"
+  };
 
   matchDao.updateById.mockResolvedValue(updatedResult);
   NotificationDao.createNotification.mockResolvedValue({ notif: true });
 
-  const emitMock = jest.fn();
   const req = {
-    params: { id: '123' },
-    body: { matchStatus: "In Progress" },
-    app: { get: () => ({ emit: emitMock }) }
+    params: { id: "123" },
+    body: { matchStatus: "In Progress" }
   };
-  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis()
+  };
 
   await controller.updateMatch(req, res);
 
-  expect(NotificationDao.createNotification).toHaveBeenCalled();
-  expect(emitMock).toHaveBeenCalledWith("matchNotification", expect.any(Object));
+  expect(NotificationDao.createNotification).toHaveBeenCalledWith({
+    matchId: "123",
+    title: "Match Started!",
+    message: "Match A vs B is now In Progress"
+  });
+
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Match updated successfully",
+    updated: updatedResult
+  });
 });
 
 test('Update match not found', async () => {
@@ -163,17 +177,24 @@ test('Update match not found', async () => {
   expect(res.json).toHaveBeenCalledWith({ message: 'Match not found' });
 });
 
-test('Update match DAO error', async () => {
+test("Update match DAO error", async () => {
   matchDao.updateById.mockRejectedValue(new Error("DB Error"));
 
-  const req = { params: { id: 'err' }, body: {} };
-  const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+  const req = { params: { id: "err" }, body: {} };
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis()
+  };
 
   await controller.updateMatch(req, res);
 
   expect(res.status).toHaveBeenCalledWith(500);
-  expect(res.json).toHaveBeenCalledWith({ message: 'Server error while updating match' });
+  expect(res.json).toHaveBeenCalledWith({
+    message: "Server error while updating match"
+  });
 });
+
 
 /*
  * get matches test

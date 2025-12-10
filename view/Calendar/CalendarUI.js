@@ -287,8 +287,12 @@ export function showEventDetails(eventsForDay, result, day, month, year) {
 
 // Edit form UI
 export function openEditForm(eventObj, defaultDate) {
+
   const coordinates = eventObj.locationCoords;
   const detailsBox = document.getElementById('event-details');
+
+  let marker = null;
+
   detailsBox.innerHTML = `
     <h4>Edit Event</h4>
     <form id="edit-event-form" class="border p-3 bg-light rounded">
@@ -321,12 +325,12 @@ export function openEditForm(eventObj, defaultDate) {
 
       <div class="form-group">
         <label for="startTime">Start Time:</label>
-        <input type="time" id="startTime" class="form-control" value="${eventObj.startTime}" required>
+        <input type="time" id="editStartTime" class="form-control" value="${eventObj.startTime}" required>
       </div>
 
       <div class="form-group">
         <label for="endTime">End Time:</label>
-        <input type="time" id="endTime" class="form-control" value="${eventObj.endTime}" required>
+        <input type="time" id="editEndTime" class="form-control" value="${eventObj.endTime}" required>
       </div>
 
       <div class="text-center">
@@ -403,18 +407,20 @@ export function openEditForm(eventObj, defaultDate) {
     const newTag = document.getElementById('editTag').value;
     const newLocation = document.getElementById('editLocation').value.trim();
     const newCoordinates = [parseFloat(document.getElementById("latitude").value), parseFloat(document.getElementById("longitude").value)];
-    if (!newTitle || !newDate || !newTag || !newLocation || !newCoordinates) {
-      statusText.textContent = 'Please provide title, date, tag, location, and location coordinates.';
+    const newStartTime = document.getElementById("editStartTime").value;
+    const newEndTime = document.getElementById("editEndTime").value;
+    if (!newTitle || !newDate || !newTag || !newLocation || !newCoordinates || !newStartTime || !newEndTime) {
+      statusText.textContent = 'Please ensure all attributes are filled.';
       return;
     }
 
-    const ok = await updateEvent(eventObj._id, { title: newTitle, 
+    const ok = await updateEvent(eventObj.id||eventObj._id, { title: newTitle, 
                                                 eventDate: newDate, 
                                                 tag: newTag, 
                                                 location: newLocation, 
                                                 locationCoords: newCoordinates,
-                                                startTime: document.getElementById("startTime").value,
-                                                endTime: document.getElementById("endTime").value });
+                                                startTime: newStartTime,
+                                                endTime: newEndTime});
     statusText.textContent = ok ? 'Event updated successfully!' : 'Could not update event.';
     if (ok) {
       await renderCalendar(currentYear, currentMonth);
@@ -427,4 +433,7 @@ export function openEditForm(eventObj, defaultDate) {
     detailsBox.style.display = 'none';
     await renderCalendar(currentYear, currentMonth);
   });
+
+  console.log("Updating event:", eventObj);
+  console.log("Using ID:", eventId);
 }

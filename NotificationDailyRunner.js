@@ -23,6 +23,7 @@ async function generateDailyEventNotifications() {
     if (!eventsToday.length) return;
 
     for (const event of eventsToday) {
+      try{
 
       // Prevent duplicates by checking if notification already exists today
       const alreadyExists = await NotificationDao.Notification.findOne({
@@ -40,8 +41,16 @@ async function generateDailyEventNotifications() {
       });
 
       console.log(`[DailyRunner] Notification created for event: ${event.title}`);
-    }
+      
   } catch (err) {
+        // IMPORTANT: continue processing remaining events
+        console.error(`[DailyRunner] Error processing event ${event._id}:`, err);
+        continue;
+      }
+    }
+  }
+  
+  catch (err) {
     console.error("[DailyRunner] Error:", err);
   }
 }

@@ -95,7 +95,7 @@ const updateMatch = async (req, res) => {
     console.error("Error updating match:", err);
     return res.status(500).json({
       message: "Server error while updating match",
-      error: err.message
+      //error: err.message
     });
   }
 };

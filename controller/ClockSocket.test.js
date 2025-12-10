@@ -1,5 +1,5 @@
 // ClockSocket.test.js
-const setupSocket = require("./controller/ClockSocket.js"); 
+const setupSocket = require("../controller/ClockSocket.js"); 
 const matchDao = require("../model/MatchDao.js");
 
 jest.mock("../model/MatchDao");

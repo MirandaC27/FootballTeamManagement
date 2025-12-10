@@ -10,7 +10,7 @@ const eventSchema = new mongoose.Schema({
   startTime: { type: String, required: true }, 
   endTime: { type: String, required: true },   
 
-  location: {type: String}, //required: true},
+  location: {type: String, required: true},
   locationCoords: {
     type: Array, // index 0 is latitude, index 1 is longitude
     //required: true,

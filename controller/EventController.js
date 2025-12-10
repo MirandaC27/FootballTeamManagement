@@ -3,6 +3,27 @@ const calendarArray = require('../model/CalendarConfig');
 const NotificationDao = require("../model/NotificationDao");
 const TAGS = ["practice", "match", "event"];
 
+function validateTimes(startTime, endTime) {
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+  if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+    return "Time must be in HH:MM (24-hour) format.";
+  }
+
+  const [sH, sM] = startTime.split(":").map(Number);
+  const [eH, eM] = endTime.split(":").map(Number);
+
+  const startMinutes = sH * 60 + sM;
+  const endMinutes = eH * 60 + eM;
+
+  if (startMinutes >= endMinutes) {
+    return "endTime must be later than startTime.";
+  }
+
+  //no boolean for error messages later
+  return null; 
+}
+
 /**
  * Create a new event and register it in the database.
  * @param {*} req request object containing data
@@ -13,12 +34,17 @@ const createNewEvent = async (req, res) => {
   try{
     const{ eventDate, title, tag, location, locationCoords, startTime, endTime } = req.body;
       
-    if(!eventDate || !title || !tag || !startTime || !endTime){
-        return res.status(400).send('date, title, tag, startTime, and endTime are required');
+    if(!eventDate || !title || !tag || !startTime || !endTime || !location){
+        return res.status(400).send('Please make sure all fields are filled out');
       }
 
       if (!TAGS.includes(tag)) {
         return res.status(400).send("Invalid tag. Must be practice, match, or event.");
+      }
+
+      const timeCheck = validateTimes(startTime, endTime);
+      if (timeCheck){
+        return res.status(400).send(timeCheck);
       }
 
       const localDate = new Date(`${eventDate}T00:00:00`);
@@ -102,6 +128,11 @@ const updateEvent = async (req, res) => {
     if (location) updatedFields.location = location;
     if (locationCoords) updatedFields.locationCoords = locationCoords;
 
+    if (startTime && endTime) {
+      const timeCheck = validateTimes(startTime, endTime);
+      if (timeCheck) return res.status(400).send(timeCheck);
+    }
+
 
     const updated = await dao.update(id, updatedFields);
 
@@ -128,13 +159,16 @@ const updateEvent = async (req, res) => {
           await NotificationDao.createNotification({
             eventId: updated._id,
             title: `Event Today: ${updated.title}`,
-            message: `You have a ${updated.tag} today at ${updated.location}.`
+            message: `You have a(n) ${updated.tag} today at ${updated.location}.`
           });
 
           console.log("Same-day UPDATE notification created.");
         }
       }
     }
+
+    console.log("CONTROLLER updateEvent id:", req.params.id);
+    console.log("Body:", req.body);
 
     res.json({ message: "Event updated successfully", updated });
   } catch (err) {

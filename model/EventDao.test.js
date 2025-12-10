@@ -21,7 +21,14 @@ beforeEach(async () => {
 
 //create a new event with title, date, tag, location, and coordinates
 test('Create new event', async () => {
-    let newData = {eventDate: new Date('2024-05-10'), title: 'Quarter Final', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let newData = {
+        eventDate: new Date('2024-05-10'), 
+        title: 'Quarter Final', 
+        tag: 'practice', 
+        location: 'Loyola University', 
+        locationCoords: [21.21, 19.19], 
+        startTime: '6:00PM', 
+        endTime: '9:00PM' };
     let created = await dao.create(newData);
     let found = await dao.readById(created._id);
     expect(created._id).not.toBeNull();
@@ -35,7 +42,7 @@ test('Create new event', async () => {
 test('Create fails with missing title', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ eventDate: new Date(), tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] });
+        await dao.create({ eventDate: new Date(), tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM'});
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -45,7 +52,7 @@ test('Create fails with missing title', async () => {
 test('Create fails with missing date', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'no date yet.', tag: 'event', location: 'Loyola University', locationCoords: [21.21, 19.19] });
+        await dao.create({ title: 'no date yet.', tag: 'event', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM'});
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -55,7 +62,7 @@ test('Create fails with missing date', async () => {
 test('Create fails with missing tag', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'No Tag', eventDate: new Date(), location: 'Loyola University', locationCoords: [21.21, 19.19] });
+        await dao.create({ title: 'No Tag', eventDate: new Date(), location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -65,7 +72,7 @@ test('Create fails with missing tag', async () => {
 test('Create fails with invalid tag', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'Invalid Tag', eventDate: new Date(), tag: 'holiday', location: 'Loyola University', locationCoords: [21.21, 19.19] });
+        await dao.create({ title: 'Invalid Tag', eventDate: new Date(), tag: 'holiday', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -75,7 +82,7 @@ test('Create fails with invalid tag', async () => {
 test('Create fails with missing location', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'No location set.', eventDate: new Date(), tag: 'event', locationCoords: [21.21, 19.19] });
+        await dao.create({ title: 'No location set.', eventDate: new Date(), tag: 'event', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' });
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -85,7 +92,27 @@ test('Create fails with missing location', async () => {
 test('Create fails with missing location', async () => {
     expect.assertions(1);
     try {
-        await dao.create({ title: 'No location coordinates set.', eventDate: new Date(), tag: 'event', location: 'Loyola University' });
+        await dao.create({ title: 'No location coordinates set.', eventDate: new Date(), tag: 'event', location: 'Loyola University', startTime: '11:00AM', endTime: '12:00PM' });
+    } catch (err) {
+        expect(err.name).toBe('ValidationError');
+    }
+});
+
+//fail to create a event with no start time
+test('Create fails with missing start times', async () => {
+    expect.assertions(1);
+    try {
+        await dao.create({ title: 'No location coordinates set.', eventDate: new Date(), tag: 'event', location: 'Loyola University', endTime: '12:00PM' });
+    } catch (err) {
+        expect(err.name).toBe('ValidationError');
+    }
+});
+
+//fail to create a event with no end time
+test('Create fails with missing end time', async () => {
+    expect.assertions(1);
+    try {
+        await dao.create({ title: 'No location coordinates set.', eventDate: new Date(), tag: 'event', location: 'Loyola University', startTime: '11:00AM'});
     } catch (err) {
         expect(err.name).toBe('ValidationError');
     }
@@ -97,7 +124,7 @@ test('Create fails with missing location', async () => {
 
 //delete an existing event
 test('Delete event', async () => {
-    let newData = {eventDate: new Date('2024-06-15'), title: 'Semi Final', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let newData = {eventDate: new Date('2024-06-15'), title: 'Semi Final', tag: 'match', location: 'Loyola University', locationCoords: [21.21, 19.19] , startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(newData);
     let deleted = await dao.remove(created._id);
     let found = await dao.readById(created._id);
@@ -117,9 +144,9 @@ test('Remove non-existent event returns null', async () => {
 */
 //find existing events
 test('Read all events', async () => {
-    let event1 = {eventDate: new Date('2024-07-01'), title: 'Event 1', tag:'practice', location: 'Loyola University', locationCoords: [21.21, 19.19]};
-    let event2 = {eventDate: new Date('2024-07-02'), title: 'Event 2', tag:'event', location: 'Towson University', locationCoords: [21.21, 19.19]};
-    let event3 = {eventDate: new Date('2024-07-03'), title: 'Event 3', tag:'match', location: 'Morgan State University', locationCoords: [21.21, 19.19]};
+    let event1 = {eventDate: new Date('2024-07-01'), title: 'Event 1', tag:'practice', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
+    let event2 = {eventDate: new Date('2024-07-02'), title: 'Event 2', tag:'event', location: 'Towson University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
+    let event3 = {eventDate: new Date('2024-07-03'), title: 'Event 3', tag:'match', location: 'Morgan State University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     await dao.create(event1);
     await dao.create(event2);
     await dao.create(event3);
@@ -130,7 +157,7 @@ test('Read all events', async () => {
 
 //find existing events by ID
 test('Read event by ID', async () => {
-    let newData = {eventDate: new Date('2024-08-20'), title: 'Final Event', tag:'match', location: 'Loyola University', locationCoords: [21.21, 19.19]};
+    let newData = {eventDate: new Date('2024-08-20'), title: 'Final Event', tag:'match', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(newData);
     let found = await dao.readById(created._id);
     expect(found).not.toBeNull();
@@ -159,10 +186,10 @@ test('Read all returns empty array when no events', async () => {
 
 //update a whole event
 test('Update existing event with new title, date, tag, location, and location coordinates', async () => {
-    let oldEvent = { eventDate: new Date('2025-10-10'), title: 'Update me!', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let oldEvent = { eventDate: new Date('2025-10-10'), title: 'Update me!', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(oldEvent);
 
-    let newEvent = { eventDate: new Date('2025-11-11'), title: 'Updated.', tag: 'match', location: 'Towson University', locationCoords: [20.20, 18.18] };
+    let newEvent = { eventDate: new Date('2025-11-11'), title: 'Updated.', tag: 'match', location: 'Towson University', locationCoords: [20.20, 18.18], startTime: '11:00AM', endTime: '12:00PM' };
     let updated = await dao.update(created._id, newEvent);
 
     expect(updated).not.toBeNull();
@@ -176,7 +203,7 @@ test('Update existing event with new title, date, tag, location, and location co
 
 //update only the title (date, tag, location, and coordinates should stay the same)
 test('Update event with only title keeps same date, tag, and location', async () => {
-    let oldEvent = { eventDate: new Date('2025-09-15'), title: 'Original', tag: 'event', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let oldEvent = { eventDate: new Date('2025-09-15'), title: 'Original', tag: 'event', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(oldEvent);
 
     let updated = await dao.update(created._id, { title: 'Title Only' });
@@ -191,7 +218,7 @@ test('Update event with only title keeps same date, tag, and location', async ()
 
 //update only the date (title, tag, location, and coordinates should stay the same)
 test('Update event with only date keeps same title, tag, and location', async () => {
-    let oldEvent = { eventDate: new Date('2025-08-10'), title: 'Keep Title', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let oldEvent = { eventDate: new Date('2025-08-10'), title: 'Keep Title', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(oldEvent);
 
     const newDate = new Date('2025-09-01');
@@ -207,7 +234,7 @@ test('Update event with only date keeps same title, tag, and location', async ()
 
 //update only the tag (title, date, location, and coordinates should stay the same)
 test('Update event with only tag keeps same title, date, and location', async () => {
-    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(oldEvent);
 
     let updated = await dao.update(created._id, { tag: 'match' });
@@ -222,7 +249,7 @@ test('Update event with only tag keeps same title, date, and location', async ()
 
 //update the location and coordinates (title, date, and tag should stay the same)
 test('Update event with only location keeps same title, date, and tag', async () => {
-    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19] };
+    let oldEvent = { eventDate: new Date('2025-12-01'), title: 'Keep Everything', tag: 'practice', location: 'Loyola University', locationCoords: [21.21, 19.19], startTime: '11:00AM', endTime: '12:00PM' };
     let created = await dao.create(oldEvent);
 
     let updated = await dao.update(created._id, { location: 'Towson University', locationCoords: [20.20, 18.18] });
